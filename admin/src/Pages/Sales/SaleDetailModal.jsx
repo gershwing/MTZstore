@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { generateReceiptPDF } from "../DirectSales/Components/SaleReceiptPDF";
+import { generateReceiptPDF } from "../DirectSales/components/SaleReceiptPDF";
 
 export default function SaleDetailModal({ sale, onClose, onDelete }) {
   if (!sale) return null;

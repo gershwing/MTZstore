@@ -3,9 +3,9 @@ import { fetchDataFromApi } from "../../utils/api";
 import { listStores } from "../../services/stores";
 import { getTenantId } from "../../utils/tenant";
 import { useAuth } from "../../hooks/useAuth";
-import PnLSelector from "./Components/PnLSelector";
-import PnLStatement from "./Components/PnLStatement";
-import { generatePnLPDF } from "./Components/PnLPdf";
+import PnLSelector from "./components/PnLSelector";
+import PnLStatement from "./components/PnLStatement";
+import { generatePnLPDF } from "./components/PnLPdf";
 
 export default function ProfitLossPage() {
   const { isSuper } = useAuth();
