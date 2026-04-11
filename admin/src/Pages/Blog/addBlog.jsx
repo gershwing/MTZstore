@@ -14,8 +14,8 @@ import { deleteImages, postData } from "../../utils/api";
 import { AppContext } from "../../context/AppContext";
 
 // NUEVO: publicación + previa
-import PublishFields from "../../Components/content/PublishFields";
-import PreviewButton from "../../Components/content/PreviewButton";
+import PublishFields from "../../Components/Content/PublishFields";
+import PreviewButton from "../../Components/Content/PreviewButton";
 import { buildBlogPreviewUrl } from "../../services/blog"; // ajusta si tu ruta difiere
 
 const AddBlog = () => {

@@ -14,8 +14,8 @@ import { IoMdClose } from "react-icons/io";
 import { deleteImages, postData } from "../../utils/api";
 
 // NUEVO: publicación + previa
-import PublishFields from "../../Components/content/PublishFields";
-import PreviewButton from "../../Components/content/PreviewButton";
+import PublishFields from "../../Components/Content/PublishFields";
+import PreviewButton from "../../Components/Content/PreviewButton";
 
 export const AddBannerV1 = () => {
     const [formFields, setFormFields] = useState({

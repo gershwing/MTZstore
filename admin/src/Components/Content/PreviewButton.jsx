@@ -1,4 +1,4 @@
-// admin/src/components/content/PreviewButton.jsx
+// admin/src/components/Content/PreviewButton.jsx
 import React, { useState } from "react";
 import { Button } from "@mui/material";
 

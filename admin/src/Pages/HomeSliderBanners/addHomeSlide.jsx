@@ -10,7 +10,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useNavigate } from "react-router-dom";
 
 // NUEVO: campos de publicación
-import PublishFields from "../../Components/content/PublishFields";
+import PublishFields from "../../Components/Content/PublishFields";
 
 const AddHomeSlide = () => {
     const [previews, setPreviews] = useState([]);

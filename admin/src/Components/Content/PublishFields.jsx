@@ -1,4 +1,4 @@
-// admin/src/components/content/PublishFields.jsx
+// admin/src/components/Content/PublishFields.jsx
 import React from "react";
 import { MenuItem, Select, TextField, FormControl, InputLabel } from "@mui/material";
 

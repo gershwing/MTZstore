@@ -14,7 +14,7 @@ import { IoMdClose } from "react-icons/io";
 import { deleteImages, editData, fetchDataFromApi } from "../../utils/api";
 
 // 👇 NUEVO: botón de previa + generador de URL para bannerList2
-import PreviewButton from "../../Components/content/PreviewButton";
+import PreviewButton from "../../Components/Content/PreviewButton";
 import { buildBannerList2PreviewUrl } from "../../services/bannerList2";
 
 /**

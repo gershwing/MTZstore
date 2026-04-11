@@ -22,7 +22,7 @@ import { buildListParams } from "../../utils/buildListParams";
 import { listBlogs, removeBlog, buildBlogPreviewUrl } from "../../services/blog";
 
 // ✅ botón de previsualización unificado
-import PreviewButton from "../../Components/content/PreviewButton";
+import PreviewButton from "../../Components/Content/PreviewButton";
 
 const columns = [
     { id: "image", label: "IMAGEN", minWidth: 120 },
