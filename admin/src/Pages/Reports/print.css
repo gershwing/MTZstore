@@ -1,0 +1,63 @@
+@page {
+  size: A4 portrait;
+  margin: 12mm;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+.print-container {
+  background: #f6f7fb;
+}
+
+.sheet {
+  background: white;
+  padding: 8mm;
+}
+
+.title {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+
+.kpis>div {
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 6px 8px;
+}
+
+.ta-right {
+  text-align: right;
+}
+
+.page-break {
+  break-after: page;
+}

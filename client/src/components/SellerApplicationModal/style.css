@@ -1,0 +1,110 @@
+.sellerAppModal .MuiDialog-paper {
+  max-width: 560px;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.sellerAppModal .modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.sellerAppModal .modalHeader h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.sellerAppModal .modalBody {
+  padding: 24px;
+}
+
+.sellerAppModal .formGroup {
+  margin-bottom: 20px;
+}
+
+.sellerAppModal .uploadArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  min-height: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sellerAppModal .uploadArea:hover {
+  border-color: #1976d2;
+}
+
+.sellerAppModal .uploadArea img {
+  max-width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.sellerAppModal .uploadArea .uploadLabel {
+  color: #666;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.sellerAppModal .uploadRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.sellerAppModal .statusContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.sellerAppModal .statusContainer .statusIcon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.sellerAppModal .statusContainer h3 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+
+.sellerAppModal .statusContainer p {
+  color: #666;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.sellerAppModal .rejectionNotes {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 20px;
+}
+
+.sellerAppModal .rejectionNotes strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #e65100;
+}
+
+@media (max-width: 600px) {
+  .sellerAppModal .uploadRow {
+    grid-template-columns: 1fr;
+  }
+}

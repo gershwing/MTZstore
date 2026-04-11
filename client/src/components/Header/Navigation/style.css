@@ -1,0 +1,28 @@
+.categoryPanel button{text-transform: capitalize !important;}
+
+/* Navigation bar */
+.navigation {
+  border-bottom: 1px solid #eee;
+}
+
+/* Category Flyout - Desktop */
+.category-flyout {
+  animation: categoryFadeIn 0.15s ease-out;
+}
+
+@keyframes categoryFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar for flyout panels */
+.category-flyout > div::-webkit-scrollbar {
+  width: 4px;
+}
+.category-flyout > div::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 4px;
+}
+.category-flyout > div::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}

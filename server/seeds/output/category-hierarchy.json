@@ -1,0 +1,2332 @@
+{
+  "generatedAt": "2026-03-13T14:06:14.500Z",
+  "stats": {
+    "l1": 18,
+    "l2": 83,
+    "l3": 306,
+    "missing": 0,
+    "created": 0
+  },
+  "tree": [
+    {
+      "name": "Arte y Manualidades",
+      "slug": "arte-manualidades",
+      "path": "arte-manualidades",
+      "children": [
+        {
+          "name": "Dibujo",
+          "slug": "dibujo",
+          "path": "arte-manualidades/dibujo",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Lapices Dibujo",
+              "slug": "lapices-dibujo",
+              "path": "arte-manualidades/dibujo/lapices-dibujo"
+            },
+            {
+              "name": "Papeles Cuadernos Arte",
+              "slug": "papeles-cuadernos-arte",
+              "path": "arte-manualidades/dibujo/papeles-cuadernos-arte"
+            },
+            {
+              "name": "Tintas Plumillas",
+              "slug": "tintas-plumillas",
+              "path": "arte-manualidades/dibujo/tintas-plumillas"
+            }
+          ]
+        },
+        {
+          "name": "Manualidades",
+          "slug": "manualidades",
+          "path": "arte-manualidades/manualidades",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Ceramica Arcilla",
+              "slug": "ceramica-arcilla",
+              "path": "arte-manualidades/manualidades/ceramica-arcilla"
+            },
+            {
+              "name": "Costura Tejido",
+              "slug": "costura-tejido",
+              "path": "arte-manualidades/manualidades/costura-tejido"
+            },
+            {
+              "name": "Resina Moldes",
+              "slug": "resina-moldes",
+              "path": "arte-manualidades/manualidades/resina-moldes"
+            },
+            {
+              "name": "Scrapbooking",
+              "slug": "scrapbooking",
+              "path": "arte-manualidades/manualidades/scrapbooking"
+            }
+          ]
+        },
+        {
+          "name": "Materiales Generales",
+          "slug": "materiales-generales",
+          "path": "arte-manualidades/materiales-generales",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Pegamentos Barnices",
+              "slug": "pegamentos-barnices",
+              "path": "arte-manualidades/materiales-generales/pegamentos-barnices"
+            },
+            {
+              "name": "Pinceles Herramientas",
+              "slug": "pinceles-herramientas",
+              "path": "arte-manualidades/materiales-generales/pinceles-herramientas"
+            }
+          ]
+        },
+        {
+          "name": "Pintura",
+          "slug": "pintura",
+          "path": "arte-manualidades/pintura",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Acuarelas",
+              "slug": "acuarelas",
+              "path": "arte-manualidades/pintura/acuarelas"
+            },
+            {
+              "name": "Gouache Tempera",
+              "slug": "gouache-tempera",
+              "path": "arte-manualidades/pintura/gouache-tempera"
+            },
+            {
+              "name": "Pinturas Acrilicas",
+              "slug": "pinturas-acrilicas",
+              "path": "arte-manualidades/pintura/pinturas-acrilicas"
+            },
+            {
+              "name": "Pinturas Oleo",
+              "slug": "pinturas-oleo",
+              "path": "arte-manualidades/pintura/pinturas-oleo"
+            },
+            {
+              "name": "Soportes Pintura",
+              "slug": "soportes-pintura",
+              "path": "arte-manualidades/pintura/soportes-pintura"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Automotriz",
+      "slug": "automotriz",
+      "path": "automotriz",
+      "children": [
+        {
+          "name": "Accesorios Exteriores",
+          "slug": "accesorios-exteriores",
+          "path": "automotriz/accesorios-exteriores",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Cobertores",
+              "slug": "cobertores",
+              "path": "automotriz/accesorios-exteriores/cobertores"
+            },
+            {
+              "name": "Luces Led",
+              "slug": "luces-led",
+              "path": "automotriz/accesorios-exteriores/luces-led"
+            },
+            {
+              "name": "Parrillas Portaequipajes",
+              "slug": "parrillas-portaequipajes",
+              "path": "automotriz/accesorios-exteriores/parrillas-portaequipajes"
+            },
+            {
+              "name": "Tapa Aros",
+              "slug": "tapa-aros",
+              "path": "automotriz/accesorios-exteriores/tapa-aros"
+            }
+          ]
+        },
+        {
+          "name": "Accesorios Interiores",
+          "slug": "accesorios-interiores",
+          "path": "automotriz/accesorios-interiores",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Alfombrillas",
+              "slug": "alfombrillas",
+              "path": "automotriz/accesorios-interiores/alfombrillas"
+            },
+            {
+              "name": "Cubre Volantes",
+              "slug": "cubre-volantes",
+              "path": "automotriz/accesorios-interiores/cubre-volantes"
+            },
+            {
+              "name": "Espaldares Cojines",
+              "slug": "espaldares-cojines",
+              "path": "automotriz/accesorios-interiores/espaldares-cojines"
+            },
+            {
+              "name": "Fundas Asiento",
+              "slug": "fundas-asiento",
+              "path": "automotriz/accesorios-interiores/fundas-asiento"
+            }
+          ]
+        },
+        {
+          "name": "Audio Navegacion",
+          "slug": "audio-navegacion",
+          "path": "automotriz/audio-navegacion",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Altavoces Auto",
+              "slug": "altavoces-auto",
+              "path": "automotriz/audio-navegacion/altavoces-auto"
+            },
+            {
+              "name": "Camaras Sensores",
+              "slug": "camaras-sensores",
+              "path": "automotriz/audio-navegacion/camaras-sensores"
+            },
+            {
+              "name": "Radios Pantallas",
+              "slug": "radios-pantallas",
+              "path": "automotriz/audio-navegacion/radios-pantallas"
+            }
+          ]
+        },
+        {
+          "name": "Herramientas Taller",
+          "slug": "herramientas-taller",
+          "path": "automotriz/herramientas-taller",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Compresores",
+              "slug": "compresores",
+              "path": "automotriz/herramientas-taller/compresores"
+            },
+            {
+              "name": "Gatos Hidraulicos",
+              "slug": "gatos-hidraulicos",
+              "path": "automotriz/herramientas-taller/gatos-hidraulicos"
+            },
+            {
+              "name": "Kits Emergencia",
+              "slug": "kits-emergencia",
+              "path": "automotriz/herramientas-taller/kits-emergencia"
+            }
+          ]
+        },
+        {
+          "name": "Repuestos",
+          "slug": "repuestos",
+          "path": "automotriz/repuestos",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Baterias",
+              "slug": "baterias",
+              "path": "automotriz/repuestos/baterias"
+            },
+            {
+              "name": "Escobillas",
+              "slug": "escobillas",
+              "path": "automotriz/repuestos/escobillas"
+            },
+            {
+              "name": "Filtros",
+              "slug": "filtros",
+              "path": "automotriz/repuestos/filtros"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bebés y Niños",
+      "slug": "bebes",
+      "path": "bebes",
+      "children": [
+        {
+          "name": "Accesorios Bebe",
+          "slug": "accesorios-bebe",
+          "path": "bebes/accesorios-bebe",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Coches Cochecitos",
+              "slug": "coches-cochecitos",
+              "path": "bebes/accesorios-bebe/coches-cochecitos"
+            },
+            {
+              "name": "Cunas Moises",
+              "slug": "cunas-moises",
+              "path": "bebes/accesorios-bebe/cunas-moises"
+            },
+            {
+              "name": "Panialeras",
+              "slug": "panialeras",
+              "path": "bebes/accesorios-bebe/panialeras"
+            },
+            {
+              "name": "Sillas Auto",
+              "slug": "sillas-auto",
+              "path": "bebes/accesorios-bebe/sillas-auto"
+            }
+          ]
+        },
+        {
+          "name": "Alimentacion",
+          "slug": "alimentacion",
+          "path": "bebes/alimentacion",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Lactancia",
+              "slug": "lactancia",
+              "path": "bebes/alimentacion/lactancia"
+            },
+            {
+              "name": "Papillas Comida",
+              "slug": "papillas-comida",
+              "path": "bebes/alimentacion/papillas-comida"
+            },
+            {
+              "name": "Utensilios Alimentacion",
+              "slug": "utensilios-alimentacion",
+              "path": "bebes/alimentacion/utensilios-alimentacion"
+            }
+          ]
+        },
+        {
+          "name": "Juguetes",
+          "slug": "juguetes",
+          "path": "bebes/juguetes",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Coches Juguete",
+              "slug": "coches-juguete",
+              "path": "bebes/juguetes/coches-juguete"
+            },
+            {
+              "name": "Educativos",
+              "slug": "educativos",
+              "path": "bebes/juguetes/educativos"
+            },
+            {
+              "name": "Electronicos",
+              "slug": "electronicos",
+              "path": "bebes/juguetes/electronicos"
+            },
+            {
+              "name": "Munecas",
+              "slug": "munecas",
+              "path": "bebes/juguetes/munecas"
+            }
+          ]
+        },
+        {
+          "name": "Ropa Bebe",
+          "slug": "ropa-bebe",
+          "path": "bebes/ropa-bebe",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Bodies",
+              "slug": "bodies",
+              "path": "bebes/ropa-bebe/bodies"
+            },
+            {
+              "name": "Conjuntos",
+              "slug": "conjuntos",
+              "path": "bebes/ropa-bebe/conjuntos"
+            },
+            {
+              "name": "Pijamas",
+              "slug": "pijamas",
+              "path": "bebes/ropa-bebe/pijamas"
+            },
+            {
+              "name": "Zapatos Bebe",
+              "slug": "zapatos-bebe",
+              "path": "bebes/ropa-bebe/zapatos-bebe"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Belleza y Salud",
+      "slug": "belleza",
+      "path": "belleza",
+      "children": [
+        {
+          "name": "Cabello",
+          "slug": "cabello",
+          "path": "belleza/cabello",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Estiladoras Rizadoras",
+              "slug": "estiladoras-rizadoras",
+              "path": "belleza/cabello/estiladoras-rizadoras"
+            },
+            {
+              "name": "Tintes Coloracion",
+              "slug": "tintes-coloracion",
+              "path": "belleza/cabello/tintes-coloracion"
+            },
+            {
+              "name": "Tratamientos Cabello",
+              "slug": "tratamientos-cabello",
+              "path": "belleza/cabello/tratamientos-cabello"
+            }
+          ]
+        },
+        {
+          "name": "Cuidado Personal",
+          "slug": "cuidado-personal",
+          "path": "belleza/cuidado-personal",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Afeitadoras",
+              "slug": "afeitadoras",
+              "path": "belleza/cuidado-personal/afeitadoras"
+            },
+            {
+              "name": "Cuidado Piel",
+              "slug": "cuidado-piel",
+              "path": "belleza/cuidado-personal/cuidado-piel"
+            },
+            {
+              "name": "Depiladoras",
+              "slug": "depiladoras",
+              "path": "belleza/cuidado-personal/depiladoras"
+            },
+            {
+              "name": "Secadoras Cabello",
+              "slug": "secadoras-cabello",
+              "path": "belleza/cuidado-personal/secadoras-cabello"
+            }
+          ]
+        },
+        {
+          "name": "Maquillaje",
+          "slug": "maquillaje",
+          "path": "belleza/maquillaje",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Bases",
+              "slug": "bases",
+              "path": "belleza/maquillaje/bases"
+            },
+            {
+              "name": "Coloretes Bronzer",
+              "slug": "coloretes-bronzer",
+              "path": "belleza/maquillaje/coloretes-bronzer"
+            },
+            {
+              "name": "Kits Maquillaje",
+              "slug": "kits-maquillaje",
+              "path": "belleza/maquillaje/kits-maquillaje"
+            },
+            {
+              "name": "Labiales",
+              "slug": "labiales",
+              "path": "belleza/maquillaje/labiales"
+            },
+            {
+              "name": "Ojos",
+              "slug": "ojos",
+              "path": "belleza/maquillaje/ojos"
+            }
+          ]
+        },
+        {
+          "name": "Salud",
+          "slug": "salud",
+          "path": "belleza/salud",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Mascarillas Proteccion",
+              "slug": "mascarillas-proteccion",
+              "path": "belleza/salud/mascarillas-proteccion"
+            },
+            {
+              "name": "Tensiometros",
+              "slug": "tensiometros",
+              "path": "belleza/salud/tensiometros"
+            },
+            {
+              "name": "Termometros",
+              "slug": "termometros",
+              "path": "belleza/salud/termometros"
+            },
+            {
+              "name": "Vitaminas Suplementos",
+              "slug": "vitaminas-suplementos",
+              "path": "belleza/salud/vitaminas-suplementos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Deportes y Aire Libre",
+      "slug": "deportes",
+      "path": "deportes",
+      "children": [
+        {
+          "name": "Aire Libre",
+          "slug": "aire-libre",
+          "path": "deportes/aire-libre",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Carpas Camping",
+              "slug": "carpas-camping",
+              "path": "deportes/aire-libre/carpas-camping"
+            },
+            {
+              "name": "Linternas",
+              "slug": "linternas",
+              "path": "deportes/aire-libre/linternas"
+            },
+            {
+              "name": "Mochilas Trekking",
+              "slug": "mochilas-trekking",
+              "path": "deportes/aire-libre/mochilas-trekking"
+            },
+            {
+              "name": "Ropa Outdoor",
+              "slug": "ropa-outdoor",
+              "path": "deportes/aire-libre/ropa-outdoor"
+            }
+          ]
+        },
+        {
+          "name": "Ciclismo",
+          "slug": "ciclismo",
+          "path": "deportes/ciclismo",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Accesorios Ciclismo",
+              "slug": "accesorios-ciclismo",
+              "path": "deportes/ciclismo/accesorios-ciclismo"
+            },
+            {
+              "name": "Bicicletas",
+              "slug": "bicicletas",
+              "path": "deportes/ciclismo/bicicletas"
+            },
+            {
+              "name": "Cascos Ciclismo",
+              "slug": "cascos-ciclismo",
+              "path": "deportes/ciclismo/cascos-ciclismo"
+            }
+          ]
+        },
+        {
+          "name": "Deportes Equipo",
+          "slug": "deportes-equipo",
+          "path": "deportes/deportes-equipo",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Basquetbol",
+              "slug": "basquetbol",
+              "path": "deportes/deportes-equipo/basquetbol"
+            },
+            {
+              "name": "Futbol",
+              "slug": "futbol",
+              "path": "deportes/deportes-equipo/futbol"
+            },
+            {
+              "name": "Tenis Padel",
+              "slug": "tenis-padel",
+              "path": "deportes/deportes-equipo/tenis-padel"
+            }
+          ]
+        },
+        {
+          "name": "Fitness",
+          "slug": "fitness",
+          "path": "deportes/fitness",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Accesorios Gym",
+              "slug": "accesorios-gym",
+              "path": "deportes/fitness/accesorios-gym"
+            },
+            {
+              "name": "Bandas Elasticas",
+              "slug": "bandas-elasticas",
+              "path": "deportes/fitness/bandas-elasticas"
+            },
+            {
+              "name": "Bicicletas Estaticas",
+              "slug": "bicicletas-estaticas",
+              "path": "deportes/fitness/bicicletas-estaticas"
+            },
+            {
+              "name": "Cintas Trotar",
+              "slug": "cintas-trotar",
+              "path": "deportes/fitness/cintas-trotar"
+            },
+            {
+              "name": "Mancuernas Pesas",
+              "slug": "mancuernas-pesas",
+              "path": "deportes/fitness/mancuernas-pesas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Electrónica",
+      "slug": "electronica",
+      "path": "electronica",
+      "children": [
+        {
+          "name": "Accesorios Celulares",
+          "slug": "accesorios-celulares",
+          "path": "electronica/accesorios-celulares",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Cargadores",
+              "slug": "cargadores",
+              "path": "electronica/accesorios-celulares/cargadores"
+            },
+            {
+              "name": "Fundas",
+              "slug": "fundas",
+              "path": "electronica/accesorios-celulares/fundas"
+            },
+            {
+              "name": "Powerbanks",
+              "slug": "powerbanks",
+              "path": "electronica/accesorios-celulares/powerbanks"
+            },
+            {
+              "name": "Protectores",
+              "slug": "protectores",
+              "path": "electronica/accesorios-celulares/protectores"
+            }
+          ]
+        },
+        {
+          "name": "Audio",
+          "slug": "audio",
+          "path": "electronica/audio",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Altavoces",
+              "slug": "altavoces",
+              "path": "electronica/audio/altavoces"
+            },
+            {
+              "name": "Audifonos",
+              "slug": "audifonos",
+              "path": "electronica/audio/audifonos"
+            },
+            {
+              "name": "Microfonos",
+              "slug": "microfonos",
+              "path": "electronica/audio/microfonos"
+            }
+          ]
+        },
+        {
+          "name": "Camaras",
+          "slug": "camaras",
+          "path": "electronica/camaras",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Accesorios Camara",
+              "slug": "accesorios-camara",
+              "path": "electronica/camaras/accesorios-camara"
+            },
+            {
+              "name": "Camaras Accion",
+              "slug": "camaras-accion",
+              "path": "electronica/camaras/camaras-accion"
+            },
+            {
+              "name": "Camaras Digitales",
+              "slug": "camaras-digitales",
+              "path": "electronica/camaras/camaras-digitales"
+            }
+          ]
+        },
+        {
+          "name": "Celulares",
+          "slug": "celulares",
+          "path": "electronica/celulares",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Apple",
+              "slug": "apple",
+              "path": "electronica/celulares/apple"
+            },
+            {
+              "name": "Honor",
+              "slug": "honor",
+              "path": "electronica/celulares/honor"
+            },
+            {
+              "name": "Infinix",
+              "slug": "infinix",
+              "path": "electronica/celulares/infinix"
+            },
+            {
+              "name": "Motorola",
+              "slug": "motorola",
+              "path": "electronica/celulares/motorola"
+            },
+            {
+              "name": "Poco",
+              "slug": "poco",
+              "path": "electronica/celulares/poco"
+            },
+            {
+              "name": "Reacondicionados",
+              "slug": "reacondicionados",
+              "path": "electronica/celulares/reacondicionados"
+            },
+            {
+              "name": "Redmi",
+              "slug": "redmi",
+              "path": "electronica/celulares/redmi"
+            },
+            {
+              "name": "Samsung",
+              "slug": "samsung",
+              "path": "electronica/celulares/samsung"
+            },
+            {
+              "name": "Tecno",
+              "slug": "tecno",
+              "path": "electronica/celulares/tecno"
+            },
+            {
+              "name": "Xiaomi",
+              "slug": "xiaomi",
+              "path": "electronica/celulares/xiaomi"
+            }
+          ]
+        },
+        {
+          "name": "Componentes",
+          "slug": "componentes",
+          "path": "electronica/componentes",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Accesorios Hardware",
+              "slug": "accesorios-hardware",
+              "path": "electronica/componentes/accesorios-hardware"
+            },
+            {
+              "name": "Discos",
+              "slug": "discos",
+              "path": "electronica/componentes/discos"
+            },
+            {
+              "name": "Fuentes Poder",
+              "slug": "fuentes-poder",
+              "path": "electronica/componentes/fuentes-poder"
+            },
+            {
+              "name": "Memorias Ram",
+              "slug": "memorias-ram",
+              "path": "electronica/componentes/memorias-ram"
+            },
+            {
+              "name": "Monitores",
+              "slug": "monitores",
+              "path": "electronica/componentes/monitores"
+            },
+            {
+              "name": "Procesadores",
+              "slug": "procesadores",
+              "path": "electronica/componentes/procesadores"
+            },
+            {
+              "name": "Refrigeracion",
+              "slug": "refrigeracion",
+              "path": "electronica/componentes/refrigeracion"
+            },
+            {
+              "name": "Tarjetas Graficas",
+              "slug": "tarjetas-graficas",
+              "path": "electronica/componentes/tarjetas-graficas"
+            },
+            {
+              "name": "Tarjetas Madre",
+              "slug": "tarjetas-madre",
+              "path": "electronica/componentes/tarjetas-madre"
+            }
+          ]
+        },
+        {
+          "name": "Computacion",
+          "slug": "computacion",
+          "path": "electronica/computacion",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Accesorios Computacion",
+              "slug": "accesorios-computacion",
+              "path": "electronica/computacion/accesorios-computacion"
+            },
+            {
+              "name": "Ipads",
+              "slug": "ipads",
+              "path": "electronica/computacion/ipads"
+            },
+            {
+              "name": "Laptops",
+              "slug": "laptops",
+              "path": "electronica/computacion/laptops"
+            },
+            {
+              "name": "Macbooks",
+              "slug": "macbooks",
+              "path": "electronica/computacion/macbooks"
+            },
+            {
+              "name": "Pcs Escritorio",
+              "slug": "pcs-escritorio",
+              "path": "electronica/computacion/pcs-escritorio"
+            },
+            {
+              "name": "Tablets",
+              "slug": "tablets",
+              "path": "electronica/computacion/tablets"
+            }
+          ]
+        },
+        {
+          "name": "Televisores",
+          "slug": "televisores",
+          "path": "electronica/televisores",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Barras Sonido",
+              "slug": "barras-sonido",
+              "path": "electronica/televisores/barras-sonido"
+            },
+            {
+              "name": "Proyectores",
+              "slug": "proyectores",
+              "path": "electronica/televisores/proyectores"
+            },
+            {
+              "name": "Smart Tv",
+              "slug": "smart-tv",
+              "path": "electronica/televisores/smart-tv"
+            },
+            {
+              "name": "Soportes Bases",
+              "slug": "soportes-bases",
+              "path": "electronica/televisores/soportes-bases"
+            },
+            {
+              "name": "Televisores Led",
+              "slug": "televisores-led",
+              "path": "electronica/televisores/televisores-led"
+            },
+            {
+              "name": "Televisores Oled",
+              "slug": "televisores-oled",
+              "path": "electronica/televisores/televisores-oled"
+            },
+            {
+              "name": "Televisores Qled",
+              "slug": "televisores-qled",
+              "path": "electronica/televisores/televisores-qled"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Farmacia OTC",
+      "slug": "farmacia",
+      "path": "farmacia",
+      "children": [
+        {
+          "name": "Analgesia Fiebre",
+          "slug": "analgesia-fiebre",
+          "path": "farmacia/analgesia-fiebre",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Analgésicos",
+              "slug": "analgésicos",
+              "path": "farmacia/analgesia-fiebre/analgésicos"
+            },
+            {
+              "name": "Antiinflamatorios",
+              "slug": "antiinflamatorios",
+              "path": "farmacia/analgesia-fiebre/antiinflamatorios"
+            }
+          ]
+        },
+        {
+          "name": "Dermatologia Otc",
+          "slug": "dermatologia-otc",
+          "path": "farmacia/dermatologia-otc",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Ojos Oidos",
+              "slug": "ojos-oidos",
+              "path": "farmacia/dermatologia-otc/ojos-oidos"
+            },
+            {
+              "name": "Piel",
+              "slug": "piel",
+              "path": "farmacia/dermatologia-otc/piel"
+            }
+          ]
+        },
+        {
+          "name": "Digestivo",
+          "slug": "digestivo",
+          "path": "farmacia/digestivo",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Antiácidos Digestivos",
+              "slug": "antiácidos-digestivos",
+              "path": "farmacia/digestivo/antiácidos-digestivos"
+            },
+            {
+              "name": "Laxantes Diarrea",
+              "slug": "laxantes-diarrea",
+              "path": "farmacia/digestivo/laxantes-diarrea"
+            }
+          ]
+        },
+        {
+          "name": "Primeros Auxilios",
+          "slug": "primeros-auxilios",
+          "path": "farmacia/primeros-auxilios",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Botiquín",
+              "slug": "botiquín",
+              "path": "farmacia/primeros-auxilios/botiquín"
+            },
+            {
+              "name": "Curaciones",
+              "slug": "curaciones",
+              "path": "farmacia/primeros-auxilios/curaciones"
+            },
+            {
+              "name": "Ortopedia",
+              "slug": "ortopedia",
+              "path": "farmacia/primeros-auxilios/ortopedia"
+            }
+          ]
+        },
+        {
+          "name": "Respiratorio Alergias",
+          "slug": "respiratorio-alergias",
+          "path": "farmacia/respiratorio-alergias",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Antigripales",
+              "slug": "antigripales",
+              "path": "farmacia/respiratorio-alergias/antigripales"
+            },
+            {
+              "name": "Antihistamínicos",
+              "slug": "antihistamínicos",
+              "path": "farmacia/respiratorio-alergias/antihistamínicos"
+            },
+            {
+              "name": "Tos Garganta",
+              "slug": "tos-garganta",
+              "path": "farmacia/respiratorio-alergias/tos-garganta"
+            }
+          ]
+        },
+        {
+          "name": "Vitaminas Otc",
+          "slug": "vitaminas-otc",
+          "path": "farmacia/vitaminas-otc",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Complementos Otc",
+              "slug": "complementos-otc",
+              "path": "farmacia/vitaminas-otc/complementos-otc"
+            },
+            {
+              "name": "Vitaminas Minerales",
+              "slug": "vitaminas-minerales",
+              "path": "farmacia/vitaminas-otc/vitaminas-minerales"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gaming y Tecnología",
+      "slug": "gaming",
+      "path": "gaming",
+      "children": [
+        {
+          "name": "Consolas",
+          "slug": "consolas",
+          "path": "gaming/consolas",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Nintendo",
+              "slug": "nintendo",
+              "path": "gaming/consolas/nintendo"
+            },
+            {
+              "name": "Playstation",
+              "slug": "playstation",
+              "path": "gaming/consolas/playstation"
+            },
+            {
+              "name": "Xbox",
+              "slug": "xbox",
+              "path": "gaming/consolas/xbox"
+            }
+          ]
+        },
+        {
+          "name": "Pc Gaming",
+          "slug": "pc-gaming",
+          "path": "gaming/pc-gaming",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Headsets Gaming",
+              "slug": "headsets-gaming",
+              "path": "gaming/pc-gaming/headsets-gaming"
+            },
+            {
+              "name": "Monitores Gaming",
+              "slug": "monitores-gaming",
+              "path": "gaming/pc-gaming/monitores-gaming"
+            },
+            {
+              "name": "Mouse Gamer",
+              "slug": "mouse-gamer",
+              "path": "gaming/pc-gaming/mouse-gamer"
+            },
+            {
+              "name": "Sillas Gaming",
+              "slug": "sillas-gaming",
+              "path": "gaming/pc-gaming/sillas-gaming"
+            },
+            {
+              "name": "Teclados Mecanicos",
+              "slug": "teclados-mecanicos",
+              "path": "gaming/pc-gaming/teclados-mecanicos"
+            }
+          ]
+        },
+        {
+          "name": "Realidad Virtual",
+          "slug": "realidad-virtual",
+          "path": "gaming/realidad-virtual",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Accesorios Vr",
+              "slug": "accesorios-vr",
+              "path": "gaming/realidad-virtual/accesorios-vr"
+            },
+            {
+              "name": "Visores Vr",
+              "slug": "visores-vr",
+              "path": "gaming/realidad-virtual/visores-vr"
+            }
+          ]
+        },
+        {
+          "name": "Videojuegos",
+          "slug": "videojuegos",
+          "path": "gaming/videojuegos",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Accesorios Consola",
+              "slug": "accesorios-consola",
+              "path": "gaming/videojuegos/accesorios-consola"
+            },
+            {
+              "name": "Juegos Digitales",
+              "slug": "juegos-digitales",
+              "path": "gaming/videojuegos/juegos-digitales"
+            },
+            {
+              "name": "Juegos Fisicos",
+              "slug": "juegos-fisicos",
+              "path": "gaming/videojuegos/juegos-fisicos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gastronomía y Delivery",
+      "slug": "gastronomia",
+      "path": "gastronomia",
+      "children": [
+        {
+          "name": "Bebidas Delivery",
+          "slug": "bebidas-delivery",
+          "path": "gastronomia/bebidas-delivery",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Bebidas Calientes",
+              "slug": "bebidas-calientes",
+              "path": "gastronomia/bebidas-delivery/bebidas-calientes"
+            },
+            {
+              "name": "Jugos Smoothies",
+              "slug": "jugos-smoothies",
+              "path": "gastronomia/bebidas-delivery/jugos-smoothies"
+            }
+          ]
+        },
+        {
+          "name": "Cafeteria Postres",
+          "slug": "cafeteria-postres",
+          "path": "gastronomia/cafeteria-postres",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Cafeteria",
+              "slug": "cafeteria",
+              "path": "gastronomia/cafeteria-postres/cafeteria"
+            },
+            {
+              "name": "Postres",
+              "slug": "postres",
+              "path": "gastronomia/cafeteria-postres/postres"
+            },
+            {
+              "name": "Tortas Pedido",
+              "slug": "tortas-pedido",
+              "path": "gastronomia/cafeteria-postres/tortas-pedido"
+            }
+          ]
+        },
+        {
+          "name": "Cocina Del Mundo",
+          "slug": "cocina-del-mundo",
+          "path": "gastronomia/cocina-del-mundo",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Comida China",
+              "slug": "comida-china",
+              "path": "gastronomia/cocina-del-mundo/comida-china"
+            },
+            {
+              "name": "Comida Italiana",
+              "slug": "comida-italiana",
+              "path": "gastronomia/cocina-del-mundo/comida-italiana"
+            },
+            {
+              "name": "Comida Mexicana",
+              "slug": "comida-mexicana",
+              "path": "gastronomia/cocina-del-mundo/comida-mexicana"
+            },
+            {
+              "name": "Sushi",
+              "slug": "sushi",
+              "path": "gastronomia/cocina-del-mundo/sushi"
+            }
+          ]
+        },
+        {
+          "name": "Cocina Local",
+          "slug": "cocina-local",
+          "path": "gastronomia/cocina-local",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Mariscos Ceviche",
+              "slug": "mariscos-ceviche",
+              "path": "gastronomia/cocina-local/mariscos-ceviche"
+            },
+            {
+              "name": "Parrilla Asados",
+              "slug": "parrilla-asados",
+              "path": "gastronomia/cocina-local/parrilla-asados"
+            },
+            {
+              "name": "Platos Tipicos",
+              "slug": "platos-tipicos",
+              "path": "gastronomia/cocina-local/platos-tipicos"
+            }
+          ]
+        },
+        {
+          "name": "Comida Rapida",
+          "slug": "comida-rapida",
+          "path": "gastronomia/comida-rapida",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Empanadas",
+              "slug": "empanadas",
+              "path": "gastronomia/comida-rapida/empanadas"
+            },
+            {
+              "name": "Hamburguesas",
+              "slug": "hamburguesas",
+              "path": "gastronomia/comida-rapida/hamburguesas"
+            },
+            {
+              "name": "Hot Dogs",
+              "slug": "hot-dogs",
+              "path": "gastronomia/comida-rapida/hot-dogs"
+            },
+            {
+              "name": "Pizzas",
+              "slug": "pizzas",
+              "path": "gastronomia/comida-rapida/pizzas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Herramientas y Construcción",
+      "slug": "herramientas",
+      "path": "herramientas",
+      "children": [
+        {
+          "name": "Electricas",
+          "slug": "electricas",
+          "path": "herramientas/electricas",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Amoladoras",
+              "slug": "amoladoras",
+              "path": "herramientas/electricas/amoladoras"
+            },
+            {
+              "name": "Lijadoras Fresadoras",
+              "slug": "lijadoras-fresadoras",
+              "path": "herramientas/electricas/lijadoras-fresadoras"
+            },
+            {
+              "name": "Sierras",
+              "slug": "sierras",
+              "path": "herramientas/electricas/sierras"
+            },
+            {
+              "name": "Taladros",
+              "slug": "taladros",
+              "path": "herramientas/electricas/taladros"
+            }
+          ]
+        },
+        {
+          "name": "Jardineria",
+          "slug": "jardineria",
+          "path": "herramientas/jardineria",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Herramientas Jardin",
+              "slug": "herramientas-jardin",
+              "path": "herramientas/jardineria/herramientas-jardin"
+            },
+            {
+              "name": "Riego",
+              "slug": "riego",
+              "path": "herramientas/jardineria/riego"
+            }
+          ]
+        },
+        {
+          "name": "Manuales",
+          "slug": "manuales",
+          "path": "herramientas/manuales",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Destornilladores",
+              "slug": "destornilladores",
+              "path": "herramientas/manuales/destornilladores"
+            },
+            {
+              "name": "Kits Herramientas",
+              "slug": "kits-herramientas",
+              "path": "herramientas/manuales/kits-herramientas"
+            },
+            {
+              "name": "Llaves",
+              "slug": "llaves",
+              "path": "herramientas/manuales/llaves"
+            },
+            {
+              "name": "Martillos",
+              "slug": "martillos",
+              "path": "herramientas/manuales/martillos"
+            }
+          ]
+        },
+        {
+          "name": "Materiales",
+          "slug": "materiales",
+          "path": "herramientas/materiales",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Adhesivos",
+              "slug": "adhesivos",
+              "path": "herramientas/materiales/adhesivos"
+            },
+            {
+              "name": "Electricidad Hogar",
+              "slug": "electricidad-hogar",
+              "path": "herramientas/materiales/electricidad-hogar"
+            },
+            {
+              "name": "Pinturas",
+              "slug": "pinturas",
+              "path": "herramientas/materiales/pinturas"
+            }
+          ]
+        },
+        {
+          "name": "Medicion Seguridad",
+          "slug": "medicion-seguridad",
+          "path": "herramientas/medicion-seguridad",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Medicion",
+              "slug": "medicion",
+              "path": "herramientas/medicion-seguridad/medicion"
+            },
+            {
+              "name": "Seguridad Epp",
+              "slug": "seguridad-epp",
+              "path": "herramientas/medicion-seguridad/seguridad-epp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Hogar y Cocina",
+      "slug": "hogar",
+      "path": "hogar",
+      "children": [
+        {
+          "name": "Cocina",
+          "slug": "cocina",
+          "path": "hogar/cocina",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Cafeteras",
+              "slug": "cafeteras",
+              "path": "hogar/cocina/cafeteras"
+            },
+            {
+              "name": "Hornos Freidoras",
+              "slug": "hornos-freidoras",
+              "path": "hogar/cocina/hornos-freidoras"
+            },
+            {
+              "name": "Licuadoras Batidoras",
+              "slug": "licuadoras-batidoras",
+              "path": "hogar/cocina/licuadoras-batidoras"
+            },
+            {
+              "name": "Ollas",
+              "slug": "ollas",
+              "path": "hogar/cocina/ollas"
+            },
+            {
+              "name": "Utensilios",
+              "slug": "utensilios",
+              "path": "hogar/cocina/utensilios"
+            }
+          ]
+        },
+        {
+          "name": "Decoracion",
+          "slug": "decoracion",
+          "path": "hogar/decoracion",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Cuadros",
+              "slug": "cuadros",
+              "path": "hogar/decoracion/cuadros"
+            },
+            {
+              "name": "Espejos",
+              "slug": "espejos",
+              "path": "hogar/decoracion/espejos"
+            },
+            {
+              "name": "Iluminacion",
+              "slug": "iluminacion",
+              "path": "hogar/decoracion/iluminacion"
+            }
+          ]
+        },
+        {
+          "name": "Electrodomesticos",
+          "slug": "electrodomesticos",
+          "path": "hogar/electrodomesticos",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Aires Acondicionados",
+              "slug": "aires-acondicionados",
+              "path": "hogar/electrodomesticos/aires-acondicionados"
+            },
+            {
+              "name": "Aspiradoras",
+              "slug": "aspiradoras",
+              "path": "hogar/electrodomesticos/aspiradoras"
+            },
+            {
+              "name": "Lavadoras",
+              "slug": "lavadoras",
+              "path": "hogar/electrodomesticos/lavadoras"
+            },
+            {
+              "name": "Microondas",
+              "slug": "microondas",
+              "path": "hogar/electrodomesticos/microondas"
+            },
+            {
+              "name": "Refrigeradores",
+              "slug": "refrigeradores",
+              "path": "hogar/electrodomesticos/refrigeradores"
+            }
+          ]
+        },
+        {
+          "name": "Muebles",
+          "slug": "muebles",
+          "path": "hogar/muebles",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Camas",
+              "slug": "camas",
+              "path": "hogar/muebles/camas"
+            },
+            {
+              "name": "Escritorios",
+              "slug": "escritorios",
+              "path": "hogar/muebles/escritorios"
+            },
+            {
+              "name": "Mesas",
+              "slug": "mesas",
+              "path": "hogar/muebles/mesas"
+            },
+            {
+              "name": "Roperos",
+              "slug": "roperos",
+              "path": "hogar/muebles/roperos"
+            },
+            {
+              "name": "Sillas",
+              "slug": "sillas",
+              "path": "hogar/muebles/sillas"
+            },
+            {
+              "name": "Sofas",
+              "slug": "sofas",
+              "path": "hogar/muebles/sofas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Instrumentos Musicales",
+      "slug": "instrumentos",
+      "path": "instrumentos",
+      "children": [
+        {
+          "name": "Accesorios Musicales",
+          "slug": "accesorios-musicales",
+          "path": "instrumentos/accesorios-musicales",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Amplificadores",
+              "slug": "amplificadores",
+              "path": "instrumentos/accesorios-musicales/amplificadores"
+            },
+            {
+              "name": "Cuerdas Accesorios",
+              "slug": "cuerdas-accesorios",
+              "path": "instrumentos/accesorios-musicales/cuerdas-accesorios"
+            },
+            {
+              "name": "Pedales Efectos",
+              "slug": "pedales-efectos",
+              "path": "instrumentos/accesorios-musicales/pedales-efectos"
+            }
+          ]
+        },
+        {
+          "name": "Cuerdas",
+          "slug": "cuerdas",
+          "path": "instrumentos/cuerdas",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Bajos",
+              "slug": "bajos",
+              "path": "instrumentos/cuerdas/bajos"
+            },
+            {
+              "name": "Guitarras Acusticas",
+              "slug": "guitarras-acusticas",
+              "path": "instrumentos/cuerdas/guitarras-acusticas"
+            },
+            {
+              "name": "Guitarras Clasicas",
+              "slug": "guitarras-clasicas",
+              "path": "instrumentos/cuerdas/guitarras-clasicas"
+            },
+            {
+              "name": "Guitarras Electricas",
+              "slug": "guitarras-electricas",
+              "path": "instrumentos/cuerdas/guitarras-electricas"
+            },
+            {
+              "name": "Ukuleles Otros",
+              "slug": "ukuleles-otros",
+              "path": "instrumentos/cuerdas/ukuleles-otros"
+            }
+          ]
+        },
+        {
+          "name": "Percusion",
+          "slug": "percusion",
+          "path": "instrumentos/percusion",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Baterias",
+              "slug": "baterias",
+              "path": "instrumentos/percusion/baterias"
+            },
+            {
+              "name": "Cajones Bongos",
+              "slug": "cajones-bongos",
+              "path": "instrumentos/percusion/cajones-bongos"
+            },
+            {
+              "name": "Percusion Latina",
+              "slug": "percusion-latina",
+              "path": "instrumentos/percusion/percusion-latina"
+            }
+          ]
+        },
+        {
+          "name": "Teclados Piano",
+          "slug": "teclados-piano",
+          "path": "instrumentos/teclados-piano",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Organos Acordeones",
+              "slug": "organos-acordeones",
+              "path": "instrumentos/teclados-piano/organos-acordeones"
+            },
+            {
+              "name": "Pianos Digitales",
+              "slug": "pianos-digitales",
+              "path": "instrumentos/teclados-piano/pianos-digitales"
+            },
+            {
+              "name": "Teclados Sintetizadores",
+              "slug": "teclados-sintetizadores",
+              "path": "instrumentos/teclados-piano/teclados-sintetizadores"
+            }
+          ]
+        },
+        {
+          "name": "Vientos",
+          "slug": "vientos",
+          "path": "instrumentos/vientos",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Vientos Madera",
+              "slug": "vientos-madera",
+              "path": "instrumentos/vientos/vientos-madera"
+            },
+            {
+              "name": "Vientos Metal",
+              "slug": "vientos-metal",
+              "path": "instrumentos/vientos/vientos-metal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Libros, Cine y Música",
+      "slug": "libros-cine-musica",
+      "path": "libros-cine-musica",
+      "children": [
+        {
+          "name": "Ebooks Audiolibros",
+          "slug": "ebooks-audiolibros",
+          "path": "libros-cine-musica/ebooks-audiolibros",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Digitales",
+              "slug": "digitales",
+              "path": "libros-cine-musica/ebooks-audiolibros/digitales"
+            }
+          ]
+        },
+        {
+          "name": "Libros",
+          "slug": "libros",
+          "path": "libros-cine-musica/libros",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Comics Manga",
+              "slug": "comics-manga",
+              "path": "libros-cine-musica/libros/comics-manga"
+            },
+            {
+              "name": "Educacion Texto",
+              "slug": "educacion-texto",
+              "path": "libros-cine-musica/libros/educacion-texto"
+            },
+            {
+              "name": "Ficcion",
+              "slug": "ficcion",
+              "path": "libros-cine-musica/libros/ficcion"
+            },
+            {
+              "name": "Infantil Juvenil",
+              "slug": "infantil-juvenil",
+              "path": "libros-cine-musica/libros/infantil-juvenil"
+            },
+            {
+              "name": "No Ficcion",
+              "slug": "no-ficcion",
+              "path": "libros-cine-musica/libros/no-ficcion"
+            }
+          ]
+        },
+        {
+          "name": "Musica Fisica",
+          "slug": "musica-fisica",
+          "path": "libros-cine-musica/musica-fisica",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Cds",
+              "slug": "cds",
+              "path": "libros-cine-musica/musica-fisica/cds"
+            },
+            {
+              "name": "Coleccionables",
+              "slug": "coleccionables",
+              "path": "libros-cine-musica/musica-fisica/coleccionables"
+            },
+            {
+              "name": "Vinilos",
+              "slug": "vinilos",
+              "path": "libros-cine-musica/musica-fisica/vinilos"
+            }
+          ]
+        },
+        {
+          "name": "Peliculas",
+          "slug": "peliculas",
+          "path": "libros-cine-musica/peliculas",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Peliculas Fisico",
+              "slug": "peliculas-fisico",
+              "path": "libros-cine-musica/peliculas/peliculas-fisico"
+            },
+            {
+              "name": "Series Tv",
+              "slug": "series-tv",
+              "path": "libros-cine-musica/peliculas/series-tv"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mascotas",
+      "slug": "mascotas",
+      "path": "mascotas",
+      "children": [
+        {
+          "name": "Acuarios",
+          "slug": "acuarios",
+          "path": "mascotas/acuarios",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Equipamiento Acuario",
+              "slug": "equipamiento-acuario",
+              "path": "mascotas/acuarios/equipamiento-acuario"
+            },
+            {
+              "name": "Peces Acuarios",
+              "slug": "peces-acuarios",
+              "path": "mascotas/acuarios/peces-acuarios"
+            }
+          ]
+        },
+        {
+          "name": "Gatos",
+          "slug": "gatos",
+          "path": "mascotas/gatos",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Accesorios Gatos",
+              "slug": "accesorios-gatos",
+              "path": "mascotas/gatos/accesorios-gatos"
+            },
+            {
+              "name": "Alimento Gatos",
+              "slug": "alimento-gatos",
+              "path": "mascotas/gatos/alimento-gatos"
+            },
+            {
+              "name": "Salud Higiene Gatos",
+              "slug": "salud-higiene-gatos",
+              "path": "mascotas/gatos/salud-higiene-gatos"
+            }
+          ]
+        },
+        {
+          "name": "Otras Mascotas",
+          "slug": "otras-mascotas",
+          "path": "mascotas/otras-mascotas",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Aves",
+              "slug": "aves",
+              "path": "mascotas/otras-mascotas/aves"
+            },
+            {
+              "name": "Reptiles",
+              "slug": "reptiles",
+              "path": "mascotas/otras-mascotas/reptiles"
+            },
+            {
+              "name": "Roedores",
+              "slug": "roedores",
+              "path": "mascotas/otras-mascotas/roedores"
+            }
+          ]
+        },
+        {
+          "name": "Perros",
+          "slug": "perros",
+          "path": "mascotas/perros",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Accesorios Perros",
+              "slug": "accesorios-perros",
+              "path": "mascotas/perros/accesorios-perros"
+            },
+            {
+              "name": "Alimento Perros",
+              "slug": "alimento-perros",
+              "path": "mascotas/perros/alimento-perros"
+            },
+            {
+              "name": "Ropa Perros",
+              "slug": "ropa-perros",
+              "path": "mascotas/perros/ropa-perros"
+            },
+            {
+              "name": "Salud Higiene Perros",
+              "slug": "salud-higiene-perros",
+              "path": "mascotas/perros/salud-higiene-perros"
+            },
+            {
+              "name": "Snacks Premios",
+              "slug": "snacks-premios",
+              "path": "mascotas/perros/snacks-premios"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Moda",
+      "slug": "moda",
+      "path": "moda",
+      "children": [
+        {
+          "name": "Accesorios",
+          "slug": "accesorios",
+          "path": "moda/accesorios",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Bolsos",
+              "slug": "bolsos",
+              "path": "moda/accesorios/bolsos"
+            },
+            {
+              "name": "Carteras",
+              "slug": "carteras",
+              "path": "moda/accesorios/carteras"
+            },
+            {
+              "name": "Gafas",
+              "slug": "gafas",
+              "path": "moda/accesorios/gafas"
+            },
+            {
+              "name": "Relojes",
+              "slug": "relojes",
+              "path": "moda/accesorios/relojes"
+            }
+          ]
+        },
+        {
+          "name": "Calzado",
+          "slug": "calzado",
+          "path": "moda/calzado",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Botas",
+              "slug": "botas",
+              "path": "moda/calzado/botas"
+            },
+            {
+              "name": "Calzado Damas",
+              "slug": "calzado-damas",
+              "path": "moda/calzado/calzado-damas"
+            },
+            {
+              "name": "Calzado Varon",
+              "slug": "calzado-varon",
+              "path": "moda/calzado/calzado-varon"
+            },
+            {
+              "name": "Sandalias",
+              "slug": "sandalias",
+              "path": "moda/calzado/sandalias"
+            },
+            {
+              "name": "Zapatillas Damas",
+              "slug": "zapatillas-damas",
+              "path": "moda/calzado/zapatillas-damas"
+            },
+            {
+              "name": "Zapatillas Varon",
+              "slug": "zapatillas-varon",
+              "path": "moda/calzado/zapatillas-varon"
+            }
+          ]
+        },
+        {
+          "name": "Joyas",
+          "slug": "joyas",
+          "path": "moda/joyas",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Brazaletes",
+              "slug": "brazaletes",
+              "path": "moda/joyas/brazaletes"
+            },
+            {
+              "name": "Collares",
+              "slug": "collares",
+              "path": "moda/joyas/collares"
+            },
+            {
+              "name": "Pendientes",
+              "slug": "pendientes",
+              "path": "moda/joyas/pendientes"
+            }
+          ]
+        },
+        {
+          "name": "Ropa Hombre",
+          "slug": "ropa-hombre",
+          "path": "moda/ropa-hombre",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Chaquetas",
+              "slug": "chaquetas",
+              "path": "moda/ropa-hombre/chaquetas"
+            },
+            {
+              "name": "Deportiva",
+              "slug": "deportiva",
+              "path": "moda/ropa-hombre/deportiva"
+            },
+            {
+              "name": "Formal",
+              "slug": "formal",
+              "path": "moda/ropa-hombre/formal"
+            },
+            {
+              "name": "Interiores",
+              "slug": "interiores",
+              "path": "moda/ropa-hombre/interiores"
+            },
+            {
+              "name": "Pantalones",
+              "slug": "pantalones",
+              "path": "moda/ropa-hombre/pantalones"
+            },
+            {
+              "name": "Poleras",
+              "slug": "poleras",
+              "path": "moda/ropa-hombre/poleras"
+            }
+          ]
+        },
+        {
+          "name": "Ropa Mujer",
+          "slug": "ropa-mujer",
+          "path": "moda/ropa-mujer",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Blusas",
+              "slug": "blusas",
+              "path": "moda/ropa-mujer/blusas"
+            },
+            {
+              "name": "Chaquetas",
+              "slug": "chaquetas",
+              "path": "moda/ropa-mujer/chaquetas"
+            },
+            {
+              "name": "Deportiva",
+              "slug": "deportiva",
+              "path": "moda/ropa-mujer/deportiva"
+            },
+            {
+              "name": "Formal",
+              "slug": "formal",
+              "path": "moda/ropa-mujer/formal"
+            },
+            {
+              "name": "Interiores",
+              "slug": "interiores",
+              "path": "moda/ropa-mujer/interiores"
+            },
+            {
+              "name": "Jeans",
+              "slug": "jeans",
+              "path": "moda/ropa-mujer/jeans"
+            },
+            {
+              "name": "Vestidos",
+              "slug": "vestidos",
+              "path": "moda/ropa-mujer/vestidos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Oficina y Papelería",
+      "slug": "oficina",
+      "path": "oficina",
+      "children": [
+        {
+          "name": "Impresoras",
+          "slug": "impresoras",
+          "path": "oficina/impresoras",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Consumibles",
+              "slug": "consumibles",
+              "path": "oficina/impresoras/consumibles"
+            },
+            {
+              "name": "Laser",
+              "slug": "laser",
+              "path": "oficina/impresoras/laser"
+            },
+            {
+              "name": "Multifuncionales",
+              "slug": "multifuncionales",
+              "path": "oficina/impresoras/multifuncionales"
+            },
+            {
+              "name": "Tinta Inkjet",
+              "slug": "tinta-inkjet",
+              "path": "oficina/impresoras/tinta-inkjet"
+            }
+          ]
+        },
+        {
+          "name": "Material Escolar",
+          "slug": "material-escolar",
+          "path": "oficina/material-escolar",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Cuadernos",
+              "slug": "cuadernos",
+              "path": "oficina/material-escolar/cuadernos"
+            },
+            {
+              "name": "Mochilas Escolar",
+              "slug": "mochilas-escolar",
+              "path": "oficina/material-escolar/mochilas-escolar"
+            },
+            {
+              "name": "Sets Escolares",
+              "slug": "sets-escolares",
+              "path": "oficina/material-escolar/sets-escolares"
+            },
+            {
+              "name": "Utiles Escritura",
+              "slug": "utiles-escritura",
+              "path": "oficina/material-escolar/utiles-escritura"
+            }
+          ]
+        },
+        {
+          "name": "Mobiliario Oficina",
+          "slug": "mobiliario-oficina",
+          "path": "oficina/mobiliario-oficina",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Archivadores Muebles",
+              "slug": "archivadores-muebles",
+              "path": "oficina/mobiliario-oficina/archivadores-muebles"
+            },
+            {
+              "name": "Escritorios Oficina",
+              "slug": "escritorios-oficina",
+              "path": "oficina/mobiliario-oficina/escritorios-oficina"
+            },
+            {
+              "name": "Sillas Ergonomicas",
+              "slug": "sillas-ergonomicas",
+              "path": "oficina/mobiliario-oficina/sillas-ergonomicas"
+            }
+          ]
+        },
+        {
+          "name": "Papeleria Oficina",
+          "slug": "papeleria-oficina",
+          "path": "oficina/papeleria-oficina",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Carpetas Archivadores",
+              "slug": "carpetas-archivadores",
+              "path": "oficina/papeleria-oficina/carpetas-archivadores"
+            },
+            {
+              "name": "Organizadores",
+              "slug": "organizadores",
+              "path": "oficina/papeleria-oficina/organizadores"
+            },
+            {
+              "name": "Plumas Lapices",
+              "slug": "plumas-lapices",
+              "path": "oficina/papeleria-oficina/plumas-lapices"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Servicios Digitales",
+      "slug": "servicios-digitales",
+      "path": "servicios-digitales",
+      "children": [
+        {
+          "name": "Hosting Dominios",
+          "slug": "hosting-dominios",
+          "path": "servicios-digitales/hosting-dominios",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Dominios",
+              "slug": "dominios",
+              "path": "servicios-digitales/hosting-dominios/dominios"
+            },
+            {
+              "name": "Hosting Web",
+              "slug": "hosting-web",
+              "path": "servicios-digitales/hosting-dominios/hosting-web"
+            },
+            {
+              "name": "Servidores Vps",
+              "slug": "servidores-vps",
+              "path": "servicios-digitales/hosting-dominios/servidores-vps"
+            }
+          ]
+        },
+        {
+          "name": "Licencias Sistemas",
+          "slug": "licencias-sistemas",
+          "path": "servicios-digitales/licencias-sistemas",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Licencias Desarrollo",
+              "slug": "licencias-desarrollo",
+              "path": "servicios-digitales/licencias-sistemas/licencias-desarrollo"
+            },
+            {
+              "name": "Sistemas Operativos",
+              "slug": "sistemas-operativos",
+              "path": "servicios-digitales/licencias-sistemas/sistemas-operativos"
+            }
+          ]
+        },
+        {
+          "name": "Software Especializado",
+          "slug": "software-especializado",
+          "path": "servicios-digitales/software-especializado",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Software Contabilidad",
+              "slug": "software-contabilidad",
+              "path": "servicios-digitales/software-especializado/software-contabilidad"
+            },
+            {
+              "name": "Software Educativo",
+              "slug": "software-educativo",
+              "path": "servicios-digitales/software-especializado/software-educativo"
+            },
+            {
+              "name": "Software Entretenimiento",
+              "slug": "software-entretenimiento",
+              "path": "servicios-digitales/software-especializado/software-entretenimiento"
+            }
+          ]
+        },
+        {
+          "name": "Software Oficina",
+          "slug": "software-oficina",
+          "path": "servicios-digitales/software-oficina",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Antivirus Seguridad",
+              "slug": "antivirus-seguridad",
+              "path": "servicios-digitales/software-oficina/antivirus-seguridad"
+            },
+            {
+              "name": "Software Diseno",
+              "slug": "software-diseno",
+              "path": "servicios-digitales/software-oficina/software-diseno"
+            },
+            {
+              "name": "Suite Oficina",
+              "slug": "suite-oficina",
+              "path": "servicios-digitales/software-oficina/suite-oficina"
+            }
+          ]
+        },
+        {
+          "name": "Suscripciones Digitales",
+          "slug": "suscripciones-digitales",
+          "path": "servicios-digitales/suscripciones-digitales",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Almacenamiento Nube",
+              "slug": "almacenamiento-nube",
+              "path": "servicios-digitales/suscripciones-digitales/almacenamiento-nube"
+            },
+            {
+              "name": "Herramientas Productividad",
+              "slug": "herramientas-productividad",
+              "path": "servicios-digitales/suscripciones-digitales/herramientas-productividad"
+            },
+            {
+              "name": "Streaming Entretenimiento",
+              "slug": "streaming-entretenimiento",
+              "path": "servicios-digitales/suscripciones-digitales/streaming-entretenimiento"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Supermercado y Alimentos",
+      "slug": "supermercado",
+      "path": "supermercado",
+      "children": [
+        {
+          "name": "Abarrotes",
+          "slug": "abarrotes",
+          "path": "supermercado/abarrotes",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Aceites Condimentos",
+              "slug": "aceites-condimentos",
+              "path": "supermercado/abarrotes/aceites-condimentos"
+            },
+            {
+              "name": "Arroz Cereales",
+              "slug": "arroz-cereales",
+              "path": "supermercado/abarrotes/arroz-cereales"
+            },
+            {
+              "name": "Enlatados Conservas",
+              "slug": "enlatados-conservas",
+              "path": "supermercado/abarrotes/enlatados-conservas"
+            },
+            {
+              "name": "Fideos Pastas",
+              "slug": "fideos-pastas",
+              "path": "supermercado/abarrotes/fideos-pastas"
+            },
+            {
+              "name": "Snacks Golosinas",
+              "slug": "snacks-golosinas",
+              "path": "supermercado/abarrotes/snacks-golosinas"
+            }
+          ]
+        },
+        {
+          "name": "Carnes Pescados",
+          "slug": "carnes-pescados",
+          "path": "supermercado/carnes-pescados",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Carne Res",
+              "slug": "carne-res",
+              "path": "supermercado/carnes-pescados/carne-res"
+            },
+            {
+              "name": "Cerdo",
+              "slug": "cerdo",
+              "path": "supermercado/carnes-pescados/cerdo"
+            },
+            {
+              "name": "Embutidos",
+              "slug": "embutidos",
+              "path": "supermercado/carnes-pescados/embutidos"
+            },
+            {
+              "name": "Pescados Mariscos",
+              "slug": "pescados-mariscos",
+              "path": "supermercado/carnes-pescados/pescados-mariscos"
+            },
+            {
+              "name": "Pollo",
+              "slug": "pollo",
+              "path": "supermercado/carnes-pescados/pollo"
+            }
+          ]
+        },
+        {
+          "name": "Frescos",
+          "slug": "frescos",
+          "path": "supermercado/frescos",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Frutas",
+              "slug": "frutas",
+              "path": "supermercado/frescos/frutas"
+            },
+            {
+              "name": "Panaderia",
+              "slug": "panaderia",
+              "path": "supermercado/frescos/panaderia"
+            },
+            {
+              "name": "Verduras",
+              "slug": "verduras",
+              "path": "supermercado/frescos/verduras"
+            }
+          ]
+        },
+        {
+          "name": "Lacteos Refrigerados",
+          "slug": "lacteos-refrigerados",
+          "path": "supermercado/lacteos-refrigerados",
+          "isLeaf": false,
+          "children": [
+            {
+              "name": "Bebidas",
+              "slug": "bebidas",
+              "path": "supermercado/lacteos-refrigerados/bebidas"
+            },
+            {
+              "name": "Huevos",
+              "slug": "huevos",
+              "path": "supermercado/lacteos-refrigerados/huevos"
+            },
+            {
+              "name": "Lacteos",
+              "slug": "lacteos",
+              "path": "supermercado/lacteos-refrigerados/lacteos"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

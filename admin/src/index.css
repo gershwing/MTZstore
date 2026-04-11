@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force light mode — prevent OS/browser dark mode from affecting the admin */
+:root {
+  color-scheme: light only;
+}
