@@ -17,12 +17,12 @@ import "yet-another-react-lightbox/styles.css";
 import { AppContext } from "../../context/AppContext";
 
 // ✅ servicios + filtros + params
-import ContentFilters from "../../components/Filters/ContentFilters";
+import ContentFilters from "../../Components/Filters/ContentFilters";
 import { buildListParams } from "../../utils/buildListParams";
 import { listBlogs, removeBlog, buildBlogPreviewUrl } from "../../services/blog";
 
 // ✅ botón de previsualización unificado
-import PreviewButton from "../../components/content/PreviewButton";
+import PreviewButton from "../../Components/content/PreviewButton";
 
 const columns = [
     { id: "image", label: "IMAGEN", minWidth: 120 },

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Tabs, Tab } from "@mui/material";
-import Badge from "../../components/Badge";
+import Badge from "../../Components/Badge";
 import { listSettlements, getPendingSettlements, paySettlement } from "../../services/settlements";
 
 const r = (n) => Number(n || 0).toFixed(2);

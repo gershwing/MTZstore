@@ -5,7 +5,7 @@ import Select from "@mui/material/Select";
 
 import { AppContext } from "../../context/AppContext";
 // ⚠️ carpeta "components" en minúscula
-import UploadBox from "../../components/UploadBox";
+import UploadBox from "../../Components/UploadBox";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { FaCloudUploadAlt } from "react-icons/fa";
@@ -14,8 +14,8 @@ import { IoMdClose } from "react-icons/io";
 import { deleteImages, editData, fetchDataFromApi } from "../../utils/api";
 
 // NUEVO: publicación + previa
-import PublishFields from "../../components/content/PublishFields";
-import PreviewButton from "../../components/content/PreviewButton";
+import PublishFields from "../../Components/content/PublishFields";
+import PreviewButton from "../../Components/content/PreviewButton";
 // 👉 Importa la URL builder desde el service (igual que sliders/bannerList2/blog)
 import { buildBannerV1PreviewUrl } from "../../services/bannersV1";
 

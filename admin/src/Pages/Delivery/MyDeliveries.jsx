@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { myDeliveries, updateDeliveryStatus, uploadDeliveryProof, deleteDeliveryProof } from "../../services/delivery";
-import Badge from "../../components/Badge";
+import Badge from "../../Components/Badge";
 import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 
 export default function MyDeliveries() {

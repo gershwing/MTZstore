@@ -5,7 +5,7 @@ import Select from "@mui/material/Select";
 // ✅ usa named export
 import { AppContext } from "../../context/AppContext";
 // ⚠️ carpeta "components" en minúscula
-import UploadBox from "../../components/UploadBox";
+import UploadBox from "../../Components/UploadBox";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { FaCloudUploadAlt } from "react-icons/fa";
@@ -14,7 +14,7 @@ import { IoMdClose } from "react-icons/io";
 import { deleteImages, editData, fetchDataFromApi } from "../../utils/api";
 
 // 👇 NUEVO: botón de previa + generador de URL para bannerList2
-import PreviewButton from "../../components/content/PreviewButton";
+import PreviewButton from "../../Components/content/PreviewButton";
 import { buildBannerList2PreviewUrl } from "../../services/bannerList2";
 
 /**

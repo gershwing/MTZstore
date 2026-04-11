@@ -4,7 +4,7 @@ import {
   Button, Grid, TextField, Alert, MenuItem, InputAdornment,
   Card, CardContent, Chip, Stack
 } from "@mui/material";
-import UploadBox from "../../components/UploadBox";
+import UploadBox from "../../Components/UploadBox";
 import { createDeliveryApp, getMyDeliveryApp } from "../../services/deliveryApps";
 import PageContainer from "../../layout/PageContainer";
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import ContentFilters from "../../components/Filters/ContentFilters";
-import Badge from "../../components/Badge";
+import ContentFilters from "../../Components/Filters/ContentFilters";
+import Badge from "../../Components/Badge";
 import { Button, Pagination, IconButton, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { listDeliveries, updateDeliveryStatus, uploadDeliveryProof, dispatchToWarehouse, receiveAtWarehouse } from "../../services/delivery";
 import AssignModal from "./AssignModal";

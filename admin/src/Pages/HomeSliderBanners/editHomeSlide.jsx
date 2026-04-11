@@ -10,8 +10,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useNavigate } from "react-router-dom";
 
 // NUEVO: campos de publicación + botón de previa
-import PublishFields from "../../components/content/PublishFields";
-import PreviewButton from "../../components/content/PreviewButton";
+import PublishFields from "../../Components/content/PublishFields";
+import PreviewButton from "../../Components/content/PreviewButton";
 // 👇 Importa la URL builder desde el service (en vez del helper local)
 import { buildSliderPreviewUrl } from "../../services/sliders";
 

@@ -5,7 +5,7 @@ import Select from "@mui/material/Select";
 // ✅ usa named export
 import { AppContext } from "../../context/AppContext";
 // ⚠️ carpeta "components" en minúscula
-import UploadBox from "../../components/UploadBox";
+import UploadBox from "../../Components/UploadBox";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { FaCloudUploadAlt } from "react-icons/fa";

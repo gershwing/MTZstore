@@ -17,7 +17,7 @@ import "yet-another-react-lightbox/styles.css";
 import { AppContext } from "../../context/AppContext";
 
 // NUEVO: servicios + filtros + params
-import ContentFilters from "../../components/Filters/ContentFilters";
+import ContentFilters from "../../Components/Filters/ContentFilters";
 import { buildListParams } from "../../utils/buildListParams";
 import { listBlogs, removeBlog } from "../../services/blog";
 

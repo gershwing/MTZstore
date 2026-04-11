@@ -1,7 +1,7 @@
 // admin/src/Pages/Blog/AddBlog.jsx
 import React, { useContext, useState } from "react";
 // ⚠️ carpeta "components" en minúscula
-import UploadBox from "../../components/UploadBox";
+import UploadBox from "../../Components/UploadBox";
 import { IoMdClose } from "react-icons/io";
 import { Button } from "@mui/material";
 import { FaCloudUploadAlt } from "react-icons/fa";
@@ -14,8 +14,8 @@ import { deleteImages, postData } from "../../utils/api";
 import { AppContext } from "../../context/AppContext";
 
 // NUEVO: publicación + previa
-import PublishFields from "../../components/content/PublishFields";
-import PreviewButton from "../../components/content/PreviewButton";
+import PublishFields from "../../Components/content/PublishFields";
+import PreviewButton from "../../Components/content/PreviewButton";
 import { buildBlogPreviewUrl } from "../../services/blog"; // ajusta si tu ruta difiere
 
 const AddBlog = () => {

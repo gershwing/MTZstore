@@ -3,11 +3,11 @@ import { Button } from "@mui/material";
 import { postData } from "../../utils/api";
 import { useDirectSale } from "./hooks/useDirectSale";
 import useCurrentStore from "../../hooks/useCurrentStore";
-import ProductSearcher from "./components/ProductSearcher";
-import SaleLineTable from "./components/SaleLineTable";
-import SaleSummary from "./components/SaleSummary";
-import CustomerSearcher from "./components/CustomerSearcher";
-import SaleResultModal from "./components/SaleResultModal";
+import ProductSearcher from "./Components/ProductSearcher";
+import SaleLineTable from "./Components/SaleLineTable";
+import SaleSummary from "./Components/SaleSummary";
+import CustomerSearcher from "./Components/CustomerSearcher";
+import SaleResultModal from "./Components/SaleResultModal";
 
 export default function DirectSalesPage() {
   const sale = useDirectSale();

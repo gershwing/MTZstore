@@ -8,7 +8,7 @@ import PageContainer from "../../layout/PageContainer";
 import { useNavigate } from "react-router-dom";
 import AppContext from "../../context/AppContext";
 
-import UploadBox from "../../components/UploadBox";
+import UploadBox from "../../Components/UploadBox";
 import { createSellerApp, reapplySellerApp } from "../../services/sellerApps";
 import { api } from "../../utils/api";
 

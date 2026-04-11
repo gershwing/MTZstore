@@ -3,8 +3,8 @@ import React, { useContext, useEffect, useMemo } from "react";
 import { Outlet } from "react-router-dom";
 
 // ⚠️ Asegúrate: carpeta "components" en minúscula
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
+import Header from "../Components/Header";
+import Sidebar from "../Components/Sidebar";
 
 // Estado de AUTH
 import { useAuth } from "../hooks/useAuth";

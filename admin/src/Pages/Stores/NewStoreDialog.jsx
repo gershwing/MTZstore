@@ -3,7 +3,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Grid, TextField, Alert
 } from "@mui/material";
-import UploadBox from "../../components/UploadBox"; // respeta tu ruta/uppercase
+import UploadBox from "../../Components/UploadBox"; // respeta tu ruta/uppercase
 import { api } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import { setCurrentStoreId } from "../../utils/tenant";

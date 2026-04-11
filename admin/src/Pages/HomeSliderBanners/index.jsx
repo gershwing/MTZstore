@@ -17,7 +17,7 @@ import { AppContext } from "../../context/AppContext"; // ✅ named export corre
 import UIContext from "../../context/UIContext";        // ✅ setProgress vive aquí
 import { deleteData, fetchDataFromApi } from "../../utils/api";
 
-import ContentFilters from "../../components/Filters/ContentFilters";
+import ContentFilters from "../../Components/Filters/ContentFilters";
 import { buildListParams } from "../../utils/buildListParams";
 
 const columns = [

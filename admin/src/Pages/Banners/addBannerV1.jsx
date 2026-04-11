@@ -5,7 +5,7 @@ import Select from "@mui/material/Select";
 // ✅ usa named export
 import { AppContext } from "../../context/AppContext";
 // ⚠️ carpeta "components" en minúscula
-import UploadBox from "../../components/UploadBox";
+import UploadBox from "../../Components/UploadBox";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { FaCloudUploadAlt } from "react-icons/fa";
@@ -14,8 +14,8 @@ import { IoMdClose } from "react-icons/io";
 import { deleteImages, postData } from "../../utils/api";
 
 // NUEVO: publicación + previa
-import PublishFields from "../../components/content/PublishFields";
-import PreviewButton from "../../components/content/PreviewButton";
+import PublishFields from "../../Components/content/PublishFields";
+import PreviewButton from "../../Components/content/PreviewButton";
 
 export const AddBannerV1 = () => {
     const [formFields, setFormFields] = useState({

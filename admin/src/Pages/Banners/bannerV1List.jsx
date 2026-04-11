@@ -14,7 +14,7 @@ import { GoTrash } from "react-icons/go";
 
 import { AppContext } from "../../context/AppContext";
 
-import ContentFilters from "../../components/Filters/ContentFilters";
+import ContentFilters from "../../Components/Filters/ContentFilters";
 import { buildListParams } from "../../utils/buildListParams";
 import { listBannerV1, removeBannerV1 } from "../../services/bannersV1";
 

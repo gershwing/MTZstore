@@ -15,7 +15,7 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 import { AppContext } from "../../context/AppContext";
-import ContentFilters from "../../components/Filters/ContentFilters";
+import ContentFilters from "../../Components/Filters/ContentFilters";
 import { buildListParams } from "../../utils/buildListParams";
 import { listBannerList2, removeBannerList2 } from "../../services/bannerList2";
 

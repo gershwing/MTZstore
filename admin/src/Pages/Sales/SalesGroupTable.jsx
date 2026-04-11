@@ -3,7 +3,7 @@ import { GoTrash } from "react-icons/go";
 import { useAuth } from "../../hooks/useAuth";
 import { deleteData } from "../../utils/api";
 import SaleDetailModal from "./SaleDetailModal";
-import { generateReceiptPDF } from "../DirectSales/components/SaleReceiptPDF";
+import { generateReceiptPDF } from "../DirectSales/Components/SaleReceiptPDF";
 
 const PAYMENT = { CASH: "Efectivo", TRANSFER: "Transferencia", QR: "QR", MIXED: "Mixto", OTHER: "Otro" };
 const PAY_STATUS = { PAID: { label: "Pagado", cls: "bg-green-100 text-green-700" }, PARTIAL: { label: "Parcial", cls: "bg-orange-100 text-orange-700" }, CREDIT: { label: "Crédito", cls: "bg-red-100 text-red-700" } };

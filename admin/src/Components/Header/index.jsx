@@ -1,4 +1,4 @@
-// admin/src/components/Header/index.jsx
+// admin/src/Components/Header/index.jsx
 import React, { useEffect, useMemo, useRef, useState, useContext } from "react";
 import Button from "@mui/material/Button";
 import Badge from "@mui/material/Badge";
@@ -25,7 +25,7 @@ import { clearSessionTokens } from "@/utils/session";
 import { closeSocket, updateSocketAuth } from "@/utils/socket";
 
 // Selector de tienda
-import StorePicker from "../../components/StorePicker";
+import StorePicker from "../../Components/StorePicker";
 
 // AppContext
 import { AppContext } from "../../context/AppContext";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { availableDeliveries, takeDelivery } from "../../services/delivery";
-import Badge from "../../components/Badge";
+import Badge from "../../Components/Badge";
 import { Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 

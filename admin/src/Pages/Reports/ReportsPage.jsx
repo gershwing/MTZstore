@@ -1,8 +1,8 @@
 // admin/src/Pages/Reports/ReportsPage.jsx
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useMemo, useState } from "react";
-import ContentFilters from "../../components/Filters/ContentFilters";
-import MetricCard from "../../components/KPI/MetricCard";
+import ContentFilters from "../../Components/Filters/ContentFilters";
+import MetricCard from "../../Components/KPI/MetricCard";
 import { Button, MenuItem, Select } from "@mui/material";
 import {
   getSalesSeries,

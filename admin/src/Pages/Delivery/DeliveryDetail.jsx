@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getDelivery, updateDeliveryStatus, uploadDeliveryProof } from "../../services/delivery";
-import Badge from "../../components/Badge";
+import Badge from "../../Components/Badge";
 import DeliveryStatusSelect from "./DeliveryStatusSelect";
 import { Button, Chip } from "@mui/material";
 

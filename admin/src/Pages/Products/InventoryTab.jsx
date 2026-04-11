@@ -2,9 +2,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button, TextField, Tooltip } from "@mui/material";
 import { getMovements, getStock } from "../../services/inventory";
-import MovementForm from "../../../components/Inventory/MovementForm";
-import MovementTable from "../../components/Inventory/MovementTable";
-import Badge from "../../../components/Badge";
+import MovementForm from "../../../Components/Inventory/MovementForm";
+import MovementTable from "../../Components/Inventory/MovementTable";
+import Badge from "../../../Components/Badge";
 import { usePermission } from "../../hooks/usePermission";
 import toast from "react-hot-toast";
 
