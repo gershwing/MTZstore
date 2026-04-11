@@ -2,7 +2,7 @@ import React from "react";
 
 import ProtectedRoute from "./ProtectedRoute";
 import RequireAdmin from "./RequireAdmin";
-import RequireTenant from "../components/Guards/RequireTenant";
+import RequireTenant from "../Components/Guards/RequireTenant";
 import RoleRedirect from "./RoleRedirect";
 import AppLayout from "../layout/AppLayout";
 
