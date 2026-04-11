@@ -1,10 +1,10 @@
 # Dependencies
 node_modules/
 
-# Environment variables (NEVER commit)
-.env
-.env.*
-!.env.example
+# Environment variables
+server/.env
+.env.local
+.env.*.local
 
 # Uploads (local temp files)
 uploads/
