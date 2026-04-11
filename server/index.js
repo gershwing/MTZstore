@@ -105,6 +105,8 @@ const corsOptions = {
         'Content-Type',
         'Authorization',
         'X-Requested-With',
+        'Cache-Control',
+        'Pragma',
         // Variantes comunes de tenant/store headers para evitar fallos de preflight
         'X-Store-Id', 'x-store-id', 'X-StoreId', 'x-storeid',
         'X-Tenant-Id', 'x-tenant-id', 'X-TenantId', 'x-tenantid',
