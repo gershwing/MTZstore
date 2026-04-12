@@ -52,6 +52,23 @@ export function mapWithFx(doc, rate) {
     oldPriceUsdt = +(finalOldPrice / fxRate).toFixed(2);
   }
 
+  // Enriquecer wholesaleTiers con precios convertidos
+  let wholesaleTiersFx = obj.wholesaleTiers || null;
+  if (wholesaleTiersFx?.enabled) {
+    const convertPrice = (p) => {
+      const fp = applyMargin(Number(p) || 0, marginPct);
+      if (baseCurrency === "USD") {
+        return { usd: +fp.toFixed(2), bob: +(fp * fxRate).toFixed(2) };
+      }
+      return { bob: +fp.toFixed(2), usd: +(fp / fxRate).toFixed(2) };
+    };
+    wholesaleTiersFx = {
+      ...wholesaleTiersFx,
+      tier1: { ...wholesaleTiersFx.tier1, ...convertPrice(wholesaleTiersFx.tier1?.price) },
+      tier2: { ...wholesaleTiersFx.tier2, ...convertPrice(wholesaleTiersFx.tier2?.price) },
+    };
+  }
+
   return {
     ...obj,
     basePrice,
@@ -64,6 +81,7 @@ export function mapWithFx(doc, rate) {
     oldPriceUsdt,
     priceBob,
     oldPriceBob,
+    wholesaleTiers: wholesaleTiersFx,
     fx: { pair: "USDT/BOB", rate: fxRate }
   };
 }

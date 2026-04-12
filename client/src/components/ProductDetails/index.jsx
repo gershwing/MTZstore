@@ -129,6 +129,25 @@ export const ProductDetailsComponent = (props) => {
     ? selectedVariant.stock
     : (props?.item?.countInStock ?? 0);
 
+  // Precios mayoristas por niveles
+  const wholesaleTiers = props?.item?.wholesaleTiers;
+  const resolveTierPrice = (qty) => {
+    if (!wholesaleTiers?.enabled) return null;
+    const { tier1, tier2 } = wholesaleTiers;
+    // Tier 2 primero (mayor cantidad = menor precio)
+    if (tier2?.minQty > 0 && tier2?.bob > 0 && qty >= tier2.minQty) {
+      return { price: tier2.bob, tier: 2, label: "Mayorista" };
+    }
+    if (tier1?.minQty > 0 && tier1?.bob > 0 && qty >= tier1.minQty) {
+      if (tier1.maxQty > 0 && qty > tier1.maxQty) return null;
+      return { price: tier1.bob, tier: 1, label: "Semi-mayorista" };
+    }
+    return null;
+  };
+
+  const tierResult = resolveTierPrice(quantity);
+  const effectivePrice = tierResult ? tierResult.price : displayPrice;
+
   const handleSelecteQty = (qty) => setQuantity(qty);
 
   const handleSelectAttr = (key, val) => {
@@ -168,11 +187,11 @@ export const ProductDetailsComponent = (props) => {
       productTitle: product?.name,
       image: selectedVariant?.images?.[0]?.url || selectedVariant?.images?.[0] || product?.images?.[0],
       rating: product?.rating,
-      price: displayPrice,
-      oldPrice: displayOldPrice,
+      price: effectivePrice,
+      oldPrice: tierResult ? displayPrice : displayOldPrice,
       discount: product?.discount,
       quantity: quantity,
-      subTotal: parseInt((displayPrice || 0) * quantity),
+      subTotal: parseInt((effectivePrice || 0) * quantity),
       productId: product?._id,
       variantId: selectedVariant?._id || null,
       countInStock: displayStock,
@@ -244,19 +263,56 @@ export const ProductDetailsComponent = (props) => {
       {/* PRECIOS */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4">
         <div className="flex items-center gap-4">
-          {displayOldPrice > 0 && (
-            <span className="oldPrice line-through text-gray-500 text-[20px] font-[500]">
-              {formatPrice(displayOldPrice, "BOB")}
-            </span>
+          {tierResult ? (
+            <>
+              <span className="oldPrice line-through text-gray-500 text-[20px] font-[500]">
+                {formatPrice(displayPrice, "BOB")}
+              </span>
+              <span className="price text-primary text-[20px] font-[600]">
+                {formatPrice(effectivePrice, "BOB")}
+              </span>
+              <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full font-medium">
+                {tierResult.label}
+              </span>
+            </>
+          ) : (
+            <>
+              {displayOldPrice > 0 && (
+                <span className="oldPrice line-through text-gray-500 text-[20px] font-[500]">
+                  {formatPrice(displayOldPrice, "BOB")}
+                </span>
+              )}
+              <span className="price text-primary text-[20px] font-[600]">
+                {formatPrice(displayPrice, "BOB")}
+              </span>
+            </>
           )}
-          <span className="price text-primary text-[20px] font-[600]">
-            {formatPrice(displayPrice, "BOB")}
-          </span>
         </div>
         <span className="text-[14px]">
           Disponible en stock: <span className="text-green-600 font-bold">{displayStock} items</span>
         </span>
       </div>
+
+      {/* Tabla de precios mayoristas */}
+      {wholesaleTiers?.enabled && (
+        <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <p className="text-xs font-semibold text-amber-900 mb-2">Precios por mayor</p>
+          <div className="space-y-1">
+            {wholesaleTiers.tier1?.minQty > 0 && wholesaleTiers.tier1?.bob > 0 && (
+              <div className={`flex justify-between text-sm px-2 py-1 rounded ${tierResult?.tier === 1 ? "bg-amber-200 font-semibold" : ""}`}>
+                <span>{wholesaleTiers.tier1.minQty}{wholesaleTiers.tier1.maxQty > 0 ? ` - ${wholesaleTiers.tier1.maxQty}` : "+"} unidades</span>
+                <span>{formatPrice(wholesaleTiers.tier1.bob, "BOB")} c/u</span>
+              </div>
+            )}
+            {wholesaleTiers.tier2?.minQty > 0 && wholesaleTiers.tier2?.bob > 0 && (
+              <div className={`flex justify-between text-sm px-2 py-1 rounded ${tierResult?.tier === 2 ? "bg-amber-200 font-semibold" : ""}`}>
+                <span>{wholesaleTiers.tier2.minQty}+ unidades</span>
+                <span>{formatPrice(wholesaleTiers.tier2.bob, "BOB")} c/u</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <p className="mt-3 pr-10 mb-4">{props?.item?.description}</p>
 
@@ -363,7 +419,7 @@ export const ProductDetailsComponent = (props) => {
 
       <div className="flex items-center gap-4 py-4">
         <div className="qtyBoxWrapper w-[70px]">
-          <QtyBox handleSelecteQty={handleSelecteQty} />
+          <QtyBox handleSelecteQty={handleSelecteQty} max={displayStock || 99} />
         </div>
 
         <Button

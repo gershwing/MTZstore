@@ -47,6 +47,25 @@ export default function ProductForm({
   /* PRECIO MAYORISTA */
   const [wholesalePrice, setWholesalePrice] = useState(initialData?.wholesalePrice || "");
 
+  /* CÓDIGO DE PRODUCTO (importCode) */
+  const [importCode, setImportCode] = useState(initialData?.importation?.importCode || "");
+
+  /* PRECIOS MAYORISTAS POR NIVELES */
+  const [wholesaleTiers, setWholesaleTiers] = useState({
+    enabled: initialData?.wholesaleTiers?.enabled || false,
+    tier1: {
+      minQty: initialData?.wholesaleTiers?.tier1?.minQty || "",
+      maxQty: initialData?.wholesaleTiers?.tier1?.maxQty || "",
+      price:  initialData?.wholesaleTiers?.tier1?.price || "",
+    },
+    tier2: {
+      minQty: initialData?.wholesaleTiers?.tier2?.minQty || "",
+      price:  initialData?.wholesaleTiers?.tier2?.price || "",
+    },
+  });
+  const updateTier = (tier, field, value) =>
+    setWholesaleTiers(prev => ({ ...prev, [tier]: { ...prev[tier], [field]: value } }));
+
   /* INVENTARIO */
   const [countInStock, setCountInStock] = useState(initialData?.countInStock || "");
   const [stockMinimo, setStockMinimo] = useState(initialData?.stockMinimo || "");
@@ -253,6 +272,19 @@ export default function ProductForm({
       entryDate: entryDate || null,
       entryType: entryType || "",
       entryReference: entryReference.trim(),
+      importation: { ...(initialData?.importation || {}), importCode: importCode.trim() },
+      wholesaleTiers: wholesaleTiers.enabled ? {
+        enabled: true,
+        tier1: {
+          minQty: Number(wholesaleTiers.tier1.minQty) || 0,
+          maxQty: Number(wholesaleTiers.tier1.maxQty) || 0,
+          price:  Number(wholesaleTiers.tier1.price) || 0,
+        },
+        tier2: {
+          minQty: Number(wholesaleTiers.tier2.minQty) || 0,
+          price:  Number(wholesaleTiers.tier2.price) || 0,
+        },
+      } : { enabled: false, tier1: { minQty: 0, maxQty: 0, price: 0 }, tier2: { minQty: 0, price: 0 } },
       attributes,
       variants: isVariantProduct
         ? variants.map((v) => ({
@@ -387,6 +419,58 @@ export default function ProductForm({
               </p>
             </div>
 
+            {/* Venta por Mayor */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-amber-900">Venta por Mayor</h3>
+                <Switch size="small" checked={wholesaleTiers.enabled} onChange={(e) => setWholesaleTiers(prev => ({ ...prev, enabled: e.target.checked }))} />
+              </div>
+              {wholesaleTiers.enabled && (
+                <div className="space-y-3">
+                  <p className="text-xs text-amber-700">Define precios especiales según cantidad. Puedes usar 1 o 2 niveles.</p>
+                  {/* Nivel 1 — Semi-mayorista */}
+                  <div className="bg-white rounded p-3 space-y-2">
+                    <p className="text-xs font-semibold text-gray-700">Nivel 1 — Semi-mayorista</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs mb-1">Desde (unidades)</label>
+                        <input type="number" min="1" value={wholesaleTiers.tier1.minQty} onChange={(e) => updateTier("tier1", "minQty", e.target.value)} className="w-full border rounded px-3 py-2" placeholder="Ej: 5" />
+                      </div>
+                      <div>
+                        <label className="block text-xs mb-1">Hasta (unidades)</label>
+                        <input type="number" min="0" value={wholesaleTiers.tier1.maxQty} onChange={(e) => updateTier("tier1", "maxQty", e.target.value)} className="w-full border rounded px-3 py-2" placeholder="Ej: 19 (0=sin límite)" />
+                      </div>
+                      <div>
+                        <label className="block text-xs mb-1">Precio unitario ({baseCurrency})</label>
+                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier1.price} onChange={(e) => updateTier("tier1", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder="0.00" />
+                        {wholesaleTiers.tier1.price > 0 && bobPerUsd > 0 && (
+                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney(Number(wholesaleTiers.tier1.price) * bobPerUsd) : roundMoney(Number(wholesaleTiers.tier1.price) / bobPerUsd)} {otherCurrency}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Nivel 2 — Mayorista / Caja */}
+                  <div className="bg-white rounded p-3 space-y-2">
+                    <p className="text-xs font-semibold text-gray-700">Nivel 2 — Mayorista / Caja</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs mb-1">Desde (unidades)</label>
+                        <input type="number" min="1" value={wholesaleTiers.tier2.minQty} onChange={(e) => updateTier("tier2", "minQty", e.target.value)} className="w-full border rounded px-3 py-2" placeholder="Ej: 20" />
+                      </div>
+                      <div className="text-xs text-gray-400 flex items-end pb-2">Hasta agotar stock</div>
+                      <div>
+                        <label className="block text-xs mb-1">Precio unitario ({baseCurrency})</label>
+                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier2.price} onChange={(e) => updateTier("tier2", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder="0.00" />
+                        {wholesaleTiers.tier2.price > 0 && bobPerUsd > 0 && (
+                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney(Number(wholesaleTiers.tier2.price) * bobPerUsd) : roundMoney(Number(wholesaleTiers.tier2.price) / bobPerUsd)} {otherCurrency}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Precio rápido */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
@@ -499,6 +583,16 @@ export default function ProductForm({
             {/* Info general */}
             <div className="space-y-4">
               <h3 className="font-semibold">Información general</h3>
+              <div>
+                <label className="block text-sm font-medium mb-1">Código de producto</label>
+                <input
+                  value={importCode}
+                  onChange={(e) => setImportCode(e.target.value)}
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Ej: MED972937 (opcional)"
+                />
+                <p className="text-xs text-gray-400 mt-1">Código identificativo de importación</p>
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Nombre del producto *</label>
                 <input

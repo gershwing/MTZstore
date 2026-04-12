@@ -46,6 +46,20 @@ const productSchema = new Schema(
       wholesalePrice: { type: Number, default: 0 },
       oldBasePrice: { type: Number, default: 0 },
 
+      /* Precios mayoristas por niveles (para ventas online) */
+      wholesaleTiers: {
+         enabled: { type: Boolean, default: false },
+         tier1: {
+            minQty: { type: Number, default: 0 },
+            maxQty: { type: Number, default: 0 },
+            price:  { type: Number, default: 0 },
+         },
+         tier2: {
+            minQty: { type: Number, default: 0 },
+            price:  { type: Number, default: 0 },
+         },
+      },
+
       baseCurrency: {
          type: String,
          enum: ["USD", "BOB"],
