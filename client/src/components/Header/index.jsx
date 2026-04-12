@@ -1,27 +1,29 @@
-import React, { useContext, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useContext, useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Search from "../Search";
 import Badge from "@mui/material/Badge";
 import { styled } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
 import { MdOutlineShoppingCart } from "react-icons/md";
-import { IoGitCompareOutline } from "react-icons/io5";
 import { FaRegHeart } from "react-icons/fa6";
 import Tooltip from "@mui/material/Tooltip";
 import Navigation from "./Navigation";
 import { MyContext } from "../../App";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import { FaRegUser } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { IoBagCheckOutline } from "react-icons/io5";
 import { IoMdHeartEmpty } from "react-icons/io";
 import { IoIosLogOut } from "react-icons/io";
-import { fetchDataFromApi } from "../../utils/api";
+import { fetchDataFromApi, postData } from "../../utils/api";
 import { LuMapPin } from "react-icons/lu";
 import { useEffect } from "react";
 import { HiOutlineMenu } from "react-icons/hi";
+import { googleSignInInteractive } from "../../firebase";
 
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -36,11 +38,18 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-
   const [isOpenCatPanel, setIsOpenCatPanel] = useState(false);
 
-  const context = useContext(MyContext);
+  // Login dropdown state
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const loginRef = useRef(null);
+  const loginTimeout = useRef(null);
 
+  const context = useContext(MyContext);
   const history = useNavigate();
 
   const handleClick = (event) => {
@@ -50,32 +59,87 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-
-  const location = useLocation();
-
+  // Logo fetch only (no forced redirect)
   useEffect(() => {
-
     fetchDataFromApi("/api/logo").then((res) => {
-      localStorage.setItem('logo', res?.logo?.[0]?.logo || '')
-    })
+      localStorage.setItem('logo', res?.logo?.[0]?.logo || '');
+    });
+  }, []);
 
+  // Login dropdown hover handlers
+  const openLoginDropdown = () => {
+    clearTimeout(loginTimeout.current);
+    setLoginOpen(true);
+  };
+  const closeLoginDropdown = () => {
+    loginTimeout.current = setTimeout(() => setLoginOpen(false), 200);
+  };
 
-    setTimeout(() => {
-      const token = localStorage.getItem('accessToken');
-
-      if (token !== undefined && token !== null && token !== "") {
-        const url = window.location.href
-        history(location.pathname)
-      } else {
-        history("/login")
+  // Close login dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (loginRef.current && !loginRef.current.contains(e.target)) {
+        setLoginOpen(false);
       }
-    }, [1000])
+    };
+    if (loginOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [loginOpen]);
 
-  }, [context?.isLogin]);
+  // Login submit from dropdown
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    if (!loginEmail || !loginPassword) {
+      context?.alertBox("error", "Ingresa correo y contraseña");
+      return;
+    }
+    setLoginLoading(true);
+    const res = await postData("/api/user/login", { email: loginEmail, password: loginPassword }, { withCredentials: true });
+    if (res?.error !== true) {
+      localStorage.setItem("accessToken", res?.data?.accessToken);
+      localStorage.setItem("refreshToken", res?.data?.refreshToken);
+      context.setIsLogin(true);
+      setLoginOpen(false);
+      setLoginEmail("");
+      setLoginPassword("");
+      context?.alertBox("success", res?.message);
+    } else {
+      context?.alertBox("error", res?.message);
+    }
+    setLoginLoading(false);
+  };
+
+  // Google login from dropdown
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await googleSignInInteractive();
+      if (!result) return;
+      const user = result.user;
+      const fields = {
+        name: user.providerData[0].displayName,
+        email: user.providerData[0].email,
+        password: null,
+        avatar: user.providerData[0].photoURL,
+        mobile: user.providerData[0].phoneNumber,
+        role: "USER"
+      };
+      const res = await postData("/api/user/authWithGoogle", fields);
+      if (res?.error !== true) {
+        localStorage.setItem("accessToken", res?.data?.accessToken);
+        localStorage.setItem("refreshToken", res?.data?.refreshToken);
+        context.setIsLogin(true);
+        setLoginOpen(false);
+        context?.alertBox("success", res?.message);
+      } else {
+        context?.alertBox("error", res?.message);
+      }
+    } catch {
+      context?.alertBox("error", "Error al iniciar sesión con Google");
+    }
+  };
 
   const logout = () => {
     setAnchorEl(null);
-
     fetchDataFromApi(`/api/user/logout?token=${localStorage.getItem('accessToken')}`, { withCredentials: true }).then((res) => {
       if (res?.error === false) {
         context.setIsLogin(false);
@@ -86,11 +150,8 @@ const Header = () => {
         context?.setMyListData([]);
         history("/");
       }
-
-
-    })
-
-  }
+    });
+  };
 
   return (
     <>
@@ -147,27 +208,90 @@ const Header = () => {
 
             <div className="col3 w-[10%] lg:w-[30%] flex items-center pl-7">
               <ul className="flex items-center justify-end gap-0 lg:gap-3 w-full">
-                {context.isLogin === false && context?.windowWidth > 992 ? (
-                  <li className="list-none">
-                    <Link
-                      to="/login"
-                      className="link transition text-[15px] font-[500]"
-                    >
-                      Iniciar sesión
-                    </Link>{" "}
-                    | &nbsp;
-                    <Link
-                      to="/register"
-                      className="link  transition text-[15px]  font-[500]"
-                    >
-                      Crear cuenta
-                    </Link>
-                  </li>
-                ) : (
-                  <>
-                    {
-                      context?.windowWidth > 992 &&
-                      <li>
+                {/* Usuario: dropdown login o menú de cuenta */}
+                {context?.windowWidth > 992 && (
+                  <li className="relative">
+                    {context.isLogin === false ? (
+                      /* ── No autenticado: icono + dropdown login ── */
+                      <div
+                        ref={loginRef}
+                        onMouseEnter={openLoginDropdown}
+                        onMouseLeave={closeLoginDropdown}
+                      >
+                        <Button
+                          className="!text-[#000] flex items-center gap-2 cursor-pointer"
+                          onClick={() => setLoginOpen(!loginOpen)}
+                        >
+                          <FaRegUser className="text-[17px] text-[rgba(0,0,0,0.7)]" />
+                          <span className="text-[14px] font-[500] normal-case">Iniciar sesión</span>
+                        </Button>
+
+                        {loginOpen && (
+                          <div className="absolute right-0 top-full mt-2 w-[320px] bg-white rounded-lg shadow-2xl border border-gray-200 p-5 z-[200]">
+                            {/* Flecha */}
+                            <div className="absolute -top-2 right-6 w-4 h-4 bg-white border-l border-t border-gray-200 rotate-45" />
+
+                            <h3 className="text-[16px] font-[600] mb-4">Inicia sesión en tu cuenta</h3>
+
+                            <form onSubmit={handleLoginSubmit} className="space-y-3">
+                              <input
+                                type="email"
+                                placeholder="Correo electrónico"
+                                value={loginEmail}
+                                onChange={(e) => setLoginEmail(e.target.value)}
+                                className="w-full border border-gray-300 rounded px-3 py-2.5 text-[14px] focus:outline-none focus:border-primary"
+                                autoComplete="email"
+                              />
+                              <div className="relative">
+                                <input
+                                  type={showPassword ? "text" : "password"}
+                                  placeholder="Contraseña"
+                                  value={loginPassword}
+                                  onChange={(e) => setLoginPassword(e.target.value)}
+                                  className="w-full border border-gray-300 rounded px-3 py-2.5 text-[14px] focus:outline-none focus:border-primary pr-10"
+                                  autoComplete="current-password"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                >
+                                  {showPassword ? <IoMdEyeOff size={18} /> : <IoMdEye size={18} />}
+                                </button>
+                              </div>
+
+                              <Button
+                                type="submit"
+                                disabled={loginLoading}
+                                className="btn-org w-full !py-2.5 flex gap-2"
+                              >
+                                {loginLoading ? <CircularProgress size={18} color="inherit" /> : "Iniciar sesión"}
+                              </Button>
+                            </form>
+
+                            <div className="flex items-center justify-between mt-3 text-[13px]">
+                              <Link to="/register" className="text-primary font-[500]" onClick={() => setLoginOpen(false)}>
+                                Crear cuenta
+                              </Link>
+                              <Link to="/login" className="text-gray-500 hover:text-primary" onClick={() => setLoginOpen(false)}>
+                                Olvidé mi contraseña
+                              </Link>
+                            </div>
+
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <Button
+                                className="w-full !bg-gray-100 !text-black !py-2 flex gap-2 !normal-case"
+                                onClick={handleGoogleLogin}
+                              >
+                                <FcGoogle size={18} /> Iniciar sesión con Google
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* ── Autenticado: menú de cuenta ── */
+                      <>
                         <Button
                           className="!text-[#000] myAccountWrap flex items-center gap-3 cursor-pointer"
                           onClick={handleClick}
@@ -175,19 +299,15 @@ const Header = () => {
                           <div className="!w-[40px] !h-[40px] !min-w-[40px] !rounded-full !bg-gray-200 flex items-center justify-center">
                             <FaRegUser className="text-[17px] text-[rgba(0,0,0,0.7)]" />
                           </div>
-
-                          {context?.windowWidth > 992 && (
-                            <div className="info flex flex-col">
-                              <h4 className="leading-3 text-[14px] text-[rgba(0,0,0,0.6)] font-[500] mb-0 capitalize text-left justify-start">
-                                {context?.userData?.name}
-                              </h4>
-                              <span className="text-[13px] text-[rgba(0,0,0,0.6)]  font-[400] capitalize text-left justify-start">
-                                {context?.userData?.email}
-                              </span>
-                            </div>
-                          )}
+                          <div className="info flex flex-col">
+                            <h4 className="leading-3 text-[14px] text-[rgba(0,0,0,0.6)] font-[500] mb-0 capitalize text-left justify-start">
+                              {context?.userData?.name}
+                            </h4>
+                            <span className="text-[13px] text-[rgba(0,0,0,0.6)] font-[400] capitalize text-left justify-start">
+                              {context?.userData?.email}
+                            </span>
+                          </div>
                         </Button>
-
 
                         <Menu
                           anchorEl={anchorEl}
@@ -202,12 +322,6 @@ const Header = () => {
                                 overflow: "visible",
                                 filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
                                 mt: 1.5,
-                                "& .MuiAvatar-root": {
-                                  width: 32,
-                                  height: 32,
-                                  ml: -0.5,
-                                  mr: 1,
-                                },
                                 "&::before": {
                                   content: '""',
                                   display: "block",
@@ -227,56 +341,38 @@ const Header = () => {
                           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                         >
                           <Link to="/my-account" className="w-full block">
-                            <MenuItem
-                              onClick={handleClose}
-                              className="flex gap-2 ! !py-2"
-                            >
-                              <FaRegUser className="text-[18px]" />{" "}
+                            <MenuItem onClick={handleClose} className="flex gap-2 !py-2">
+                              <FaRegUser className="text-[18px]" />
                               <span className="text-[14px]">Mi cuenta</span>
                             </MenuItem>
                           </Link>
                           <Link to="/address" className="w-full block">
-                            <MenuItem
-                              onClick={handleClose}
-                              className="flex gap-2 ! !py-2"
-                            >
-                              <LuMapPin className="text-[18px]" />{" "}
+                            <MenuItem onClick={handleClose} className="flex gap-2 !py-2">
+                              <LuMapPin className="text-[18px]" />
                               <span className="text-[14px]">Dirección</span>
                             </MenuItem>
                           </Link>
                           <Link to="/my-orders" className="w-full block">
-                            <MenuItem
-                              onClick={handleClose}
-                              className="flex gap-2 ! !py-2"
-                            >
-                              <IoBagCheckOutline className="text-[18px]" />{" "}
+                            <MenuItem onClick={handleClose} className="flex gap-2 !py-2">
+                              <IoBagCheckOutline className="text-[18px]" />
                               <span className="text-[14px]">Pedidos</span>
                             </MenuItem>
                           </Link>
                           <Link to="/my-list" className="w-full block">
-                            <MenuItem
-                              onClick={handleClose}
-                              className="flex gap-2 ! !py-2"
-                            >
-                              <IoMdHeartEmpty className="text-[18px]" />{" "}
+                            <MenuItem onClick={handleClose} className="flex gap-2 !py-2">
+                              <IoMdHeartEmpty className="text-[18px]" />
                               <span className="text-[14px]">Lista de deseos</span>
                             </MenuItem>
                           </Link>
-
-                          <MenuItem
-                            onClick={logout}
-                            className="flex gap-2 ! !py-2"
-                          >
-                            <IoIosLogOut className="text-[18px]" />{" "}
+                          <MenuItem onClick={logout} className="flex gap-2 !py-2">
+                            <IoIosLogOut className="text-[18px]" />
                             <span className="text-[14px]">Cerrar Sesión</span>
                           </MenuItem>
                         </Menu>
-                      </li>
-                    }
-
-                  </>
+                      </>
+                    )}
+                  </li>
                 )}
-
 
                 {
                   context?.windowWidth > 992 &&
@@ -291,9 +387,7 @@ const Header = () => {
                       </Link>
                     </Tooltip>
                   </li>
-
                 }
-
 
                 <li>
                   <Tooltip title="Cart">
@@ -301,7 +395,6 @@ const Header = () => {
                       aria-label="cart"
                       onClick={() => context.setOpenCartPanel(true)}
                     >
-
                       <StyledBadge badgeContent={context?.cartData?.length !== 0 ? context?.cartData?.length : 0} color="secondary">
                         <MdOutlineShoppingCart />
                       </StyledBadge>
@@ -316,9 +409,7 @@ const Header = () => {
         <Navigation isOpenCatPanel={isOpenCatPanel} setIsOpenCatPanel={setIsOpenCatPanel} />
       </header>
 
-
       <div className="afterHeader mt-[115px] lg:mt-0"></div>
-
     </>
   );
 };

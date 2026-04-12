@@ -7,6 +7,33 @@ const authHeaders = () => ({
     Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
 });
 
+// Auto-refresh: renueva el access token usando el refresh token
+let _refreshPromise = null;
+async function tryRefreshToken() {
+    if (_refreshPromise) return _refreshPromise;
+    _refreshPromise = (async () => {
+        try {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (!refreshToken) return false;
+            const res = await fetch(apiUrl + '/api/user/refresh-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken }),
+                credentials: 'include',
+            });
+            const data = await res.json();
+            if (data?.error === false && data?.data?.accessToken) {
+                localStorage.setItem('accessToken', data.data.accessToken);
+                if (data.data.refreshToken) localStorage.setItem('refreshToken', data.data.refreshToken);
+                return true;
+            }
+            return false;
+        } catch { return false; }
+        finally { _refreshPromise = null; }
+    })();
+    return _refreshPromise;
+}
+
 // --- POST (mantengo fetch como lo tienes)
 export const postData = async (url, formData) => {
     try {
@@ -19,8 +46,21 @@ export const postData = async (url, formData) => {
             body: JSON.stringify(formData),
         });
 
+        // Auto-refresh on 401
+        if (response.status === 401 && !url.includes('refresh-token') && !url.includes('login')) {
+            const refreshed = await tryRefreshToken();
+            if (refreshed) {
+                const retry = await fetch(apiUrl + url, {
+                    method: 'POST',
+                    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                });
+                return await retry.json();
+            }
+        }
+
         const json = await response.json();
-        return json; // conservamos tu contrato actual
+        return json;
     } catch (error) {
         console.error('Error:', error);
         return { error: true, message: String(error) };
@@ -39,8 +79,16 @@ export const fetchDataFromApi = async (url) => {
         const { data } = await axios.get(apiUrl + url, params);
         return data;
     } catch (error) {
+        // Auto-refresh on 401
+        if (error?.response?.status === 401 && !url.includes('refresh-token')) {
+            const refreshed = await tryRefreshToken();
+            if (refreshed) {
+                const { data } = await axios.get(apiUrl + url, { headers: { ...authHeaders(), 'Content-Type': 'application/json' } });
+                return data;
+            }
+        }
         console.log(error);
-        return error; // conservamos tu retorno actual
+        return error;
     }
 };
 
