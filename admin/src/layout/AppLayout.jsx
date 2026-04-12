@@ -94,7 +94,7 @@ export default function AppLayout() {
 
       {/* Contenido principal */}
       <div
-        className="flex-1 flex flex-col min-w-0 transition-[padding] duration-300"
+        className="flex-1 flex flex-col min-w-0 min-h-0 transition-[padding] duration-300"
         style={{ paddingLeft: isMobile ? 0 : sidebarWidthPx }}
       >
         {/* Header */}
