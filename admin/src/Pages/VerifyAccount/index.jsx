@@ -1,6 +1,7 @@
 // src/Pages/VerifyAccount/index.jsx
 import { Button } from "@mui/material";
 import React, { useState, useEffect, useContext } from "react";
+import { extractErrorMsg } from "../../utils/extractError";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { CgLogIn } from "react-icons/cg";
 import { FaRegUser } from "react-icons/fa6";
@@ -59,7 +60,7 @@ const VerifyAccount = () => {
           context.alertBox("success", res?.message || "Código verificado.");
           navigate("/change-password");
         } else {
-          context.alertBox("error", res?.message || "OTP inválido o expirado.");
+          context.alertBox("error", extractErrorMsg(res, "OTP inválido o expirado."));
         }
       } else {
         // Verifica OTP de verificación de email
@@ -70,7 +71,7 @@ const VerifyAccount = () => {
           localStorage.removeItem("actionType");
           navigate("/login");
         } else {
-          context.alertBox("error", res?.message || "OTP inválido o expirado.");
+          context.alertBox("error", extractErrorMsg(res, "OTP inválido o expirado."));
         }
       }
     } finally {

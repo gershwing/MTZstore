@@ -1,5 +1,6 @@
 // src/Pages/SignUp/index.jsx
 import React, { useState, useEffect } from "react";
+import { extractErrorMsg } from "../../utils/extractError";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -147,7 +148,7 @@ const SignUp = () => {
                 setFormFields({ name: "", email: "", password: "" });
                 navigate("/verify-account");
             } else {
-                alertBox?.("error", res?.message);
+                alertBox?.("error", extractErrorMsg(res));
             }
         } finally {
             setIsLoading(false);
@@ -175,7 +176,7 @@ const SignUp = () => {
                 localStorage.setItem("userEmail", fields.email);
                 await afterLogin({ apiData: res, navigate });
             } else {
-                alertBox?.("error", res?.message);
+                alertBox?.("error", extractErrorMsg(res));
             }
         } catch (err) {
             console.error(err);

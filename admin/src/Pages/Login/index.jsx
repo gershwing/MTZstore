@@ -1,5 +1,6 @@
 // src/Pages/Login/index.jsx
 import React, { useState, useEffect, useContext } from "react";
+import { extractErrorMsg } from "../../utils/extractError";
 import { Button } from "@mui/material";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -285,7 +286,7 @@ const Login = () => {
         { __public: true }
       );
       if (res?.error) {
-        notify("error", res?.message || "No se pudo enviar el código");
+        notify("error", extractErrorMsg(res, "No se pudo enviar el código"));
         return;
       }
       notify("success", res?.message || "Te enviamos un código");
