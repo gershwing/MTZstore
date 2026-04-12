@@ -235,15 +235,11 @@ export async function updateProduct(req, res, next) {
             updateData.salesConfig = req.body.salesConfig;
         }
 
-        console.log("[updateProduct] wholesaleTiers payload:", JSON.stringify(updateData.wholesaleTiers));
-
         const updated = await ProductModel.findOneAndUpdate(
             { _id: req.params.id, ...tenantFilter(req, {}) },
             { $set: updateData },
             { new: true }
         );
-
-        console.log("[updateProduct] saved wholesaleTiers:", JSON.stringify(updated?.wholesaleTiers));
 
         if (!updated) throw ERR.NOT_FOUND("Producto no encontrado");
 
