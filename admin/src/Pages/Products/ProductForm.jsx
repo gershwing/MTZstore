@@ -278,11 +278,11 @@ export default function ProductForm({
         tier1: {
           minQty: Number(wholesaleTiers.tier1.minQty) || 0,
           maxQty: Number(wholesaleTiers.tier1.maxQty) || 0,
-          price:  Number(wholesaleTiers.tier1.price) || 0,
+          price:  Number(wholesaleTiers.tier1.price) || Number(basePrice) || 0,
         },
         tier2: {
           minQty: Number(wholesaleTiers.tier2.minQty) || 0,
-          price:  Number(wholesaleTiers.tier2.price) || 0,
+          price:  Number(wholesaleTiers.tier2.price) || Number(basePrice) || 0,
         },
       } : { enabled: false, tier1: { minQty: 0, maxQty: 0, price: 0 }, tier2: { minQty: 0, price: 0 } },
       attributes,
@@ -551,9 +551,9 @@ export default function ProductForm({
                       </div>
                       <div>
                         <label className="block text-xs mb-1">Precio unitario ({baseCurrency})</label>
-                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier1.price} onChange={(e) => updateTier("tier1", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder="0.00" />
-                        {wholesaleTiers.tier1.price > 0 && bobPerUsd > 0 && (
-                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney(Number(wholesaleTiers.tier1.price) * bobPerUsd) : roundMoney(Number(wholesaleTiers.tier1.price) / bobPerUsd)} {otherCurrency}</p>
+                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier1.price} onChange={(e) => updateTier("tier1", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder={basePrice || "0.00"} />
+                        {(Number(wholesaleTiers.tier1.price) || Number(basePrice)) > 0 && bobPerUsd > 0 && (
+                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney((Number(wholesaleTiers.tier1.price) || Number(basePrice)) * bobPerUsd) : roundMoney((Number(wholesaleTiers.tier1.price) || Number(basePrice)) / bobPerUsd)} {otherCurrency}</p>
                         )}
                       </div>
                     </div>
@@ -569,9 +569,9 @@ export default function ProductForm({
                       <div className="text-xs text-gray-400 flex items-end pb-2">Hasta agotar stock</div>
                       <div>
                         <label className="block text-xs mb-1">Precio unitario ({baseCurrency})</label>
-                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier2.price} onChange={(e) => updateTier("tier2", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder="0.00" />
-                        {wholesaleTiers.tier2.price > 0 && bobPerUsd > 0 && (
-                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney(Number(wholesaleTiers.tier2.price) * bobPerUsd) : roundMoney(Number(wholesaleTiers.tier2.price) / bobPerUsd)} {otherCurrency}</p>
+                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier2.price} onChange={(e) => updateTier("tier2", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder={basePrice || "0.00"} />
+                        {(Number(wholesaleTiers.tier2.price) || Number(basePrice)) > 0 && bobPerUsd > 0 && (
+                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney((Number(wholesaleTiers.tier2.price) || Number(basePrice)) * bobPerUsd) : roundMoney((Number(wholesaleTiers.tier2.price) || Number(basePrice)) / bobPerUsd)} {otherCurrency}</p>
                         )}
                       </div>
                     </div>
