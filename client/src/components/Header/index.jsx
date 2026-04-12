@@ -156,7 +156,7 @@ const Header = () => {
   return (
     <>
       <header className="bg-white fixed lg:sticky left-0 w-full top-0 lg:-top-[47px] z-[101]">
-        <div className="top-strip hidden lg:block py-2 border-t-[1px] border-gray-250  border-b-[1px]">
+        <div className="top-strip hidden lg:block py-1.5 border-b border-gray-100 bg-gray-50">
           <div className="container">
             <div className="flex items-center justify-between">
               <div className="col1 w-[50%] hidden lg:block">
@@ -189,25 +189,25 @@ const Header = () => {
           </div>
         </div>
 
-        <div className="header py-2 lg:py-4 border-b-[1px] border-gray-250">
-          <div className="container flex items-center justify-between">
+        <div className="header py-2 lg:py-3 border-b-[1px] border-gray-200">
+          <div className="container flex items-center gap-4">
             {
               context?.windowWidth < 992 &&
               <Button className="!w-[35px] !min-w-[35px] !h-[35px] !rounded-full !text-gray-800" onClick={() => setIsOpenCatPanel(true)}><HiOutlineMenu size={22} /></Button>
             }
 
-            <div className="col1 w-[40%] lg:w-[25%]">
+            <div className="col1 shrink-0">
               <Link to={"/"}>
-                <img src={localStorage.getItem('logo')} className="max-w-[140px] lg:max-w-[200px]" />
+                <img src={localStorage.getItem('logo')} className="max-w-[120px] lg:max-w-[160px]" />
               </Link>
             </div>
 
-            <div className={`col2 fixed top-0 left-0 w-full h-full lg:w-[40%] lg:static p-2 lg:p-0 bg-white z-50 ${context?.windowWidth > 992 && '!block'} ${context?.openSearchPanel === true ? 'block' : 'hidden'}`}>
+            <div className={`col2 fixed top-0 left-0 w-full h-full lg:flex-1 lg:static p-2 lg:p-0 bg-white z-50 ${context?.windowWidth > 992 && '!block'} ${context?.openSearchPanel === true ? 'block' : 'hidden'}`}>
               <Search />
             </div>
 
-            <div className="col3 w-[10%] lg:w-[30%] flex items-center pl-7">
-              <ul className="flex items-center justify-end gap-0 lg:gap-3 w-full">
+            <div className="col3 shrink-0 flex items-center">
+              <ul className="flex items-center gap-1 lg:gap-2">
                 {/* Usuario: dropdown login o menú de cuenta */}
                 {context?.windowWidth > 992 && (
                   <li className="relative">
