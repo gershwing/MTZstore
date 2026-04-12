@@ -338,8 +338,6 @@ const Login = () => {
       const res = await postData("/api/user/authWithGoogle", fields, { __public: true, withCredentials: true });
       if (res?.error) throw new Error("BACKEND_GOOGLE_ERROR");
 
-      notify("success", res?.message || "¡Bienvenido!");
-
       // Tokens desde la respuesta (tolerante)
       const access =
         res?.accessToken || res?.data?.accessToken || res?.token || res?.access || "";
