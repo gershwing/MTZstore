@@ -109,6 +109,22 @@ export async function enrichProductsWithFx(rows, snapshot) {
     p.marginPct = marginPct;
     p.fxAsOf = snapshot?.asOf || null;
 
+    // Enriquecer wholesaleTiers con precios convertidos
+    if (p.wholesaleTiers?.enabled) {
+      const convertTierPrice = (tierPrice) => {
+        const fp = applyMargin(Number(tierPrice) || 0, marginPct);
+        return {
+          bob: roundMoney(baseCurrency === 'BOB' ? fp : convert(fp, 'USD', 'BOB', snapshot), 2),
+          usd: roundMoney(baseCurrency === 'USD' ? fp : convert(fp, 'BOB', 'USD', snapshot), 2),
+        };
+      };
+      p.wholesaleTiers = {
+        ...p.wholesaleTiers,
+        tier1: { ...p.wholesaleTiers.tier1, ...convertTierPrice(p.wholesaleTiers.tier1?.price) },
+        tier2: { ...p.wholesaleTiers.tier2, ...convertTierPrice(p.wholesaleTiers.tier2?.price) },
+      };
+    }
+
     return p;
   });
 }
