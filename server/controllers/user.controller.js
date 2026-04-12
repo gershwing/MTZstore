@@ -58,22 +58,38 @@ export async function registerUserController(req, res, next) {
         if (!isEmailValid) throw ERR.VALIDATION('Invalid email format');
         if (String(password).length < 8) throw ERR.VALIDATION('Password must be at least 8 characters');
 
-        const exists = await UserModel.findOne({ email: normEmail });
-        if (exists) throw ERR.VALIDATION('User already registered with this email');
+        const exists = await UserModel.findOne({ email: normEmail }).select("+password +verify_email");
 
         const hashPassword = await bcryptjs.hash(password, 10);
         const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-        const user = await UserModel.create({
-            email: normEmail,
-            password: hashPassword,
-            name: String(name).trim(),
-            otp: verifyCode,
-            otpExpires: Date.now() + 600_000, // 10 min
-            verify_email: false,
-            signUpWithGoogle: false,
-            status: 'Active',
-        });
+        let user;
+
+        if (exists && exists.verify_email === true) {
+            throw ERR.VALIDATION('User already registered with this email');
+        }
+
+        if (exists && !exists.verify_email) {
+            // Usuario existe pero no verificó — regenerar OTP y reenviar
+            exists.password = hashPassword;
+            exists.name = String(name).trim();
+            exists.otp = verifyCode;
+            exists.otpExpires = Date.now() + 600_000;
+            await exists.save();
+            user = exists;
+        } else {
+            // Nuevo usuario
+            user = await UserModel.create({
+                email: normEmail,
+                password: hashPassword,
+                name: String(name).trim(),
+                otp: verifyCode,
+                otpExpires: Date.now() + 600_000,
+                verify_email: false,
+                signUpWithGoogle: false,
+                status: 'active',
+            });
+        }
 
         await sendEmailFun({
             sendTo: normEmail,
