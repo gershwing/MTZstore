@@ -130,9 +130,18 @@ export async function createProduct(req, res, next) {
             attributes: req.body.attributes || {},
         };
 
-        // Importation solo para SUPER_ADMIN (legacy)
-        if (isSuperAdmin && req.body.importation?.enabled) {
-            productData.importation = req.body.importation;
+        // Wholesale tiers (precios por mayor para ventas online)
+        if (req.body.wholesaleTiers) {
+            productData.wholesaleTiers = req.body.wholesaleTiers;
+        }
+
+        // Importation: importCode para todos, campos completos para SUPER_ADMIN
+        if (req.body.importation) {
+            if (isSuperAdmin) {
+                productData.importation = req.body.importation;
+            } else if (req.body.importation.importCode) {
+                productData.importation = { importCode: req.body.importation.importCode };
+            }
         }
 
         // Configuración de venta (todos los vendedores)
@@ -207,9 +216,18 @@ export async function updateProduct(req, res, next) {
             attributes: req.body.attributes || {},
         };
 
-        // Importation solo para SUPER_ADMIN (legacy)
-        if (isSuperAdmin && req.body.importation !== undefined) {
-            updateData.importation = req.body.importation;
+        // Wholesale tiers (precios por mayor para ventas online)
+        if (req.body.wholesaleTiers !== undefined) {
+            updateData.wholesaleTiers = req.body.wholesaleTiers;
+        }
+
+        // Importation: importCode para todos, campos completos para SUPER_ADMIN
+        if (req.body.importation !== undefined) {
+            if (isSuperAdmin) {
+                updateData.importation = req.body.importation;
+            } else if (req.body.importation?.importCode !== undefined) {
+                updateData["importation.importCode"] = req.body.importation.importCode;
+            }
         }
 
         // Configuración de venta (todos los vendedores)
