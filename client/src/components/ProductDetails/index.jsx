@@ -293,26 +293,74 @@ export const ProductDetailsComponent = (props) => {
         </span>
       </div>
 
-      {/* Tabla de precios mayoristas */}
-      {wholesaleTiers?.enabled && (
-        <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
-          <p className="text-xs font-semibold text-amber-900 mb-2">Precios por mayor</p>
-          <div className="space-y-1">
-            {wholesaleTiers.tier1?.minQty > 0 && wholesaleTiers.tier1?.bob > 0 && (
-              <div className={`flex justify-between text-sm px-2 py-1 rounded ${tierResult?.tier === 1 ? "bg-amber-200 font-semibold" : ""}`}>
-                <span>{wholesaleTiers.tier1.minQty}{wholesaleTiers.tier1.maxQty > 0 ? ` - ${wholesaleTiers.tier1.maxQty}` : "+"} unidades</span>
-                <span>{formatPrice(wholesaleTiers.tier1.bob, "BOB")} c/u</span>
-              </div>
-            )}
-            {wholesaleTiers.tier2?.minQty > 0 && wholesaleTiers.tier2?.bob > 0 && (
-              <div className={`flex justify-between text-sm px-2 py-1 rounded ${tierResult?.tier === 2 ? "bg-amber-200 font-semibold" : ""}`}>
-                <span>{wholesaleTiers.tier2.minQty}+ unidades</span>
-                <span>{formatPrice(wholesaleTiers.tier2.bob, "BOB")} c/u</span>
-              </div>
-            )}
+      {/* Precios por mayor — estilo Alibaba */}
+      {wholesaleTiers?.enabled && (() => {
+        const t1 = wholesaleTiers.tier1;
+        const t2 = wholesaleTiers.tier2;
+        const hasT1 = t1?.minQty > 0 && t1?.bob > 0;
+        const hasT2 = t2?.minQty > 0 && t2?.bob > 0;
+        if (!hasT1 && !hasT2) return null;
+
+        // Construir columnas dinámicamente
+        const cols = [];
+
+        // Columna 0: precio unitario normal (siempre)
+        const unitMax = hasT1 ? t1.minQty - 1 : hasT2 ? t2.minQty - 1 : 0;
+        cols.push({
+          range: unitMax > 1 ? `1 - ${unitMax}` : "1",
+          label: "unidades",
+          price: displayPrice,
+          active: !tierResult,
+        });
+
+        // Columna 1: tier 1 semi-mayorista
+        if (hasT1) {
+          const t1Max = t1.maxQty > 0 ? t1.maxQty : hasT2 ? t2.minQty - 1 : null;
+          cols.push({
+            range: t1Max ? `${t1.minQty} - ${t1Max}` : `${t1.minQty}+`,
+            label: "unidades",
+            price: t1.bob,
+            active: tierResult?.tier === 1,
+          });
+        }
+
+        // Columna 2: tier 2 mayorista/caja
+        if (hasT2) {
+          cols.push({
+            range: `${t2.minQty}+`,
+            label: "unidades",
+            price: t2.bob,
+            active: tierResult?.tier === 2,
+          });
+        }
+
+        return (
+          <div className="mt-4 border border-amber-200 rounded-lg overflow-hidden">
+            <div className={`grid divide-x divide-amber-200 ${cols.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+              {cols.map((col, i) => (
+                <div
+                  key={i}
+                  className={`p-3 text-center transition-colors ${
+                    col.active
+                      ? "bg-amber-100 border-b-2 border-amber-500"
+                      : "bg-amber-50 hover:bg-amber-100/50"
+                  }`}
+                >
+                  <p className="text-xs text-gray-500 mb-1">
+                    {col.range} {col.label}
+                  </p>
+                  <p className={`text-lg font-bold ${col.active ? "text-amber-800" : "text-gray-700"}`}>
+                    {formatPrice(col.price, "BOB")}
+                  </p>
+                  {col.active && (
+                    <p className="text-[10px] text-amber-600 mt-0.5 font-medium">Precio aplicado</p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <p className="mt-3 pr-10 mb-4">{props?.item?.description}</p>
 
