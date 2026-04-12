@@ -9,10 +9,7 @@ import { MyContext } from "../../App";
 import CircularProgress from '@mui/material/CircularProgress';
 import { postData } from "../../utils/api";
 
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { firebaseApp } from "../../firebase";
-const auth = getAuth(firebaseApp);
-const googleProvider = new GoogleAuthProvider();
+import { googleSignInInteractive, completeGoogleRedirectIfAny } from "../../firebase";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,14 +23,43 @@ const Login = () => {
   const history = useNavigate();
 
 
-  useEffect(() => {
-    window.scrollTo(0, 0)
-    const token = localStorage.getItem('accessToken');
+  const handleGoogleResult = (result) => {
+    if (!result) return;
+    const user = result.user;
+    const fields = {
+      name: user.providerData[0].displayName,
+      email: user.providerData[0].email,
+      password: null,
+      avatar: user.providerData[0].photoURL,
+      mobile: user.providerData[0].phoneNumber,
+      role: "USER"
+    };
 
+    postData("/api/user/authWithGoogle", fields).then((res) => {
+      if (res?.error !== true) {
+        setIsLoading(false);
+        context.alertBox("success", res?.message);
+        localStorage.setItem("userEmail", fields.email);
+        localStorage.setItem("accessToken", res?.data?.accessToken);
+        localStorage.setItem("refreshToken", res?.data?.refreshToken);
+        context.setIsLogin(true);
+        history("/");
+      } else {
+        context.alertBox("error", res?.message);
+        setIsLoading(false);
+      }
+    });
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const token = localStorage.getItem('accessToken');
     if (token !== undefined && token !== null && token !== "") {
-      history("/")
+      history("/");
     }
 
+    // Completar flujo de redirect si venimos de Google redirect (Safari/iOS)
+    completeGoogleRedirectIfAny().then(handleGoogleResult).catch(() => {});
   }, []);
 
   const forgotPassword = () => {
@@ -122,60 +148,13 @@ const Login = () => {
 
 
 
-  const authWithGoogle = () => {
-
-    signInWithPopup(auth, googleProvider)
-      .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        // The signed-in user info.
-        const user = result.user;
-
-        const fields = {
-          name: user.providerData[0].displayName,
-          email: user.providerData[0].email,
-          password: null,
-          avatar: user.providerData[0].photoURL,
-          mobile: user.providerData[0].phoneNumber,
-          role: "USER"
-        };
-
-
-        postData("/api/user/authWithGoogle", fields).then((res) => {
-
-          if (res?.error !== true) {
-            setIsLoading(false);
-            context.alertBox("success", res?.message);
-            localStorage.setItem("userEmail", fields.email)
-            localStorage.setItem("accessToken", res?.data?.accessToken);
-            localStorage.setItem("refreshToken", res?.data?.refreshToken);
-
-            context.setIsLogin(true);
-
-            history("/")
-          } else {
-            context.alertBox("error", res?.message);
-            setIsLoading(false);
-          }
-
-        })
-
-        console.log(user)
-        // IdP data available using getAdditionalUserInfo(result)
-        // ...
-      }).catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.customData.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
-      });
-
-
+  const authWithGoogle = async () => {
+    try {
+      const result = await googleSignInInteractive();
+      handleGoogleResult(result);
+    } catch (error) {
+      context.alertBox("error", "Error al iniciar sesión con Google");
+    }
   }
 
 

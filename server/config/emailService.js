@@ -13,11 +13,11 @@ const transporter = nodemailer.createTransport({
 });
 
 // Function to send email
-async function sendEmail(to, subject, text, html) {
+async function sendEmail(to, subject, text, html, from) {
   try {
-   
+
     const info = await transporter.sendMail({
-      from: process.env.EMAIL, // sender address
+      from: from || process.env.EMAIL_FROM || process.env.EMAIL,
       to, // list of receivers
       subject, // Subject line
       text, // plain text body

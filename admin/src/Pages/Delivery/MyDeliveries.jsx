@@ -24,12 +24,10 @@ export default function MyDeliveries() {
   useEffect(() => { load(); }, []);
 
   const setStatus = async (id, status, note) => {
-    try {
-      await updateDeliveryStatus(id, { status, note });
-    } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || "Error al actualizar estado";
-      const detail = typeof msg === "object" ? Object.values(msg).join(". ") : msg;
-      alert(detail);
+    const res = await updateDeliveryStatus(id, { status, note });
+    if (res?.error) {
+      const msg = res?.message || "Error al actualizar estado";
+      alert(typeof msg === "object" ? Object.values(msg).join(". ") : msg);
     }
     load();
   };

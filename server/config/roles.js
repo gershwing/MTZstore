@@ -84,6 +84,8 @@ export function getEffectiveRoles(user, tenantId) {
   if (!tenantId) {
     const base = new Set();
     if (user.platformRole) base.add(String(user.platformRole));
+    // Incluir roles del usuario (ej: DELIVERY_AGENT)
+    if (Array.isArray(user.roles)) user.roles.forEach(r => base.add(String(r)));
     base.add(mapLegacyUserRoleToPlatformRole(user.role));
     // Si no tenía nada, al menos CUSTOMER
     if (base.size === 0) base.add(ROLES.CUSTOMER);
