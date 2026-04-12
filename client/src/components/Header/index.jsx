@@ -59,10 +59,13 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-  // Logo fetch only (no forced redirect)
+  // Logo fetch — preferir scope=platform
   useEffect(() => {
     fetchDataFromApi("/api/logo").then((res) => {
-      localStorage.setItem('logo', res?.logo?.[0]?.logo || '');
+      const logos = res?.data?.logo || res?.logo || [];
+      const platform = logos.find(l => l.scope === "platform");
+      const url = platform?.logo || logos[0]?.logo || '';
+      if (url) localStorage.setItem('logo', url);
     });
   }, []);
 
@@ -219,11 +222,14 @@ const Header = () => {
                         onMouseLeave={closeLoginDropdown}
                       >
                         <Button
-                          className="!text-[#000] flex items-center gap-2 cursor-pointer"
+                          className="!text-[#000] flex items-center gap-2 cursor-pointer !normal-case"
                           onClick={() => setLoginOpen(!loginOpen)}
                         >
-                          <FaRegUser className="text-[17px] text-[rgba(0,0,0,0.7)]" />
-                          <span className="text-[14px] font-[500] normal-case">Iniciar sesión</span>
+                          <FaRegUser className="text-[20px] text-[rgba(0,0,0,0.6)]" />
+                          <div className="flex flex-col text-left leading-tight">
+                            <span className="text-[11px] text-gray-500">Bienvenido</span>
+                            <span className="text-[13px] font-[500]">Identifícate / Regístrate</span>
+                          </div>
                         </Button>
 
                         {loginOpen && (
