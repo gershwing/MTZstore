@@ -75,10 +75,11 @@ const isProd = process.env.NODE_ENV === 'production';
 /* ===== CORS HTTP (ponerlo primero) ===== */
 const envAdmin = process.env.ADMIN_ORIGIN || 'http://localhost:5173';
 const envStore = process.env.STORE_ORIGIN || 'http://localhost:5174';
+const envClient = process.env.CLIENT_ORIGIN;
 const extra = process.env.EXTRA_ORIGIN;
 const webOrigin = process.env.WEB_ORIGIN;
 
-const STATIC_WHITELIST = [envAdmin, envStore, extra, webOrigin].filter(Boolean);
+const STATIC_WHITELIST = [envAdmin, envStore, envClient, extra, webOrigin].filter(Boolean);
 const LOCAL_WHITELIST = new Set([
     'http://localhost:5173',
     'http://127.0.0.1:5173',
