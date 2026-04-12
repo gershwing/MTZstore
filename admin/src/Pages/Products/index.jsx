@@ -47,6 +47,7 @@ const ENTRY_TYPE_LABELS = {
 };
 
 const columns = [
+    { id: "code", label: "CÓDIGO", minWidth: 100 },
     { id: "product", label: "PRODUCTO", minWidth: 150, sortable: true },
     { id: "category", label: "CATEGORÍA", minWidth: 100, sortable: true },
     { id: "brand", label: "MARCA", minWidth: 80, sortable: true },
@@ -73,6 +74,10 @@ function ProductRow({ p, onCheck, onEdit, onDelete }) {
         <TableRow>
             <TableCell>
                 <Checkbox checked={!!p.checked} onChange={() => onCheck(p._id)} size="small" />
+            </TableCell>
+            {/* CÓDIGO */}
+            <TableCell>
+                <span className="text-xs font-mono">{p.importation?.importCode || "—"}</span>
             </TableCell>
             {/* PRODUCTO */}
             <TableCell>
@@ -261,8 +266,27 @@ const Products = () => {
             }
             map.get(sid).products.push(p);
         }
-        return Array.from(map.values());
+        // Plataforma primero, luego tiendas ordenadas por nombre
+        const groups = Array.from(map.values()).sort((a, b) => {
+            const aPlat = a.storeName === "Productos de plataforma" ? 0 : 1;
+            const bPlat = b.storeName === "Productos de plataforma" ? 0 : 1;
+            if (aPlat !== bPlat) return aPlat - bPlat;
+            return a.storeName.localeCompare(b.storeName);
+        });
+        return groups;
     }, [visibleProducts, isSuper]);
+
+    // Expandir todas las secciones por defecto cuando cambian los grupos
+    useEffect(() => {
+        if (!storeGroups) return;
+        setExpandedStores(prev => {
+            const next = { ...prev };
+            for (const g of storeGroups) {
+                if (!(g.storeId in next)) next[g.storeId] = true;
+            }
+            return next;
+        });
+    }, [storeGroups]);
 
     const toggleStore = (sid) => {
         setExpandedStores(prev => ({ ...prev, [sid]: !prev[sid] }));
