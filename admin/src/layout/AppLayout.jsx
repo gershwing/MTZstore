@@ -104,7 +104,7 @@ export default function AppLayout() {
         </div>
 
         {/* ⬇⬇⬇ remount del Outlet cuando cambie authKey */}
-        <main className="flex-1 overflow-hidden relative" key={`out:${authKey}`}>
+        <main className="flex-1 min-h-0 overflow-hidden relative" key={`out:${authKey}`}>
           <div className="h-full overflow-auto p-4 md:p-6">
             <Outlet />
           </div>
