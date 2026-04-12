@@ -278,11 +278,11 @@ export default function ProductForm({
         tier1: {
           minQty: Number(wholesaleTiers.tier1.minQty) || 0,
           maxQty: Number(wholesaleTiers.tier1.maxQty) || 0,
-          price:  Number(wholesaleTiers.tier1.price) || Number(basePrice) || 0,
+          price:  Number(wholesaleTiers.tier1.price) || 0,
         },
         tier2: {
           minQty: Number(wholesaleTiers.tier2.minQty) || 0,
-          price:  Number(wholesaleTiers.tier2.price) || Number(displayWholesalePrice) || Number(basePrice) || 0,
+          price:  Number(wholesaleTiers.tier2.price) || 0,
         },
       } : { enabled: false, tier1: { minQty: 0, maxQty: 0, price: 0 }, tier2: { minQty: 0, price: 0 } },
       attributes,
@@ -419,124 +419,86 @@ export default function ProductForm({
               </p>
             </div>
 
-            {/* Precio rápido */}
+            {/* ── Precios ── */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-blue-900">Precio rápido</h3>
-                <p className="text-xs text-blue-500">Puedes definir aquí el precio manualmente o usar Costos y Márgenes para calcularlo automáticamente</p>
+                <h3 className="font-semibold text-blue-900">Precios</h3>
+                <p className="text-xs text-blue-500">Define manualmente o usa Costos y Márgenes para calcular automáticamente</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+
+              {/* Fila 1: Precio unitario + Precio anterior */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-medium">Mayorista ({baseCurrency})</label>
-                    <Switch size="small" checked={salesConfig.wholesaleEnabled} onChange={(e) => salesConfig.setWholesaleEnabled(e.target.checked)} />
-                  </div>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={displayWholesalePrice}
-                    onChange={(e) => {
-                      setWholesalePrice(e.target.value);
-                      wholesalePriceEditedRef.current = true;
-                    }}
-                    className={`w-full border rounded px-3 py-2 ${!salesConfig.wholesaleEnabled ? "bg-gray-100 text-gray-400" : ""}`}
-                    placeholder="0.00"
-                    disabled={!salesConfig.wholesaleEnabled}
-                  />
-                  {salesConfig.wholesaleEnabled && displayWholesalePrice > 0 && bobPerUsd > 0 && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      ≈ {baseCurrency === "USD" ? roundMoney(Number(displayWholesalePrice) * bobPerUsd) : roundMoney(Number(displayWholesalePrice) / bobPerUsd)} {otherCurrency}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1">Precio actual ({baseCurrency}) *</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={basePrice}
-                    onChange={(e) => {
-                      setBasePrice(e.target.value);
-                      priceEditedRef.current = true;
-                    }}
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="0.00"
-                  />
+                  <label className="block text-xs font-medium mb-1">Precio unitario ({baseCurrency}) *</label>
+                  <input type="number" min="0" step="0.01" value={basePrice} onChange={(e) => { setBasePrice(e.target.value); priceEditedRef.current = true; }} className="w-full border rounded px-3 py-2" placeholder="0.00" />
                   {basePrice > 0 && (
                     <p className="text-xs text-gray-500 mt-1">≈ {convertedBasePrice} {otherCurrency}</p>
                   )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium mb-1">Precio anterior ({baseCurrency})</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={oldBasePrice}
-                    onChange={(e) => {
-                      setOldBasePrice(e.target.value);
-                      oldPriceEditedRef.current = true;
-                    }}
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="0.00"
-                  />
+                  <input type="number" min="0" step="0.01" value={oldBasePrice} onChange={(e) => { setOldBasePrice(e.target.value); oldPriceEditedRef.current = true; }} className="w-full border rounded px-3 py-2" placeholder="0.00" />
                   {convertedOldPrice !== null && (
                     <p className="text-xs text-gray-500 mt-1">≈ {convertedOldPrice} {otherCurrency}</p>
                   )}
                 </div>
+                <div className="flex items-end pb-2">
+                  {computedDiscount > 0 && (
+                    <span className="inline-block bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+                      {computedDiscount}% descuento
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Fila 2: Impuestos */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-medium">IVA %</label>
                     <Switch size="small" checked={salesConfig.ivaEnabled} onChange={(e) => salesConfig.setIvaEnabled(e.target.checked)} />
                   </div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    value={salesConfig.ivaPct}
-                    onChange={(e) => salesConfig.setIvaPct(e.target.value)}
-                    className={`w-full border rounded px-3 py-2 ${!salesConfig.ivaEnabled ? "bg-gray-100 text-gray-400" : ""}`}
-                    placeholder="13"
-                    disabled={!salesConfig.ivaEnabled}
-                  />
+                  <input type="number" min="0" max="100" step="0.1" value={salesConfig.ivaPct} onChange={(e) => salesConfig.setIvaPct(e.target.value)} className={`w-full border rounded px-3 py-2 ${!salesConfig.ivaEnabled ? "bg-gray-100 text-gray-400" : ""}`} placeholder="13" disabled={!salesConfig.ivaEnabled} />
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-medium">IT %</label>
                     <Switch size="small" checked={salesConfig.itEnabled} onChange={(e) => salesConfig.setItEnabled(e.target.checked)} />
                   </div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    value={salesConfig.otherTaxesPct}
-                    onChange={(e) => salesConfig.setOtherTaxesPct(e.target.value)}
-                    className={`w-full border rounded px-3 py-2 ${!salesConfig.itEnabled ? "bg-gray-100 text-gray-400" : ""}`}
-                    placeholder="3"
-                    disabled={!salesConfig.itEnabled}
-                  />
+                  <input type="number" min="0" max="100" step="0.1" value={salesConfig.otherTaxesPct} onChange={(e) => salesConfig.setOtherTaxesPct(e.target.value)} className={`w-full border rounded px-3 py-2 ${!salesConfig.itEnabled ? "bg-gray-100 text-gray-400" : ""}`} placeholder="3" disabled={!salesConfig.itEnabled} />
                 </div>
               </div>
-              {computedDiscount > 0 && (
-                <span className="inline-block bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
-                  {computedDiscount}% descuento
-                </span>
+            </div>
+
+            {/* ── Precio mayorista (Ventas directas) ── */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-green-900">Precio mayorista <span className="text-xs font-normal text-green-600">(Ventas directas)</span></h3>
+                <Switch size="small" checked={salesConfig.wholesaleEnabled} onChange={(e) => salesConfig.setWholesaleEnabled(e.target.checked)} />
+              </div>
+              {salesConfig.wholesaleEnabled && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium mb-1">Precio mayorista ({baseCurrency})</label>
+                    <input type="number" min="0" step="0.01" value={displayWholesalePrice} onChange={(e) => { setWholesalePrice(e.target.value); wholesalePriceEditedRef.current = true; }} className="w-full border rounded px-3 py-2" placeholder="0.00" />
+                    {displayWholesalePrice > 0 && bobPerUsd > 0 && (
+                      <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney(Number(displayWholesalePrice) * bobPerUsd) : roundMoney(Number(displayWholesalePrice) / bobPerUsd)} {otherCurrency}</p>
+                    )}
+                    <p className="text-xs text-green-600 mt-1">Se usa en el módulo de ventas directas presenciales</p>
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Venta por Mayor */}
+            {/* ── Venta por Mayor (Clientes online) ── */}
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-amber-900">Venta por Mayor</h3>
+                <h3 className="font-semibold text-amber-900">Venta por Mayor <span className="text-xs font-normal text-amber-600">(Clientes online)</span></h3>
                 <Switch size="small" checked={wholesaleTiers.enabled} onChange={(e) => setWholesaleTiers(prev => ({ ...prev, enabled: e.target.checked }))} />
               </div>
               {wholesaleTiers.enabled && (
                 <div className="space-y-3">
-                  <p className="text-xs text-amber-700">Define precios especiales según cantidad. Puedes usar 1 o 2 niveles.</p>
+                  <p className="text-xs text-amber-700">Precios automáticos según cantidad pedida por el cliente. Puedes usar 1 o 2 niveles.</p>
                   {/* Nivel 1 — Semi-mayorista */}
                   <div className="bg-white rounded p-3 space-y-2">
                     <p className="text-xs font-semibold text-gray-700">Nivel 1 — Semi-mayorista</p>
@@ -551,9 +513,9 @@ export default function ProductForm({
                       </div>
                       <div>
                         <label className="block text-xs mb-1">Precio unitario ({baseCurrency})</label>
-                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier1.price} onChange={(e) => updateTier("tier1", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder={basePrice || "0.00"} />
-                        {(Number(wholesaleTiers.tier1.price) || Number(basePrice)) > 0 && bobPerUsd > 0 && (
-                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney((Number(wholesaleTiers.tier1.price) || Number(basePrice)) * bobPerUsd) : roundMoney((Number(wholesaleTiers.tier1.price) || Number(basePrice)) / bobPerUsd)} {otherCurrency}</p>
+                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier1.price} onChange={(e) => updateTier("tier1", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder="0.00" />
+                        {Number(wholesaleTiers.tier1.price) > 0 && bobPerUsd > 0 && (
+                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney(Number(wholesaleTiers.tier1.price) * bobPerUsd) : roundMoney(Number(wholesaleTiers.tier1.price) / bobPerUsd)} {otherCurrency}</p>
                         )}
                       </div>
                     </div>
@@ -569,9 +531,9 @@ export default function ProductForm({
                       <div className="text-xs text-gray-400 flex items-end pb-2">Hasta agotar stock</div>
                       <div>
                         <label className="block text-xs mb-1">Precio unitario ({baseCurrency})</label>
-                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier2.price} onChange={(e) => updateTier("tier2", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder={displayWholesalePrice || basePrice || "0.00"} />
-                        {(Number(wholesaleTiers.tier2.price) || Number(displayWholesalePrice) || Number(basePrice)) > 0 && bobPerUsd > 0 && (
-                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney((Number(wholesaleTiers.tier2.price) || Number(displayWholesalePrice) || Number(basePrice)) * bobPerUsd) : roundMoney((Number(wholesaleTiers.tier2.price) || Number(displayWholesalePrice) || Number(basePrice)) / bobPerUsd)} {otherCurrency}</p>
+                        <input type="number" min="0" step="0.01" value={wholesaleTiers.tier2.price} onChange={(e) => updateTier("tier2", "price", e.target.value)} className="w-full border rounded px-3 py-2" placeholder="0.00" />
+                        {Number(wholesaleTiers.tier2.price) > 0 && bobPerUsd > 0 && (
+                          <p className="text-xs text-gray-500 mt-1">≈ {baseCurrency === "USD" ? roundMoney(Number(wholesaleTiers.tier2.price) * bobPerUsd) : roundMoney(Number(wholesaleTiers.tier2.price) / bobPerUsd)} {otherCurrency}</p>
                         )}
                       </div>
                     </div>
