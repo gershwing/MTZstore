@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import "./App.css";
 import "./responsive.css";
 import Header from "./components/Header";
@@ -262,13 +262,13 @@ function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/verify" element={<Verify />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/my-account" element={<MyAccount />} />
-            <Route path="/my-list" element={<MyList />} />
-            <Route path="/my-orders" element={<Orders />} />
+            <Route path="/checkout" element={isLogin ? <Checkout /> : <Navigate to="/" />} />
+            <Route path="/my-account" element={isLogin ? <MyAccount /> : <Navigate to="/" />} />
+            <Route path="/my-list" element={isLogin ? <MyList /> : <Navigate to="/" />} />
+            <Route path="/my-orders" element={isLogin ? <Orders /> : <Navigate to="/" />} />
             <Route path="/order/success" element={<OrderSuccess />} />
             <Route path="/order/failed" element={<OrderFailed />} />
-            <Route path="/address" element={<Address />} />
+            <Route path="/address" element={isLogin ? <Address /> : <Navigate to="/" />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/store/:id" element={<StorePage />} />
           </Routes>

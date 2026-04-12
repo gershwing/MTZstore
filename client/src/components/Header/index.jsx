@@ -227,7 +227,7 @@ const Header = () => {
                         </Button>
 
                         {loginOpen && (
-                          <div className="absolute right-0 top-full mt-2 w-[320px] bg-white rounded-lg shadow-2xl border border-gray-200 p-5 z-[200]">
+                          <div className="absolute right-0 top-full mt-2 w-[360px] bg-white rounded-lg shadow-2xl border border-gray-200 p-5 z-[200]">
                             {/* Flecha */}
                             <div className="absolute -top-2 right-6 w-4 h-4 bg-white border-l border-t border-gray-200 rotate-45" />
 
@@ -378,13 +378,19 @@ const Header = () => {
                   context?.windowWidth > 992 &&
                   <li>
                     <Tooltip title="Wishlist">
-                      <Link to="/my-list">
-                        <IconButton aria-label="cart">
-                          <StyledBadge badgeContent={context?.myListData?.length !== 0 ? context?.myListData?.length : 0} color="secondary">
-                            <FaRegHeart />
-                          </StyledBadge>
+                      {context.isLogin ? (
+                        <Link to="/my-list">
+                          <IconButton aria-label="wishlist">
+                            <StyledBadge badgeContent={context?.myListData?.length || 0} color="secondary">
+                              <FaRegHeart />
+                            </StyledBadge>
+                          </IconButton>
+                        </Link>
+                      ) : (
+                        <IconButton aria-label="wishlist" onClick={openLoginDropdown}>
+                          <FaRegHeart />
                         </IconButton>
-                      </Link>
+                      )}
                     </Tooltip>
                   </li>
                 }
@@ -393,9 +399,15 @@ const Header = () => {
                   <Tooltip title="Cart">
                     <IconButton
                       aria-label="cart"
-                      onClick={() => context.setOpenCartPanel(true)}
+                      onClick={() => {
+                        if (context.isLogin) {
+                          context.setOpenCartPanel(true);
+                        } else {
+                          openLoginDropdown();
+                        }
+                      }}
                     >
-                      <StyledBadge badgeContent={context?.cartData?.length !== 0 ? context?.cartData?.length : 0} color="secondary">
+                      <StyledBadge badgeContent={context.isLogin ? (context?.cartData?.length || 0) : 0} color="secondary">
                         <MdOutlineShoppingCart />
                       </StyledBadge>
                     </IconButton>
