@@ -38,44 +38,39 @@ const MobileNav = () => {
     if (isProductPage) return null;
 
     return (
-        <div className='mobileNav bg-white p-1 px-3 w-full flex items-center justify-between fixed bottom-0 left-0 gap-0 z-[51]'>
+        <div className='mobileNav bg-white p-1 px-3 w-full flex items-center justify-between fixed bottom-0 left-0 gap-0 z-[51] border-t border-gray-100'>
             <NavLink
                 to="/"
                 className={({ isActive }) => (isActive ? "isActive" : "")}
                 onClick={() => context?.setOpenSearchPanel(false)}
             >
-                <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-700">
-                    <IoHomeOutline size={18} />
-                    <span className="text-[12px]">Inicio</span>
+                <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-500 !p-1">
+                    <IoHomeOutline size={20} />
+                    <span className="text-[9px] leading-tight">Inicio</span>
                 </Button>
             </NavLink>
 
-
-
             {
                 context?.isFilterBtnShow === true &&
-                <Button className="flex-col !w-[40px] !h-[40px] !min-w-[40px] !capitalize !text-gray-700 !bg-primary !rounded-full" onClick={openFilters}>
+                <Button className="flex-col !w-[36px] !h-[36px] !min-w-[36px] !capitalize !text-gray-700 !bg-primary !rounded-full !p-0" onClick={openFilters}>
                     <MdOutlineFilterAlt size={18} className='text-white' />
                 </Button>
             }
 
-            <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-700"
+            <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-500 !p-1"
                 onClick={() => context?.setOpenSearchPanel(true)}>
-                <IoSearch size={18} />
-                <span className='text-[12px]'>Buscar</span>
+                <IoSearch size={20} />
+                <span className='text-[9px] leading-tight'>Buscar</span>
             </Button>
-
-
-
 
             <NavLink
                 to="/my-list"
                 className={({ isActive }) => (isActive ? "isActive" : "")}
                 onClick={() => context?.setOpenSearchPanel(false)}
             >
-                <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-700">
-                    <LuHeart size={18} />
-                    <span className="text-[12px]">Lista de deseos</span>
+                <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-500 !p-1">
+                    <LuHeart size={20} />
+                    <span className="text-[9px] leading-tight">Favoritos</span>
                 </Button>
             </NavLink>
 
@@ -84,9 +79,9 @@ const MobileNav = () => {
                 className={({ isActive }) => (isActive ? "isActive" : "")}
                 onClick={() => context?.setOpenSearchPanel(false)}
             >
-                <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-700">
-                    <BsBagCheck size={18} />
-                    <span className="text-[12px]">Pedidos</span>
+                <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-500 !p-1">
+                    <BsBagCheck size={20} />
+                    <span className="text-[9px] leading-tight">Pedidos</span>
                 </Button>
             </NavLink>
 
@@ -95,9 +90,9 @@ const MobileNav = () => {
                 className={({ isActive }) => (isActive ? "isActive" : "")}
                 onClick={() => context?.setOpenSearchPanel(false)}
             >
-                <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-700">
-                    <FiUser size={18} />
-                    <span className="text-[12px]">Mi cuenta</span>
+                <Button className="flex-col !w-[40px] !min-w-[40px] !capitalize !text-gray-500 !p-1">
+                    <FiUser size={20} />
+                    <span className="text-[9px] leading-tight">Cuenta</span>
                 </Button>
             </NavLink>
 
