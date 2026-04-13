@@ -23,6 +23,7 @@ import { fetchDataFromApi, postData } from "../../utils/api";
 import { LuMapPin } from "react-icons/lu";
 import { useEffect } from "react";
 import { HiOutlineMenu } from "react-icons/hi";
+import { IoChevronBack, IoSearchOutline } from "react-icons/io5";
 import { googleSignInInteractive } from "../../firebase";
 
 
@@ -193,15 +194,24 @@ const Header = () => {
         </div>
 
         <div className="header py-2 lg:py-3 border-b-[1px] border-gray-200">
-          <div className="container flex items-center gap-4">
+          <div className="container flex items-center gap-2 lg:gap-4">
+            {/* ── Mobile header: ← ≡ LOGO ——— 🔍 👤 ♡ 🛒 ── */}
+            {context?.windowWidth < 992 && (
+              <IconButton aria-label="back" onClick={() => history(-1)} className="!p-1">
+                <IoChevronBack size={22} />
+              </IconButton>
+            )}
+
             {
               context?.windowWidth < 992 &&
-              <Button className="!w-[35px] !min-w-[35px] !h-[35px] !rounded-full !text-gray-800" onClick={() => setIsOpenCatPanel(true)}><HiOutlineMenu size={22} /></Button>
+              <IconButton aria-label="menu" onClick={() => setIsOpenCatPanel(true)} className="!p-1">
+                <HiOutlineMenu size={22} />
+              </IconButton>
             }
 
-            <div className="col1 shrink-0">
+            <div className="col1 shrink-0 flex-1 lg:flex-none">
               <Link to={"/"}>
-                <img src={localStorage.getItem('logo')} className="max-w-[120px] lg:max-w-[160px]" />
+                <img src={localStorage.getItem('logo')} className="max-w-[100px] lg:max-w-[160px]" />
               </Link>
             </div>
 
@@ -210,23 +220,22 @@ const Header = () => {
             </div>
 
             <div className="col3 shrink-0 flex items-center">
-              <ul className="flex items-center gap-1 lg:gap-2">
+              <ul className="flex items-center gap-0 lg:gap-2">
                 {/* Búsqueda mobile */}
                 {context?.windowWidth < 992 && (
                   <li>
-                    <IconButton aria-label="search" onClick={() => context.setOpenSearchPanel(true)}>
-                      <MdOutlineShoppingCart className="!hidden" />
-                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <IconButton aria-label="search" onClick={() => context.setOpenSearchPanel(true)} className="!p-1.5">
+                      <IoSearchOutline size={22} />
                     </IconButton>
                   </li>
                 )}
 
-                {/* Usuario mobile: icono simple */}
+                {/* Usuario mobile */}
                 {context?.windowWidth < 992 && (
                   <li>
                     <Link to={context.isLogin ? "/my-account" : "/login"}>
-                      <IconButton aria-label="user">
-                        <FaRegUser className="text-[18px]" />
+                      <IconButton aria-label="user" className="!p-1.5">
+                        <FaRegUser size={20} />
                       </IconButton>
                     </Link>
                   </li>
