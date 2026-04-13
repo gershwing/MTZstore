@@ -40,46 +40,45 @@ const Footer = () => {
         <div className="container">
           <div className="flex items-center justify-center gap-2 py-3 lg:py-8 pb-0 lg:pb-8 px-0 lg:px-5 scrollableBox footerBoxWrap">
             <div className="col flex items-center justify-center flex-col group w-[15%]">
-              <LiaShippingFastSolid className="text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
-              <h3 className="text-[16px] font-[600] mt-3">Envío gratuito</h3>
-              {/* Antes: "$100" → ahora BOB */}
-              <p className="text-[12px] font-[500]">
-                Para todos los pedidos superiores a: {formatPrice(FREE_SHIPPING_THRESHOLD_BOB, "BOB")}
+              <LiaShippingFastSolid className="text-[24px] lg:text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
+              <h3 className="text-[11px] lg:text-[16px] font-[600] mt-1 lg:mt-3">Envío gratuito</h3>
+              <p className="text-[9px] lg:text-[12px] font-[500] hidden lg:block">
+                Pedidos +{formatPrice(FREE_SHIPPING_THRESHOLD_BOB, "BOB")}
               </p>
             </div>
 
             <div className="col flex items-center justify-center flex-col group w-[15%]">
-              <PiKeyReturnLight className="text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
-              <h3 className="text-[16px] font-[600] mt-3">Devolución 30D</h3>
-              <p className="text-[12px] font-[500]">Para un producto de intercambio</p>
+              <PiKeyReturnLight className="text-[24px] lg:text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
+              <h3 className="text-[11px] lg:text-[16px] font-[600] mt-1 lg:mt-3">Devolución 30D</h3>
+              <p className="text-[9px] lg:text-[12px] font-[500] hidden lg:block">Producto de intercambio</p>
             </div>
 
             <div className="col flex items-center justify-center flex-col group w-[15%]">
-              <BsWallet2 className="text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
-              <h3 className="text-[16px] font-[600] mt-3">Pago Seguro</h3>
-              <p className="text-[12px] font-[500]">Tarjetas de pago aceptadas</p>
+              <BsWallet2 className="text-[24px] lg:text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
+              <h3 className="text-[11px] lg:text-[16px] font-[600] mt-1 lg:mt-3">Pago Seguro</h3>
+              <p className="text-[9px] lg:text-[12px] font-[500] hidden lg:block">Tarjetas aceptadas</p>
             </div>
 
             <div className="col flex items-center justify-center flex-col group w-[15%]">
-              <LiaGiftSolid className="text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
-              <h3 className="text-[16px] font-[600] mt-3">Regalos especiales</h3>
-              <p className="text-[12px] font-[500]">Para el primer pedido</p>
+              <LiaGiftSolid className="text-[24px] lg:text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
+              <h3 className="text-[11px] lg:text-[16px] font-[600] mt-1 lg:mt-3">Regalos</h3>
+              <p className="text-[9px] lg:text-[12px] font-[500] hidden lg:block">Primer pedido</p>
             </div>
 
             <div className="col flex items-center justify-center flex-col group w-[15%]">
-              <BiSupport className="text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
-              <h3 className="text-[16px] font-[600] mt-3">Soporte 24/7</h3>
-              <p className="text-[12px] font-[500]">Póngase en contacto con nosotros en cualquier momento</p>
+              <BiSupport className="text-[24px] lg:text-[40px] transition-all duration-300 group-hover:text-primary group-hover:-translate-y-1" />
+              <h3 className="text-[11px] lg:text-[16px] font-[600] mt-1 lg:mt-3">Soporte 24/7</h3>
+              <p className="text-[9px] lg:text-[12px] font-[500] hidden lg:block">Contáctanos</p>
             </div>
           </div>
           <br />
 
           <hr />
 
-          <div className="footer flex px-3 lg:px-0 flex-col lg:flex-row py-8">
+          <div className="footer flex px-3 lg:px-0 flex-col lg:flex-row py-4 lg:py-8">
             <div className="part1 w-full lg:w-[25%] border-r border-[rgba(0,0,0,0.1)]">
-              <h2 className="text-[18px] font-[600] mb-4">Contáctanos</h2>
-              <p className="text-[13px] font-[400] pb-4">
+              <h2 className="text-[14px] lg:text-[18px] font-[600] mb-2 lg:mb-4">Contáctanos</h2>
+              <p className="text-[11px] lg:text-[13px] font-[400] pb-2 lg:pb-4">
                 MTZstore - La mejor tienda de la región
                 <br />
                 6 de Octubre entre San Felipe y Aldana
@@ -92,7 +91,7 @@ const Footer = () => {
                 mtzstore.bo@gmail.com
               </Link>
 
-              <span className="text-[22px] font-[600] block w-full mt-3 mb-5 text-primary">
+              <span className="text-[16px] lg:text-[22px] font-[600] block w-full mt-2 mb-3 lg:mt-3 lg:mb-5 text-primary">
                 (+591) 71854443
               </span>
 
@@ -108,35 +107,35 @@ const Footer = () => {
 
             <div className="part2  w-full lg:w-[40%] flex pl-0 lg:pl-8 mt-5 lg:mt-0">
               <div className="part2_col1 w-[50%]">
-                <h2 className="text-[18px] font-[600] mb-4">Productos</h2>
+                <h2 className="text-[14px] lg:text-[18px] font-[600] mb-2 lg:mb-4">Productos</h2>
 
                 <ul className="list">
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Precios bajos
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Nuevos productos
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Las mejores novedades
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Contáctanos
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Ubicación
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Tiendas
                     </Link>
@@ -145,35 +144,35 @@ const Footer = () => {
               </div>
 
               <div className="part2_col2 w-[50%]">
-                <h2 className="text-[18px] font-[600] mb-4">Nuestra empresa</h2>
+                <h2 className="text-[14px] lg:text-[18px] font-[600] mb-2 lg:mb-4">Nuestra empresa</h2>
 
                 <ul className="list">
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Reparto
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Aviso Legal
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Terminos y condiciones de uso
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Sobre nosotros
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Pago seguro
                     </Link>
                   </li>
-                  <li className="list-none text-[14px] w-full mb-2">
+                  <li className="list-none text-[12px] lg:text-[14px] w-full mb-1 lg:mb-2">
                     <Link to="/" className="link">
                       Iniciar Sesión
                     </Link>
@@ -183,7 +182,7 @@ const Footer = () => {
             </div>
 
             <div className="part2  w-full lg:w-[35%] flex pl-0 lg:pl-8 flex-col pr-8 mt-5 lg:mt-0">
-              <h2 className="text-[18px] font-[600] mb-2 lg:mb-4">
+              <h2 className="text-[14px] lg:text-[18px] font-[600] mb-2 lg:mb-4">
                 Suscribirse al boletín
               </h2>
               <p className="text-[13px]">
