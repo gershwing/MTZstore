@@ -445,7 +445,8 @@ export async function refreshController(req, res, next) {
         if (!refresh) return res.status(401).json({ error: "missing_refresh" });
 
         // valida refresh (ajusta tu secreto/claims)
-        const payload = jwt.verify(refresh, process.env.SECRET_KEY_REFRESH_TOKEN);
+        const refreshSecret = process.env.SECRET_KEY_REFRESH_TOKEN || process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+        const payload = jwt.verify(refresh, refreshSecret);
         const userId = payload?.sub || payload?.id || payload?._id;
 
         const user = await UserModel.findById(userId).lean();
@@ -861,7 +862,8 @@ export async function refreshToken(req, res, next) {
         // 2) verificar firma/exp
         let payload;
         try {
-            payload = jwt.verify(token, process.env.SECRET_KEY_REFRESH_TOKEN);
+            const refreshSecret = process.env.SECRET_KEY_REFRESH_TOKEN || process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+            payload = jwt.verify(token, refreshSecret);
         } catch {
             return res.err(401, 'UNAUTHORIZED', 'token is expired');
         }
