@@ -211,6 +211,16 @@ const Header = () => {
 
             <div className="col3 shrink-0 flex items-center">
               <ul className="flex items-center gap-1 lg:gap-2">
+                {/* Búsqueda mobile */}
+                {context?.windowWidth < 992 && (
+                  <li>
+                    <IconButton aria-label="search" onClick={() => context.setOpenSearchPanel(true)}>
+                      <MdOutlineShoppingCart className="!hidden" />
+                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </IconButton>
+                  </li>
+                )}
+
                 {/* Usuario: dropdown login o menú de cuenta */}
                 {context?.windowWidth > 992 && (
                   <li className="relative">
@@ -408,8 +418,10 @@ const Header = () => {
                       onClick={() => {
                         if (context.isLogin) {
                           context.setOpenCartPanel(true);
-                        } else {
+                        } else if (context?.windowWidth > 992) {
                           openLoginDropdown();
+                        } else {
+                          history("/login");
                         }
                       }}
                     >
