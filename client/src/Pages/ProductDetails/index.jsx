@@ -103,13 +103,13 @@ export const ProductDetails = () => {
           </div>
         ) : (
           <>
-            <div className="w-full px-3 flex gap-8 flex-col lg:flex-row items-start lg:items-center">
-              <div className="productZoomContainer w-full lg:w-[40%]">
+            <div className="w-full px-3 flex gap-5 flex-col lg:flex-row items-start">
+              {/* Col 1: Imágenes */}
+              <div className="productZoomContainer w-full lg:w-[35%]">
                 <ProductZoom
                   images={displayImages?.length > 0 ? displayImages : productData?.images}
                   activeIndex={activeImageIndex}
                   onImageClick={(index) => {
-                    // Al clic en thumbnail, si esa imagen pertenece a una variante, seleccionarla
                     setActiveImageIndex(index);
                     const variant = imageToVariantMap[index];
                     if (variant) {
@@ -119,7 +119,8 @@ export const ProductDetails = () => {
                 />
               </div>
 
-              <div className="productContent w-full lg:w-[60%] pr-2 pl-2 lg:pr-10 lg:pl-10">
+              {/* Col 2: Detalles del producto */}
+              <div className="productContent w-full lg:w-[40%]">
                 <ProductDetailsComponent
                   item={productData}
                   variants={variantsData}
@@ -128,7 +129,6 @@ export const ProductDetails = () => {
                   reviewsCount={reviewsCount}
                   gotoReviews={gotoReviews}
                   onVariantSelect={(variant) => {
-                    // Al seleccionar variante por botones, mover galeria a su imagen
                     if (variant?.images?.length > 0) {
                       const varImg = typeof variant.images[0] === "string" ? variant.images[0] : variant.images[0]?.url;
                       const idx = displayImages.indexOf(varImg);
@@ -137,35 +137,67 @@ export const ProductDetails = () => {
                   }}
                 />
               </div>
-            </div>
 
-            {/* Store button */}
-            {storeInfo && (
-              <div className="w-full px-3 pt-6">
-                <Link
-                  to={`/store/${storeInfo._id}`}
-                  className="inline-flex items-center gap-3 border border-gray-200 rounded-lg px-4 py-3 hover:shadow-md transition-all hover:border-primary group"
-                >
-                  <div className="w-[42px] h-[42px] rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-200">
-                    {storeInfo.logo ? (
-                      <img
-                        src={storeInfo.logo}
-                        alt={storeInfo.name}
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <IoStorefrontOutline className="text-[20px] text-gray-400" />
-                    )}
+              {/* Col 3: Panel lateral (estilo AliExpress) */}
+              <div className="hidden lg:block w-full lg:w-[25%]">
+                <div className="sticky top-[80px] space-y-4">
+                  {/* Vendedor */}
+                  {storeInfo && (
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <Link
+                        to={`/store/${storeInfo._id}`}
+                        className="flex items-center gap-3 hover:text-primary transition-all"
+                      >
+                        <div className="w-[36px] h-[36px] rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-200">
+                          {storeInfo.logo ? (
+                            <img src={storeInfo.logo} alt={storeInfo.name} className="w-full h-full object-cover rounded-full" />
+                          ) : (
+                            <IoStorefrontOutline className="text-[18px] text-gray-400" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-[600] text-gray-800">
+                            {storeInfo.isPlatformStore ? "MTZstore" : storeInfo.name}
+                          </p>
+                          <p className="text-[11px] text-gray-500">Ver tienda</p>
+                        </div>
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* Envío y seguridad */}
+                  <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+                    {(() => {
+                      const ship = productData?.shipping;
+                      const sName = storeInfo?.isPlatformStore ? "MTZstore" : storeInfo?.name;
+                      const methods = [];
+                      if (ship?.mtzExpress) methods.push({ label: "MTZstore Express", sub: "menos de 24h" });
+                      if (ship?.mtzStandard) methods.push({ label: "MTZstore Estándar", sub: "1-3 días" });
+                      if (ship?.storeSelf) methods.push({ label: sName || "Tienda", sub: "2-5 días" });
+                      if (methods.length === 0) methods.push({ label: sName || "Tienda", sub: "2-5 días" });
+                      return methods.map((m, i) => (
+                        <div key={i} className="flex items-center gap-2 text-[13px]">
+                          <span className="text-green-600">✓</span>
+                          <div>
+                            <span className="font-[500]">{m.label}</span>
+                            <span className="text-gray-400 ml-1">{m.sub}</span>
+                          </div>
+                        </div>
+                      ));
+                    })()}
+
+                    <div className="pt-2 border-t border-gray-100 space-y-2">
+                      <div className="flex items-center gap-2 text-[12px] text-gray-500">
+                        <span>🔒</span> <span>Pagos seguros</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[12px] text-gray-500">
+                        <span>🛡️</span> <span>Protección al comprador</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[14px] font-[600] text-gray-800 group-hover:text-primary transition-all">
-                      {storeInfo.isPlatformStore ? "MTZstore" : storeInfo.name}
-                    </p>
-                    <p className="text-[12px] text-gray-500">Ver tienda</p>
-                  </div>
-                </Link>
+                </div>
               </div>
-            )}
+            </div>
 
             <div className="w-full px-3 pt-10">
               <div className="flex items-center gap-8 mb-5">
