@@ -215,41 +215,44 @@ export const ProductDetails = () => {
                       />
                     </div>
 
-                    <Button
-                      className="w-full !bg-primary !text-white !py-2.5 !font-[600] !normal-case !text-[14px]"
-                      disabled={actions?.hasVariants && !actions?.selectedVariant}
-                      onClick={() => {
-                        if (!context?.isLogin) {
-                          context?.alertBox("error", "Inicia sesión para comprar");
-                          return;
-                        }
-                        actions?.addToCart();
-                        setTimeout(() => navigate("/checkout"), 500);
-                      }}
-                    >
-                      Comprar
-                    </Button>
+                    {/* Comprar + Carrito — solo desktop (mobile usa barra fija inferior) */}
+                    <div className="hidden xl:block space-y-3">
+                      <Button
+                        className="w-full !bg-primary !text-white !py-2.5 !font-[600] !normal-case !text-[14px]"
+                        disabled={actions?.hasVariants && !actions?.selectedVariant}
+                        onClick={() => {
+                          if (!context?.isLogin) {
+                            context?.alertBox("error", "Inicia sesión para comprar");
+                            return;
+                          }
+                          actions?.addToCart();
+                          setTimeout(() => navigate("/checkout"), 500);
+                        }}
+                      >
+                        Comprar
+                      </Button>
 
-                    <Button
-                      className="w-full !border !border-gray-300 !text-gray-800 !py-2.5 !normal-case !text-[14px] flex gap-2"
-                      variant="outlined"
-                      disabled={actions?.hasVariants && !actions?.selectedVariant}
-                      onClick={() => {
-                        if (!context?.isLogin) {
-                          context?.alertBox("error", "Inicia sesión para agregar al carrito");
-                          return;
-                        }
-                        actions?.addToCart();
-                      }}
-                    >
-                      {actions?.isLoading ? (
-                        <CircularProgress size={18} />
-                      ) : actions?.isAdded ? (
-                        <><FaCheckDouble /> Agregado</>
-                      ) : (
-                        <><MdOutlineShoppingCart className="text-[18px]" /> Agregar al carrito</>
-                      )}
-                    </Button>
+                      <Button
+                        className="w-full !border !border-gray-300 !text-gray-800 !py-2.5 !normal-case !text-[14px] flex gap-2"
+                        variant="outlined"
+                        disabled={actions?.hasVariants && !actions?.selectedVariant}
+                        onClick={() => {
+                          if (!context?.isLogin) {
+                            context?.alertBox("error", "Inicia sesión para agregar al carrito");
+                            return;
+                          }
+                          actions?.addToCart();
+                        }}
+                      >
+                        {actions?.isLoading ? (
+                          <CircularProgress size={18} />
+                        ) : actions?.isAdded ? (
+                          <><FaCheckDouble /> Agregado</>
+                        ) : (
+                          <><MdOutlineShoppingCart className="text-[18px]" /> Agregar al carrito</>
+                        )}
+                      </Button>
+                    </div>
 
                     <div className="flex gap-2">
                       <Button
