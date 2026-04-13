@@ -401,26 +401,26 @@ const Header = () => {
                   </li>
                 )}
 
-                {
-                  context?.windowWidth > 992 &&
-                  <li>
-                    <Tooltip title="Wishlist">
-                      {context.isLogin ? (
-                        <Link to="/my-list">
-                          <IconButton aria-label="wishlist">
-                            <StyledBadge badgeContent={context?.myListData?.length || 0} color="secondary">
-                              <FaRegHeart />
-                            </StyledBadge>
-                          </IconButton>
-                        </Link>
-                      ) : (
-                        <IconButton aria-label="wishlist" onClick={openLoginDropdown}>
-                          <FaRegHeart />
+                <li>
+                  <Tooltip title="Wishlist">
+                    {context.isLogin ? (
+                      <Link to="/my-list">
+                        <IconButton aria-label="wishlist">
+                          <StyledBadge badgeContent={context?.myListData?.length || 0} color="secondary">
+                            <FaRegHeart />
+                          </StyledBadge>
                         </IconButton>
-                      )}
-                    </Tooltip>
-                  </li>
-                }
+                      </Link>
+                    ) : (
+                      <IconButton aria-label="wishlist" onClick={() => {
+                        if (context?.windowWidth > 992) openLoginDropdown();
+                        else history("/login");
+                      }}>
+                        <FaRegHeart />
+                      </IconButton>
+                    )}
+                  </Tooltip>
+                </li>
 
                 <li>
                   <Tooltip title="Cart">

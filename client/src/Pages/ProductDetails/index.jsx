@@ -149,7 +149,7 @@ export const ProductDetails = () => {
               </div>
 
               {/* Col 3: Panel lateral (estilo AliExpress) */}
-              <div className="hidden xl:block w-full xl:w-[25%]">
+              <div className="w-full xl:w-[25%]">
                 <div className="sticky top-[80px] space-y-4">
                   {/* Vendedor */}
                   {storeInfo && (
