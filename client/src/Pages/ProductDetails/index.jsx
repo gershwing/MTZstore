@@ -332,21 +332,35 @@ export const ProductDetails = () => {
 
       {/* Barra inferior fija mobile — estilo AliExpress */}
       {!isLoading && productData && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center z-[100] xl:hidden">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center gap-2 px-3 py-2 z-[100] xl:hidden">
           {/* Tienda */}
           {storeInfo && (
             <Link
               to={`/store/${storeInfo._id}`}
-              className="flex flex-col items-center justify-center px-3 py-2 text-gray-500 border-r border-gray-100"
+              className="flex flex-col items-center justify-center px-2 text-gray-500"
             >
-              <IoStorefrontOutline size={20} />
-              <span className="text-[10px] mt-0.5">Tienda</span>
+              <IoStorefrontOutline size={22} />
+              <span className="text-[10px]">Tienda</span>
             </Link>
           )}
 
+          {/* Carrito icono */}
+          <div className="flex flex-col items-center justify-center px-2 text-gray-500 relative"
+            onClick={() => {
+              if (!context?.isLogin) { context?.alertBox("error", "Inicia sesión"); return; }
+              context.setOpenCartPanel(true);
+            }}
+          >
+            <MdOutlineShoppingCart size={22} />
+            {context?.cartData?.length > 0 && (
+              <span className="absolute -top-1 -right-0.5 bg-primary text-white text-[9px] w-[16px] h-[16px] rounded-full flex items-center justify-center font-bold">{context.cartData.length}</span>
+            )}
+            <span className="text-[10px]">Carrito</span>
+          </div>
+
           {/* Agregar al carrito */}
           <button
-            className="flex-1 py-3 text-white font-semibold text-[14px] bg-amber-500 active:bg-amber-600"
+            className="flex-1 py-2.5 text-gray-800 font-semibold text-[13px] bg-white border-2 border-gray-800 rounded-full active:bg-gray-100 transition-colors"
             onClick={() => {
               if (!context?.isLogin) { context?.alertBox("error", "Inicia sesión"); return; }
               actions?.addToCart();
@@ -357,7 +371,7 @@ export const ProductDetails = () => {
 
           {/* Comprar */}
           <button
-            className="flex-1 py-3 text-white font-semibold text-[14px] bg-primary active:bg-red-600"
+            className="flex-1 py-2.5 text-white font-semibold text-[13px] bg-primary rounded-full active:brightness-90 transition-colors"
             onClick={() => {
               if (!context?.isLogin) { context?.alertBox("error", "Inicia sesión"); return; }
               actions?.addToCart();
