@@ -221,7 +221,18 @@ const Header = () => {
                   </li>
                 )}
 
-                {/* Usuario: dropdown login o menú de cuenta */}
+                {/* Usuario mobile: icono simple */}
+                {context?.windowWidth < 992 && (
+                  <li>
+                    <Link to={context.isLogin ? "/my-account" : "/login"}>
+                      <IconButton aria-label="user">
+                        <FaRegUser className="text-[18px]" />
+                      </IconButton>
+                    </Link>
+                  </li>
+                )}
+
+                {/* Usuario desktop: dropdown login o menú de cuenta */}
                 {context?.windowWidth > 992 && (
                   <li className="relative">
                     {context.isLogin === false ? (
