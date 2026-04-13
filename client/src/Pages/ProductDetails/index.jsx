@@ -105,7 +105,7 @@ export const ProductDetails = () => {
 
   return (
     <>
-      <section className="bg-white py-5 pb-20 xl:pb-5">
+      <section className="bg-white py-5 pb-[120px] sm:pb-20 xl:pb-5">
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[300px]">
             <CircularProgress />
@@ -332,7 +332,7 @@ export const ProductDetails = () => {
 
       {/* Mobile bottom action bar */}
       {!isLoading && productData && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-3 py-2 flex gap-2 z-[100] xl:hidden">
+        <div className="fixed bottom-[55px] sm:bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg px-3 py-2 flex gap-2 z-[100] xl:hidden">
           <Button
             className="flex-1 !bg-primary !text-white !py-2.5 !font-[600] !normal-case !text-[13px]"
             onClick={() => {
