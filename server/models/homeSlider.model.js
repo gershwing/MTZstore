@@ -5,8 +5,9 @@ const homeSliderSchema = new mongoose.Schema(
         storeId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Store',
-            required: true,
-            index: true, // 🔑 para consultas rápidas por tienda
+            required: false,
+            default: null,
+            index: true,
         },
         images: [
             {

@@ -10,6 +10,7 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { AiOutlineEdit } from "react-icons/ai";
 import { GoTrash } from "react-icons/go";
+import { IoMdClose } from "react-icons/io";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
@@ -19,6 +20,8 @@ import { deleteData, fetchDataFromApi } from "../../utils/api";
 
 import ContentFilters from "../../Components/Filters/ContentFilters";
 import { buildListParams } from "../../utils/buildListParams";
+import AddHomeSlide from "./addHomeSlide";
+import EditHomeSlide from "./editHomeSlide";
 
 const columns = [
     { id: "image", label: "IMAGEN", minWidth: 250 },
@@ -68,13 +71,9 @@ export const HomeSliderBanners = () => {
     const ui = useContext(UIContext);   // progreso/tema/medidas
 
     const getTenantHeaders = () => {
-        const tenantId =
-            app?.viewer?.activeStoreId ||
-            app?.viewer?.storeId ||
-            app?.userData?.storeId ||
-            app?.tenant?.storeId ||
-            null;
-        return tenantId ? { "x-tenant-id": String(tenantId) } : {};
+        if (app?.isSuper) return {};
+        const sid = localStorage.getItem("X-Store-Id");
+        return sid ? { "X-Store-Id": sid } : {};
     };
 
     // Opciones de tienda (si tienes)
@@ -162,8 +161,28 @@ export const HomeSliderBanners = () => {
         }
     };
 
+    const panel = app?.isOpenFullScreenPanel;
+    const panelOpen = !!panel?.open;
+    const panelModel = (panel?.model || "").toLowerCase();
+    const closePanel = () => app?.setIsOpenFullScreenPanel?.({ open: false });
+
     return (
         <>
+            {/* Fullscreen panel overlay */}
+            {panelOpen && (panelModel.includes("slide") || panelModel.includes("slider")) && (
+                <div className="absolute inset-0 z-20 bg-white overflow-y-auto">
+                    <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
+                        <h3 className="text-lg font-semibold">
+                            {panelModel.includes("editar") ? "Editar Slide Principal" : "Agregar Slide Principal"}
+                        </h3>
+                        <Button onClick={closePanel} className="!min-w-0 !p-1">
+                            <IoMdClose className="text-2xl" />
+                        </Button>
+                    </div>
+                    {panelModel.includes("editar") ? <EditHomeSlide /> : <AddHomeSlide />}
+                </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 px-2 py-0 mt-1 md:mt-2">
                 <h2 className="text-[18px] font-[600]">Banners del Slider Principal</h2>
 

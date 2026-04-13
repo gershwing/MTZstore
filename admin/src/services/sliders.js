@@ -2,7 +2,7 @@
 import { fetchDataFromApi, postData, editData, deleteData } from "../utils/api";
 import { toISOorNull } from "./_contentUtils";
 
-const BASE = "/api/home-sliders";
+const BASE = "/api/homeSlides";
 
 export function listSliders(params = {}) {
   const qs = new URLSearchParams(params).toString();

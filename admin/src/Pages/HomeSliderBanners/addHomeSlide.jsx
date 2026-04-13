@@ -7,7 +7,7 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import { AppContext } from "../../context/AppContext"; // ✅ named export
 import { deleteImages, postData } from "../../utils/api";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useNavigate } from "react-router-dom";
+
 
 // NUEVO: campos de publicación
 import PublishFields from "../../Components/Content/PublishFields";
@@ -25,17 +25,11 @@ const AddHomeSlide = () => {
     });
 
     const context = useContext(AppContext); // ✅ contexto correcto
-    const history = useNavigate();
-
-    // Header opcional de tenant
+    // Header opcional de tenant (patrón estándar: SUPER_ADMIN no envía header)
     const getTenantHeaders = () => {
-        const tenantId =
-            context?.viewer?.activeStoreId ||
-            context?.viewer?.storeId ||
-            context?.userData?.storeId ||
-            context?.tenant?.storeId ||
-            null;
-        return tenantId ? { "x-tenant-id": String(tenantId) } : {};
+        if (context?.isSuper) return {};
+        const sid = localStorage.getItem("X-Store-Id");
+        return sid ? { "X-Store-Id": sid } : {};
     };
 
     // Helper para URL de previa (abre /preview/:id)
@@ -49,7 +43,7 @@ const AddHomeSlide = () => {
     const removeImg = async (imageUrl, index) => {
         try {
             await deleteImages(
-                `/api/home-slides/delete-image?img=${encodeURIComponent(imageUrl)}`,
+                `/api/homeSlides/delete-image?img=${encodeURIComponent(imageUrl)}`,
                 {},
                 { withCredentials: true, headers: { ...getTenantHeaders() } }
             );
@@ -92,7 +86,6 @@ const AddHomeSlide = () => {
             }
 
             context?.setIsOpenFullScreenPanel?.({ open: false });
-            history("/homeSlider/list");
         } catch (err) {
             context?.alertBox?.("error", err?.message || "No se pudo crear el slide");
         } finally {
@@ -124,7 +117,7 @@ const AddHomeSlide = () => {
                         <UploadBox
                             multiple={false}
                             name="images"
-                            url="/api/home-slides/uploadImages"
+                            url="/api/homeSlides/uploadImages"
                             setPreviewsFun={setPreviewsFun}
                             withCredentials={true}
                             headers={{ ...getTenantHeaders() }}

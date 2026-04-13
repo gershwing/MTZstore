@@ -7,7 +7,7 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import { AppContext } from "../../context/AppContext"; // ✅ named export
 import { deleteImages, editData, fetchDataFromApi } from "../../utils/api";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useNavigate } from "react-router-dom";
+
 
 // NUEVO: campos de publicación + botón de previa
 import PublishFields from "../../Components/Content/PublishFields";
@@ -28,24 +28,21 @@ const EditHomeSlide = () => {
     });
 
     const context = useContext(AppContext); // ✅ contexto correcto
-    const history = useNavigate();
-
-    // Header opcional de tenant
+    // Header opcional de tenant (patrón estándar: SUPER_ADMIN no envía header)
     const getTenantHeaders = () => {
-        const tenantId =
-            context?.viewer?.activeStoreId ||
-            context?.viewer?.storeId ||
-            context?.userData?.storeId ||
-            context?.tenant?.storeId ||
-            null;
-        return tenantId ? { "x-tenant-id": String(tenantId) } : {};
+        if (context?.isSuper) return {};
+        const sid = localStorage.getItem("X-Store-Id");
+        return sid ? { "X-Store-Id": sid } : {};
     };
 
     useEffect(() => {
         const id = context?.isOpenFullScreenPanel?.id;
         if (!id) return;
         (async () => {
-            const res = await fetchDataFromApi(`/api/home-slides/${id}`);
+            const res = await fetchDataFromApi(`/api/homeSlides/admin/${id}`, {
+                withCredentials: true,
+                headers: { ...getTenantHeaders() },
+            });
             const slide = res?.slide || res?.data || {};
             const imgs = slide?.images || [];
             setPreviews(Array.isArray(imgs) ? imgs : []);
@@ -68,7 +65,7 @@ const EditHomeSlide = () => {
     const removeImg = async (imageUrl, index) => {
         try {
             await deleteImages(
-                `/api/home-slides/delete-image?img=${encodeURIComponent(imageUrl)}`,
+                `/api/homeSlides/delete-image?img=${encodeURIComponent(imageUrl)}`,
                 {},
                 { withCredentials: true, headers: { ...getTenantHeaders() } }
             );
@@ -105,7 +102,6 @@ const EditHomeSlide = () => {
 
             context?.alertBox?.("success", "Slide actualizado correctamente");
             context?.setIsOpenFullScreenPanel?.({ open: false });
-            history("/homeSlider/list");
         } catch (err) {
             context?.alertBox?.("error", err?.message || "No se pudo actualizar el slide");
         } finally {
@@ -138,7 +134,7 @@ const EditHomeSlide = () => {
                         <UploadBox
                             multiple={false}
                             name="images"
-                            url="/api/home-slides/uploadImages"
+                            url="/api/homeSlides/uploadImages"
                             setPreviewsFun={setPreviewsFun}
                             withCredentials={true}
                             headers={{ ...getTenantHeaders() }}

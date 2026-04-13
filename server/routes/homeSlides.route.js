@@ -29,6 +29,8 @@ const forcePublicScope = (req, _res, next) => {
 /** Escrituras: exige tenant por header o cae a storeId del usuario */
 const ensureTenantWrite = (req, _res, next) => {
   if (!req.tenantId) {
+    // SUPER_ADMIN de plataforma puede operar sin tenant explícito
+    if (req.tenant?.role === 'SUPER_ADMIN') return next();
     const userStore = req?.user?.storeId;
     if (userStore) {
       req.tenantId = String(userStore);
@@ -86,8 +88,7 @@ homeSlidesRouter.get(
 homeSlidesRouter.post(
   '/uploadImages',
   auth,
-  withTenant({ required: false, source: 'header' }),
-  ensureTenantWrite,
+  withTenant({ required: true, source: 'header' }),
   requirePermission('slider:create'),
   upload.array('images', 10),
   uploadImages
@@ -97,7 +98,7 @@ homeSlidesRouter.post(
 homeSlidesRouter.post(
   '/add',
   auth,
-  withTenant({ required: false, source: 'header' }),
+  withTenant({ required: true, source: 'header' }),
   ensureTenantWrite,
   requirePermission('slider:create'),
   addHomeSlide
@@ -107,7 +108,7 @@ homeSlidesRouter.post(
 homeSlidesRouter.delete(
   '/deteleImage',
   auth,
-  withTenant({ required: false, source: 'header' }),
+  withTenant({ required: true, source: 'header' }),
   ensureTenantWrite,
   requirePermission('slider:delete'),
   removeImageFromCloudinary
@@ -115,7 +116,7 @@ homeSlidesRouter.delete(
 homeSlidesRouter.delete(
   '/delete-image',
   auth,
-  withTenant({ required: false, source: 'header' }),
+  withTenant({ required: true, source: 'header' }),
   ensureTenantWrite,
   requirePermission('slider:delete'),
   removeImageFromCloudinary
@@ -125,7 +126,7 @@ homeSlidesRouter.delete(
 homeSlidesRouter.delete(
   '/:id',
   auth,
-  withTenant({ required: false, source: 'header' }),
+  withTenant({ required: true, source: 'header' }),
   ensureTenantWrite,
   requirePermission('slider:delete'),
   deleteSlide
@@ -135,7 +136,7 @@ homeSlidesRouter.delete(
 homeSlidesRouter.delete(
   '/bulk',
   auth,
-  withTenant({ required: false, source: 'header' }),
+  withTenant({ required: true, source: 'header' }),
   ensureTenantWrite,
   requirePermission('slider:delete'),
   deleteMultipleSlides
@@ -145,7 +146,7 @@ homeSlidesRouter.delete(
 homeSlidesRouter.put(
   '/:id',
   auth,
-  withTenant({ required: false, source: 'header' }),
+  withTenant({ required: true, source: 'header' }),
   ensureTenantWrite,
   requirePermission('slider:update'),
   updatedSlide
