@@ -33,11 +33,11 @@ const HomeSlider = (props) => {
           {slidesCount > 0 &&
             slides.map((item, index) => (
               <SwiperSlide key={index}>
-                <div className="item rounded-[10px] overflow-hidden">
+                <div className="item rounded-[10px] overflow-hidden max-h-[400px]">
                   <img
                     src={item?.images?.[0]}
                     alt="Banner slide"
-                    className="w-full"
+                    className="w-full h-full object-cover"
                     loading="lazy"
                   />
                 </div>

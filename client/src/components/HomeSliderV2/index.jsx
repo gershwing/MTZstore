@@ -45,8 +45,8 @@ const HomeBannerV2 = (props) => {
     >
       {slides.map((item, index) => (
         <SwiperSlide key={index}>
-          <div className="item w-full rounded-md overflow-hidden relative">
-            <img src={item?.bannerimages?.[0]} className="w-full" loading="lazy" />
+          <div className="item w-full max-h-[400px] rounded-md overflow-hidden relative">
+            <img src={item?.bannerimages?.[0]} className="w-full h-full object-cover" loading="lazy" />
 
             <div className="info absolute top-0 -right-[100%] opacity-0 w-[50%] h-[100%] z-50 p-8 flex items-center flex-col justify-center transition-all duration-700">
               <h4 className="text-[12px] lg:text-[18px] font-[500] w-full text-left mb-3 relative -right-[100%] opacity-0 hidden lg:block">
