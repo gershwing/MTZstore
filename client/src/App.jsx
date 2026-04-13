@@ -253,6 +253,7 @@ function App() {
       <BrowserRouter>
         <MyContext.Provider value={values}>
           <Header />
+          <div className="pb-[65px] lg:pb-0">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<ProductListing />} />
@@ -273,6 +274,7 @@ function App() {
             <Route path="/store/:id" element={<StorePage />} />
           </Routes>
           <Footer />
+          </div>
 
           <SellerApplicationModal
             open={showSellerModal}
