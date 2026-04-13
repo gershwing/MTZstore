@@ -105,16 +105,16 @@ export const ProductDetails = () => {
 
   return (
     <>
-      <section className="bg-white py-5 pb-20 lg:pb-5">
+      <section className="bg-white py-5 pb-20 xl:pb-5">
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[300px]">
             <CircularProgress />
           </div>
         ) : (
           <>
-            <div className="w-full px-3 flex gap-5 flex-col lg:flex-row items-start">
+            <div className="w-full px-3 flex gap-5 flex-col xl:flex-row items-start">
               {/* Col 1: Imágenes */}
-              <div className="productZoomContainer w-full lg:w-[35%]">
+              <div className="productZoomContainer w-full xl:w-[35%]">
                 <ProductZoom
                   images={displayImages?.length > 0 ? displayImages : productData?.images}
                   activeIndex={activeImageIndex}
@@ -129,7 +129,7 @@ export const ProductDetails = () => {
               </div>
 
               {/* Col 2: Detalles del producto */}
-              <div className="productContent w-full lg:w-[40%]">
+              <div className="productContent w-full xl:w-[40%]">
                 <ProductDetailsComponent
                   item={productData}
                   variants={variantsData}
@@ -149,7 +149,7 @@ export const ProductDetails = () => {
               </div>
 
               {/* Col 3: Panel lateral (estilo AliExpress) */}
-              <div className="hidden lg:block w-full lg:w-[25%]">
+              <div className="hidden xl:block w-full xl:w-[25%]">
                 <div className="sticky top-[80px] space-y-4">
                   {/* Vendedor */}
                   {storeInfo && (
@@ -332,7 +332,7 @@ export const ProductDetails = () => {
 
       {/* Mobile bottom action bar */}
       {!isLoading && productData && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-3 py-2 flex gap-2 z-[100] lg:hidden">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-3 py-2 flex gap-2 z-[100] xl:hidden">
           <Button
             className="flex-1 !bg-primary !text-white !py-2.5 !font-[600] !normal-case !text-[13px]"
             onClick={() => {
