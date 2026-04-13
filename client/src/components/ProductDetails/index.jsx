@@ -1,15 +1,7 @@
 import React, { useContext, useEffect, useState, useMemo } from "react";
-import Button from "@mui/material/Button";
-import { QtyBox } from "../QtyBox";
 import Rating from "@mui/material/Rating";
-import { MdOutlineShoppingCart } from "react-icons/md";
-import { FaRegHeart } from "react-icons/fa";
-import { IoGitCompareOutline } from "react-icons/io5";
 import { MyContext } from "../../App";
-import CircularProgress from '@mui/material/CircularProgress';
 import { postData, fetchDataFromApi } from "../../utils/api";
-import { FaCheckDouble } from "react-icons/fa";
-import { IoMdHeart } from "react-icons/io";
 import { formatPrice } from "../../utils/formatPrice";
 
 export const ProductDetailsComponent = (props) => {
@@ -149,6 +141,18 @@ export const ProductDetailsComponent = (props) => {
   const effectivePrice = tierResult ? tierResult.price : displayPrice;
 
   const handleSelecteQty = (qty) => setQuantity(qty);
+
+  // Expose actions to parent for side panel
+  useEffect(() => {
+    props.onActionsReady?.({
+      quantity, setQuantity: handleSelecteQty,
+      effectivePrice, displayPrice, displayStock,
+      addToCart: () => addToCart(props?.item, context?.userData?._id, quantity),
+      addToMyList: () => handleAddToMyList(props?.item),
+      isLoading, isAdded, isAddedInMyList,
+      hasVariants, selectedVariant,
+    });
+  }, [quantity, effectivePrice, displayPrice, displayStock, isLoading, isAdded, isAddedInMyList, selectedVariant]);
 
   const handleSelectAttr = (key, val) => {
     setSelectedAttrs(prev => ({ ...prev, [key]: val }));
@@ -335,25 +339,25 @@ export const ProductDetailsComponent = (props) => {
         }
 
         return (
-          <div className="mt-4 border border-amber-200 rounded-lg overflow-hidden">
-            <div className={`grid divide-x divide-amber-200 ${cols.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+          <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
+            <div className={`grid divide-x divide-gray-200 ${cols.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
               {cols.map((col, i) => (
                 <div
                   key={i}
-                  className={`p-3 text-center transition-colors ${
+                  className={`py-2 px-3 text-center transition-colors ${
                     col.active
-                      ? "bg-amber-100 border-b-2 border-amber-500"
-                      : "bg-amber-50 hover:bg-amber-100/50"
+                      ? "bg-white border-b-3 border-primary"
+                      : "bg-white hover:bg-gray-50"
                   }`}
                 >
-                  <p className="text-xs text-gray-500 mb-1">
+                  <p className="text-[11px] text-gray-400">
                     {col.range} {col.label}
                   </p>
-                  <p className={`text-lg font-bold ${col.active ? "text-amber-800" : "text-gray-700"}`}>
+                  <p className={`text-[16px] font-bold ${col.active ? "text-primary" : "text-gray-700"}`}>
                     {formatPrice(col.price, "BOB")}
                   </p>
                   {col.active && (
-                    <p className="text-[10px] text-amber-600 mt-0.5 font-medium">Precio aplicado</p>
+                    <p className="text-[10px] text-primary font-medium">Precio aplicado</p>
                   )}
                 </div>
               ))}
@@ -404,104 +408,7 @@ export const ProductDetailsComponent = (props) => {
         </div>
       )}
 
-      {/* Métodos de envío disponibles */}
-      {(() => {
-        const ship = props?.item?.shipping;
-        const storeName = props?.storeInfo?.isPlatformStore ? "MTZstore" : props?.storeInfo?.name;
-
-        const METHOD_MAP = {
-          mtzExpress: { key: "MTZSTORE_EXPRESS", label: "MTZstore Express" },
-          mtzStandard: { key: "MTZSTORE_STANDARD", label: "MTZstore Estándar" },
-          storeSelf: { key: "STORE", label: storeName || "Tienda" },
-        };
-
-        // Métodos activos del producto
-        const activeMethods = [];
-        if (ship?.mtzExpress) activeMethods.push(METHOD_MAP.mtzExpress);
-        if (ship?.mtzStandard) activeMethods.push(METHOD_MAP.mtzStandard);
-        if (ship?.storeSelf) activeMethods.push({ ...METHOD_MAP.storeSelf });
-
-        // Fallback legacy
-        if (activeMethods.length === 0) {
-          const legacy = props?.item?.shippedBy;
-          if (legacy === "MTZSTORE_EXPRESS") activeMethods.push(METHOD_MAP.mtzExpress);
-          else if (legacy === "MTZSTORE_STANDARD") activeMethods.push(METHOD_MAP.mtzStandard);
-          else activeMethods.push({ ...METHOD_MAP.storeSelf });
-        }
-
-        return (
-          <div className="mt-3 mb-2">
-            {/* Vendido por */}
-            {props?.storeInfo && (
-              <p className="text-[13px] text-gray-500 mb-1.5">
-                Vendido por: <span className="font-[600] text-gray-700">{props.storeInfo.isPlatformStore ? "MTZstore" : props.storeInfo.name}</span>
-              </p>
-            )}
-
-            {/* Opciones de envío */}
-            <p className="text-[12px] text-gray-400 mb-1">Enviado por:</p>
-            <div className="space-y-1.5">
-              {activeMethods.map((m) => {
-                const rate = shippingRates.find((r) => r.method === m.key);
-                const days = rate?.estimatedDays;
-                const cost = rate?.baseRate || 0;
-                const isMtz = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(m.key);
-                const isFree = !isMtz && cost === 0;
-
-                return (
-                  <div key={m.key} className="flex items-center gap-2 text-[13px]">
-                    <span className="text-green-600 font-medium">✓</span>
-                    <span className="font-[500] text-gray-800">{m.label}</span>
-                    {days && (
-                      <span className="text-gray-400">
-                        {days.min === 0 ? `menos de ${days.max * 24}h` : `${days.min}-${days.max} días`}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
-
-      <div className="flex items-center gap-4 py-4">
-        <div className="qtyBoxWrapper w-[70px]">
-          <QtyBox handleSelecteQty={handleSelecteQty} max={displayStock || 99} />
-        </div>
-
-        <Button
-          className="btn-org flex gap-2 !min-w-[150px]"
-          onClick={() => addToCart(props?.item, context?.userData?._id, quantity)}
-          disabled={hasVariants && !selectedVariant}
-        >
-          {isLoading ? (
-            <CircularProgress size={20} />
-          ) : isAdded ? (
-            <><FaCheckDouble /> Agregado</>
-          ) : (
-            <><MdOutlineShoppingCart className="text-[22px]" /> Agregar al carrito</>
-          )}
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-4 mt-4">
-        <span
-          className="flex items-center gap-2 text-[14px] link cursor-pointer font-[500]"
-          onClick={() => handleAddToMyList(props?.item)}
-        >
-          {isAddedInMyList ? (
-            <IoMdHeart className="text-[18px] !text-primary" />
-          ) : (
-            <FaRegHeart className="text-[18px] !text-black" />
-          )}
-          Agregar a la lista de deseos
-        </span>
-
-        <span className="flex items-center gap-2 text-[14px] link cursor-pointer font-[500]">
-          <IoGitCompareOutline className="text-[18px]" /> Comparar
-        </span>
-      </div>
+      {/* Acciones movidas al panel lateral (col 3) — se exponen via callback */}
     </>
   );
 };

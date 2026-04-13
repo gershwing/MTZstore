@@ -1,18 +1,27 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { ProductZoom } from "../../components/ProductZoom";
 import ProductsSlider from '../../components/ProductsSlider';
 import { ProductDetailsComponent } from "../../components/ProductDetails";
+import { QtyBox } from "../../components/QtyBox";
 
 import { fetchDataFromApi } from "../../utils/api";
 import CircularProgress from '@mui/material/CircularProgress';
+import { Button } from "@mui/material";
 import { Reviews } from "./reviews";
 import { IoStorefrontOutline } from "react-icons/io5";
+import { MdOutlineShoppingCart } from "react-icons/md";
+import { FaCheckDouble, FaRegHeart } from "react-icons/fa";
+import { IoMdHeart } from "react-icons/io";
+import { FiShare2 } from "react-icons/fi";
+import { MyContext } from "../../App";
 
 export const ProductDetails = () => {
-
+  const context = useContext(MyContext);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
+  const [actions, setActions] = useState(null);
   const [productData, setProductData] = useState();
   const [variantsData, setVariantsData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -128,6 +137,7 @@ export const ProductDetails = () => {
                   storeInfo={storeInfo}
                   reviewsCount={reviewsCount}
                   gotoReviews={gotoReviews}
+                  onActionsReady={setActions}
                   onVariantSelect={(variant) => {
                     if (variant?.images?.length > 0) {
                       const varImg = typeof variant.images[0] === "string" ? variant.images[0] : variant.images[0]?.url;
@@ -165,7 +175,7 @@ export const ProductDetails = () => {
                     </div>
                   )}
 
-                  {/* Envío y seguridad */}
+                  {/* Envío */}
                   <div className="border border-gray-200 rounded-lg p-4 space-y-3">
                     {(() => {
                       const ship = productData?.shipping;
@@ -185,7 +195,6 @@ export const ProductDetails = () => {
                         </div>
                       ));
                     })()}
-
                     <div className="pt-2 border-t border-gray-100 space-y-2">
                       <div className="flex items-center gap-2 text-[12px] text-gray-500">
                         <span>🔒</span> <span>Pagos seguros</span>
@@ -193,6 +202,87 @@ export const ProductDetails = () => {
                       <div className="flex items-center gap-2 text-[12px] text-gray-500">
                         <span>🛡️</span> <span>Protección al comprador</span>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Cantidad + Acciones */}
+                  <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+                    <div>
+                      <p className="text-[13px] font-[600] mb-2">Cantidad</p>
+                      <QtyBox
+                        handleSelecteQty={(qty) => actions?.setQuantity(qty)}
+                        max={actions?.displayStock || 99}
+                      />
+                    </div>
+
+                    <Button
+                      className="w-full !bg-primary !text-white !py-2.5 !font-[600] !normal-case !text-[14px]"
+                      disabled={actions?.hasVariants && !actions?.selectedVariant}
+                      onClick={() => {
+                        if (!context?.isLogin) {
+                          context?.alertBox("error", "Inicia sesión para comprar");
+                          return;
+                        }
+                        actions?.addToCart();
+                        setTimeout(() => navigate("/checkout"), 500);
+                      }}
+                    >
+                      Comprar
+                    </Button>
+
+                    <Button
+                      className="w-full !border !border-gray-300 !text-gray-800 !py-2.5 !normal-case !text-[14px] flex gap-2"
+                      variant="outlined"
+                      disabled={actions?.hasVariants && !actions?.selectedVariant}
+                      onClick={() => {
+                        if (!context?.isLogin) {
+                          context?.alertBox("error", "Inicia sesión para agregar al carrito");
+                          return;
+                        }
+                        actions?.addToCart();
+                      }}
+                    >
+                      {actions?.isLoading ? (
+                        <CircularProgress size={18} />
+                      ) : actions?.isAdded ? (
+                        <><FaCheckDouble /> Agregado</>
+                      ) : (
+                        <><MdOutlineShoppingCart className="text-[18px]" /> Agregar al carrito</>
+                      )}
+                    </Button>
+
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1 !border !border-gray-200 !text-gray-600 !py-2 !normal-case !text-[12px] flex gap-1"
+                        variant="outlined"
+                        onClick={() => {
+                          if (navigator.share) {
+                            navigator.share({ title: productData?.name, url: window.location.href });
+                          } else {
+                            navigator.clipboard.writeText(window.location.href);
+                            context?.alertBox("success", "Enlace copiado");
+                          }
+                        }}
+                      >
+                        <FiShare2 className="text-[14px]" /> Compartir
+                      </Button>
+                      <Button
+                        className="flex-1 !border !border-gray-200 !text-gray-600 !py-2 !normal-case !text-[12px] flex gap-1"
+                        variant="outlined"
+                        onClick={() => {
+                          if (!context?.isLogin) {
+                            context?.alertBox("error", "Inicia sesión");
+                            return;
+                          }
+                          actions?.addToMyList();
+                        }}
+                      >
+                        {actions?.isAddedInMyList ? (
+                          <><IoMdHeart className="text-[14px] text-primary" /> Guardado</>
+                        ) : (
+                          <><FaRegHeart className="text-[14px]" /> Guardar</>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </div>

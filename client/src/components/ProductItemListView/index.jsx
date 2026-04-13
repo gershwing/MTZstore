@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Rating from "@mui/material/Rating";
 import Button from "@mui/material/Button";
 import { FaRegHeart } from "react-icons/fa";
-import { IoGitCompareOutline } from "react-icons/io5";
+import { FiShare2 } from "react-icons/fi";
 import { MdZoomOutMap } from "react-icons/md";
 import { MyContext } from "../../App";
 import { MdOutlineShoppingCart } from "react-icons/md";
@@ -266,8 +266,13 @@ const ProductItem = (props) => {
             <MdZoomOutMap className="text-[18px] !text-black group-hover:text-white hover:!text-white" />
           </Button>
 
-          <Button className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-white  text-black hover:!bg-primary hover:text-white group">
-            <IoGitCompareOutline className="text-[18px] !text-black group-hover:text-white hover:!text-white" />
+          <Button className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-white  text-black hover:!bg-primary hover:text-white group"
+            onClick={() => {
+              const url = `${window.location.origin}/product/${props?.item?._id}`;
+              if (navigator.share) { navigator.share({ title: props?.item?.name, url }); }
+              else { navigator.clipboard.writeText(url); }
+            }}>
+            <FiShare2 className="text-[16px] !text-black group-hover:text-white hover:!text-white" />
           </Button>
 
           <Button className={`!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-white  text-black hover:!bg-primary hover:text-white group`}
