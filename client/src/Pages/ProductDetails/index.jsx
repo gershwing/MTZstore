@@ -105,7 +105,7 @@ export const ProductDetails = () => {
 
   return (
     <>
-      <section className="bg-white py-5 pb-[120px] sm:pb-20 xl:pb-5">
+      <section className="bg-white py-5">
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[300px]">
             <CircularProgress />
@@ -330,41 +330,6 @@ export const ProductDetails = () => {
         )}
       </section>
 
-      {/* Mobile bottom action bar */}
-      {!isLoading && productData && (
-        <div className="fixed bottom-[55px] sm:bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg px-3 py-2 flex gap-2 z-[100] xl:hidden">
-          <Button
-            className="flex-1 !bg-primary !text-white !py-2.5 !font-[600] !normal-case !text-[13px]"
-            onClick={() => {
-              if (!context?.isLogin) { context?.alertBox("error", "Inicia sesión"); return; }
-              actions?.addToCart();
-              setTimeout(() => navigate("/checkout"), 500);
-            }}
-          >
-            Comprar
-          </Button>
-          <Button
-            className="flex-1 !border !border-gray-300 !text-gray-800 !py-2.5 !normal-case !text-[13px] flex gap-1"
-            variant="outlined"
-            onClick={() => {
-              if (!context?.isLogin) { context?.alertBox("error", "Inicia sesión"); return; }
-              actions?.addToCart();
-            }}
-          >
-            {actions?.isAdded ? <><FaCheckDouble /> Agregado</> : <><MdOutlineShoppingCart /> Carrito</>}
-          </Button>
-          <Button
-            className="!min-w-[44px] !w-[44px] !border !border-gray-200 !text-gray-600 !p-0"
-            variant="outlined"
-            onClick={() => {
-              if (!context?.isLogin) { context?.alertBox("error", "Inicia sesión"); return; }
-              actions?.addToMyList();
-            }}
-          >
-            {actions?.isAddedInMyList ? <IoMdHeart className="text-primary" /> : <FaRegHeart />}
-          </Button>
-        </div>
-      )}
     </>
   );
 };

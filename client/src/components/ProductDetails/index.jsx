@@ -1,5 +1,13 @@
 import React, { useContext, useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Rating from "@mui/material/Rating";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import { QtyBox } from "../QtyBox";
+import { MdOutlineShoppingCart } from "react-icons/md";
+import { FaCheckDouble, FaRegHeart } from "react-icons/fa";
+import { IoMdHeart } from "react-icons/io";
+import { FiShare2 } from "react-icons/fi";
 import { MyContext } from "../../App";
 import { postData, fetchDataFromApi } from "../../utils/api";
 import { formatPrice } from "../../utils/formatPrice";
@@ -408,7 +416,46 @@ export const ProductDetailsComponent = (props) => {
         </div>
       )}
 
-      {/* Acciones movidas al panel lateral (col 3) — se exponen via callback */}
+      {/* Acciones inline (mobile/tablet) — ocultas en xl+ donde el panel lateral las muestra */}
+      <div className="xl:hidden mt-4 space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="w-[80px]">
+            <QtyBox handleSelecteQty={handleSelecteQty} max={displayStock || 99} />
+          </div>
+          <span className="text-sm text-gray-500">Disponible: {displayStock}</span>
+        </div>
+
+        <Button
+          className="w-full !bg-primary !text-white !py-2.5 !font-[600] !normal-case !text-[14px]"
+          disabled={hasVariants && !selectedVariant}
+          onClick={() => {
+            if (!context?.userData?._id) { context?.alertBox("error", "Inicia sesión para comprar"); return; }
+            addToCart(props?.item, context?.userData?._id, quantity);
+          }}
+        >
+          {isLoading ? <CircularProgress size={18} color="inherit" /> : isAdded ? <><FaCheckDouble /> Agregado</> : <><MdOutlineShoppingCart className="text-[18px]" /> Agregar al carrito</>}
+        </Button>
+
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 !border !border-gray-200 !text-gray-600 !py-2 !normal-case !text-[13px] flex gap-1"
+            variant="outlined"
+            onClick={() => {
+              if (navigator.share) { navigator.share({ title: props?.item?.name, url: window.location.href }); }
+              else { navigator.clipboard.writeText(window.location.href); context?.alertBox("success", "Enlace copiado"); }
+            }}
+          >
+            <FiShare2 className="text-[14px]" /> Compartir
+          </Button>
+          <Button
+            className="flex-1 !border !border-gray-200 !text-gray-600 !py-2 !normal-case !text-[13px] flex gap-1"
+            variant="outlined"
+            onClick={() => handleAddToMyList(props?.item)}
+          >
+            {isAddedInMyList ? <><IoMdHeart className="text-[14px] text-primary" /> Guardado</> : <><FaRegHeart className="text-[14px]" /> Guardar</>}
+          </Button>
+        </div>
+      </div>
     </>
   );
 };

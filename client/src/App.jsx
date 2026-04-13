@@ -253,7 +253,7 @@ function App() {
       <BrowserRouter>
         <MyContext.Provider value={values}>
           <Header />
-          <div className="pb-[65px] lg:pb-0">
+          <div>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<ProductListing />} />
