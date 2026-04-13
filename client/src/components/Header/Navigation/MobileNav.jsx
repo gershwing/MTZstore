@@ -16,6 +16,9 @@ const MobileNav = () => {
 
     const location = useLocation();
 
+    // Ocultar MobileNav en pagina de producto (tiene su propia barra)
+    const isProductPage = location.pathname.startsWith("/product/");
+
     useEffect(() => {
 
         if (location.pathname === "/products" || location.pathname === "/search") {
@@ -31,6 +34,8 @@ const MobileNav = () => {
         context?.setOpenSearchPanel(false)
     }
 
+
+    if (isProductPage) return null;
 
     return (
         <div className='mobileNav bg-white p-1 px-3 w-full flex items-center justify-between fixed bottom-0 left-0 gap-0 z-[51]'>
