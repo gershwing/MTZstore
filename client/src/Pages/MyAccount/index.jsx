@@ -51,12 +51,10 @@ const MyAccount = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-
-    if (token === null) {
+    // Solo redirigir si no hay token Y el contexto ya terminó de cargar
+    if (!token && context?.isLogin === false) {
       history("/");
     }
-
-
   }, [context?.isLogin])
 
 
