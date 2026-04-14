@@ -384,13 +384,13 @@ const Header = () => {
                 <Link to="/profile">
                   <MenuItem onClick={handleCloseMyAcc} className="flex items-center gap-3">
                     <FaRegUser className="text-[16px]" />
-                    <span className="text-[14px]">Profile</span>
+                    <span className="text-[14px]">Mi Perfil</span>
                   </MenuItem>
                 </Link>
 
                 <MenuItem onClick={onLogout} className="flex items-center gap-3">
                   <IoMdLogOut className="text-[18px]" />
-                  <span className="text-[14px]">Sign Out</span>
+                  <span className="text-[14px]">Cerrar Sesión</span>
                 </MenuItem>
               </Menu>
             </div>
