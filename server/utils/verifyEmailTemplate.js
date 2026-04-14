@@ -1,4 +1,18 @@
-const VerificationEmail = (username, otp) => {
+const COPY = {
+    register: {
+        title: "Verificación de correo",
+        body: "Gracias por registrarte en <strong>MTZstore</strong>. Utiliza el siguiente código para verificar tu correo electrónico:",
+        ignore: "Si no creaste esta cuenta, puedes ignorar este mensaje con tranquilidad.",
+    },
+    password: {
+        title: "Cambio de contraseña",
+        body: "Recibimos una solicitud para cambiar tu contraseña en <strong>MTZstore</strong>. Utiliza el siguiente código para confirmar:",
+        ignore: "Si no solicitaste este cambio, puedes ignorar este mensaje. Tu contraseña no se modificará.",
+    },
+};
+
+const VerificationEmail = (username, otp, purpose = "register") => {
+    const c = COPY[purpose] || COPY.register;
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -64,13 +78,13 @@ const VerificationEmail = (username, otp) => {
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="title">MTZstore • Verificación de correo</h1>
+      <h1 class="title">MTZstore • ${c.title}</h1>
     </div>
     <div class="content">
       <p>Hola <strong>${username || ""}</strong>,</p>
-      <p>Gracias por registrarte en <strong>MTZstore</strong>. Utiliza el siguiente código para verificar tu correo electrónico:</p>
+      <p>${c.body}</p>
       <div class="otp">${otp}</div>
-      <p>Si no creaste esta cuenta, puedes ignorar este mensaje con tranquilidad.</p>
+      <p>${c.ignore}</p>
     </div>
     <div class="footer">
       <p>&copy; ${new Date().getFullYear()} MTZstore. Todos los derechos reservados.</p>

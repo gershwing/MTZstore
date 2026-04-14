@@ -682,9 +682,9 @@ export async function forgotPasswordController(req, res, next) {
         // Enviar email
         await sendEmailFun({
             sendTo: normEmail,
-            subject: 'Verify OTP from Ecommerce App',
+            subject: 'Código para cambiar contraseña - MTZstore',
             text: '',
-            html: VerificationEmail(user.name, verifyCode),
+            html: VerificationEmail(user.name, verifyCode, "password"),
         });
 
         return res.ok({ message: 'Check your email' });
