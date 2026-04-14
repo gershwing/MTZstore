@@ -18,7 +18,12 @@ const MyAccount = () => {
   const [userId, setUserId] = useState("");
   const [isChangePasswordFormShow, setisChangePasswordFormShow] = useState(false);
   const [phone, setPhone] = useState('');
-  const [showPw, setShowPw] = useState({ old: false, new: false, confirm: false });
+  const [showPw, setShowPw] = useState({ new: false, confirm: false });
+
+  // OTP flow: idle → verifying → changing
+  const [otpStep, setOtpStep] = useState("idle");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
 
   const [formFields, setFormsFields] = useState({
     name: '',
@@ -27,8 +32,6 @@ const MyAccount = () => {
   });
 
   const [changePassword, setChangePassword] = useState({
-    email: '',
-    oldPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
@@ -64,9 +67,7 @@ const MyAccount = () => {
       );
 
 
-      setChangePassword({
-        email: context?.userData?.email
-      })
+      setChangePassword({ newPassword: '', confirmPassword: '' })
     }
 
   }, [context?.userData])
@@ -119,52 +120,76 @@ const MyAccount = () => {
 
   }
 
-  const valideValue2 = Object.values(formFields).every(el => el)
+  // Paso 1: Enviar OTP al email
+  const handleSendOtp = async () => {
+    const email = formFields.email || context?.userData?.email;
+    if (!email) return context.alertBox("error", "No se encontró el email");
+    setOtpLoading(true);
+    const res = await postData("/api/user/forgot-password", { email });
+    setOtpLoading(false);
+    if (res?.error !== true) {
+      context.alertBox("success", "Código enviado a tu email");
+      setOtpStep("verifying");
+    } else {
+      context.alertBox("error", res?.message || "No se pudo enviar el código");
+    }
+  };
 
+  // Paso 2: Verificar OTP
+  const handleVerifyOtp = async () => {
+    const email = formFields.email || context?.userData?.email;
+    if (!otpCode || otpCode.length < 6) return context.alertBox("error", "Ingrese el código de 6 dígitos");
+    setOtpLoading(true);
+    const res = await postData("/api/user/verify-forgot-password-otp", { email, otp: otpCode });
+    setOtpLoading(false);
+    if (res?.error !== true) {
+      context.alertBox("success", "Código verificado");
+      setOtpStep("changing");
+    } else {
+      context.alertBox("error", res?.message || "Código inválido o expirado");
+    }
+  };
 
-
-  const handleSubmitChangePassword = (e) => {
+  // Paso 3: Guardar nueva contraseña
+  const handleSubmitChangePassword = async (e) => {
     e.preventDefault();
+    const email = formFields.email || context?.userData?.email;
+    if (!changePassword.newPassword) return context.alertBox("error", "Ingrese la nueva contraseña");
+    if (!changePassword.confirmPassword) return context.alertBox("error", "Confirme su contraseña");
+    if (changePassword.newPassword !== changePassword.confirmPassword) return context.alertBox("error", "Las contraseñas no coinciden");
+    if (changePassword.newPassword.length < 8) return context.alertBox("error", "La contraseña debe tener al menos 8 caracteres");
 
     setIsLoading2(true);
-
-    if (changePassword.oldPassword === "") {
-      context.alertBox("error", "Ingrese su contraseña actual");
-      return false
+    const res = await postData("/api/user/forgot-password/change-password", {
+      email,
+      newPassword: changePassword.newPassword,
+      confirmPassword: changePassword.confirmPassword,
+    });
+    setIsLoading2(false);
+    if (res?.error !== true) {
+      context.alertBox("success", res?.message || "Contraseña actualizada");
+      setChangePassword({ newPassword: '', confirmPassword: '' });
+      setOtpStep("idle");
+      setOtpCode("");
+      setisChangePasswordFormShow(false);
+    } else {
+      context.alertBox("error", res?.message || "No se pudo cambiar la contraseña");
     }
+  };
 
-    if (changePassword.newPassword === "") {
-      context.alertBox("error", "Ingrese la nueva contraseña");
-      return false
+  // Abrir panel + enviar OTP
+  const handleTogglePasswordPanel = () => {
+    if (isChangePasswordFormShow) {
+      // Cerrar y resetear
+      setisChangePasswordFormShow(false);
+      setOtpStep("idle");
+      setOtpCode("");
+      setChangePassword({ newPassword: '', confirmPassword: '' });
+    } else {
+      setisChangePasswordFormShow(true);
+      handleSendOtp();
     }
-
-    if (changePassword.confirmPassword === "") {
-      context.alertBox("error", "Confirme su contraseña");
-      return false
-    }
-
-    if (changePassword.confirmPassword !== changePassword.newPassword) {
-      context.alertBox("error", "Las contraseñas no coinciden");
-      return false
-    }
-
-
-    postData(`/api/user/reset-password`, changePassword, { withCredentials: true }).then((res) => {
-
-      if (res?.error !== true) {
-        setIsLoading2(false);
-        context.alertBox("success", res?.message);
-        setChangePassword(prev => ({ email: prev.email, oldPassword: '', newPassword: '', confirmPassword: '' }));
-        setisChangePasswordFormShow(false);
-      } else {
-        context.alertBox("error", res?.message);
-        setIsLoading2(false);
-      }
-
-    })
-
-
-  }
+  };
 
   return (
     <section className="py-3 lg:py-10 w-full">
@@ -178,7 +203,9 @@ const MyAccount = () => {
           <div className="card bg-white p-5 shadow-md rounded-md mb-5">
             <div className="flex items-center pb-3">
               <h2 className="pb-0">Mi perfil</h2>
-              <Button className="!ml-auto" onClick={() => setisChangePasswordFormShow(!isChangePasswordFormShow)}>Cambiar contraseña</Button>
+              <Button className="!ml-auto" onClick={handleTogglePasswordPanel}>
+                {otpLoading && otpStep === "idle" ? <CircularProgress size={20} /> : "Cambiar contraseña"}
+              </Button>
             </div>
             <hr />
 
@@ -255,102 +282,88 @@ const MyAccount = () => {
               </div>
               <hr />
 
+              {/* Paso 1: Verificar OTP */}
+              {otpStep === "verifying" && (
+                <div className="mt-8">
+                  <p className="text-sm text-gray-600 mb-4">
+                    Enviamos un código de verificación a tu email. Ingrésalo para continuar.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <TextField
+                      label="Código OTP"
+                      variant="outlined"
+                      size="small"
+                      className="w-[200px]"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      inputProps={{ maxLength: 6, inputMode: "numeric" }}
+                    />
+                    <Button onClick={handleVerifyOtp} disabled={otpLoading || otpCode.length < 6} className="btn-org btn-sm">
+                      {otpLoading ? <CircularProgress size={20} color="inherit" /> : "Verificar"}
+                    </Button>
+                  </div>
+                  <Button size="small" className="!mt-3 !text-xs" onClick={handleSendOtp} disabled={otpLoading}>
+                    Reenviar código
+                  </Button>
+                </div>
+              )}
 
-              <form className="mt-8" onSubmit={handleSubmitChangePassword}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-                  {
-                    context?.userData?.signUpWithGoogle === false &&
+              {/* Paso 2: Nueva contraseña */}
+              {otpStep === "changing" && (
+                <form className="mt-8" onSubmit={handleSubmitChangePassword}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="col">
                       <TextField
-                        type={showPw.old ? "text" : "password"}
-                        label="Contraseña actual"
+                        type={showPw.new ? "text" : "password"}
+                        label="Nueva contraseña"
                         variant="outlined"
                         size="small"
                         className="w-full"
-                        name="oldPassword"
-                        value={changePassword.oldPassword || ""}
-                        disabled={isLoading2}
-                        onChange={onChangeInput}
+                        value={changePassword.newPassword || ""}
+                        onChange={(e) => setChangePassword(prev => ({ ...prev, newPassword: e.target.value }))}
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
-                              <IconButton size="small" onClick={() => setShowPw(p => ({ ...p, old: !p.old }))}>
-                                {showPw.old ? <IoMdEyeOff /> : <IoMdEye />}
+                              <IconButton size="small" onClick={() => setShowPw(p => ({ ...p, new: !p.new }))}>
+                                {showPw.new ? <IoMdEyeOff /> : <IoMdEye />}
                               </IconButton>
                             </InputAdornment>
                           ),
                         }}
                       />
                     </div>
-                  }
 
-
-
-                  <div className="col">
-                    <TextField
-                      type={showPw.new ? "text" : "password"}
-                      label="Nueva contraseña"
-                      variant="outlined"
-                      size="small"
-                      className="w-full"
-                      name="newPassword"
-                      value={changePassword.newPassword || ""}
-                      onChange={onChangeInput}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton size="small" onClick={() => setShowPw(p => ({ ...p, new: !p.new }))}>
-                              {showPw.new ? <IoMdEyeOff /> : <IoMdEye />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
+                    <div className="col">
+                      <TextField
+                        type={showPw.confirm ? "text" : "password"}
+                        label="Confirmar contraseña"
+                        variant="outlined"
+                        size="small"
+                        className="w-full"
+                        value={changePassword.confirmPassword || ""}
+                        onChange={(e) => setChangePassword(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton size="small" onClick={() => setShowPw(p => ({ ...p, confirm: !p.confirm }))}>
+                                {showPw.confirm ? <IoMdEyeOff /> : <IoMdEye />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </div>
                   </div>
 
-                  <div className="col">
-                    <TextField
-                      type={showPw.confirm ? "text" : "password"}
-                      label="Confirmar contraseña"
-                      variant="outlined"
-                      size="small"
-                      className="w-full"
-                      name="confirmPassword"
-                      value={changePassword.confirmPassword || ""}
-                      onChange={onChangeInput}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton size="small" onClick={() => setShowPw(p => ({ ...p, confirm: !p.confirm }))}>
-                              {showPw.confirm ? <IoMdEyeOff /> : <IoMdEye />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
+                  <br />
+
+                  <div className="flex items-center gap-4">
+                    <Button type="submit" disabled={isLoading2} className="btn-org btn-sm w-[200px]">
+                      {isLoading2 ? <CircularProgress color="inherit" /> : "Guardar Contraseña"}
+                    </Button>
                   </div>
-
-
-                </div>
-
-
-                <br />
-
-                <div className="flex items-center gap-4">
-                  <Button type="submit" className="btn-org btn-sm w-[200px]">
-                    {
-                      isLoading2 === true ? <CircularProgress color="inherit" />
-                        :
-                        'Cambiar Contraseña'
-                    }
-                  </Button>
-
-                </div>
-              </form>
-
-
-
+                </form>
+              )}
             </div>
           </Collapse>
 
