@@ -679,15 +679,15 @@ export async function forgotPasswordController(req, res, next) {
         user.otpExpires = Date.now() + OTP_TTL_MS;
         await user.save();
 
-        // Enviar email
-        await sendEmailFun({
+        // Fire-and-forget: no bloquear la respuesta
+        sendEmailFun({
             sendTo: normEmail,
             subject: 'Código para cambiar contraseña - MTZstore',
             text: '',
             html: VerificationEmail(user.name, verifyCode, "password"),
-        });
+        }).catch(err => console.error('Password OTP email failed:', err));
 
-        return res.ok({ message: 'Check your email' });
+        return res.ok({ message: 'Código enviado a tu email' });
     } catch (error) {
         return next(error);
     }
