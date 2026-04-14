@@ -4,8 +4,8 @@ import nodemailer from 'nodemailer';
 // Configure the SMTP transporter
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com', // e.g., 'smtp.gmail.com' for Gmail
-  port: 587, // STARTTLS — compatible con Render (465 bloqueado)
-  secure: false, // false para 587, TLS se negocia con STARTTLS
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL, // your SMTP username
     pass: process.env.EMAIL_PASS,    // your SMTP password
