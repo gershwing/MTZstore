@@ -65,11 +65,17 @@ export async function registerUserController(req, res, next) {
 
         let user;
 
-        if (exists && exists.verify_email === true) {
+        if (exists && exists.verify_email === true && exists.signUpWithGoogle === true) {
+            // Cuenta Google-only: permitir agregar contraseña local (requiere OTP)
+            exists.password = hashPassword;
+            exists.otp = verifyCode;
+            exists.otpExpires = Date.now() + 600_000;
+            exists.verify_email = false; // requiere re-verificar para confirmar que es el dueño
+            await exists.save();
+            user = exists;
+        } else if (exists && exists.verify_email === true) {
             throw ERR.VALIDATION('User already registered with this email');
-        }
-
-        if (exists && !exists.verify_email) {
+        } else if (exists && !exists.verify_email) {
             // Usuario existe pero no verificó — regenerar OTP y reenviar
             exists.password = hashPassword;
             exists.name = String(name).trim();
