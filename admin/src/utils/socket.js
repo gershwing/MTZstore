@@ -29,9 +29,10 @@ function resolveBaseUrl() {
   const envSock = import.meta.env?.VITE_SOCKET_URL || import.meta.env?.VITE_WS_URL;
   if (envSock) return String(envSock).replace(/\/$/, "");
 
-  if (typeof window !== "undefined" && window.location?.origin) {
-    return window.location.origin;
-  }
+  // Fallback: usar la misma URL del API (backend en Render)
+  const envApi = import.meta.env?.VITE_API_URL || import.meta.env?.VITE_BASE_URL;
+  if (envApi) return String(envApi).replace(/\/$/, "");
+
   return "http://localhost:8000";
 }
 
