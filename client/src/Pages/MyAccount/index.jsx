@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Button } from "@mui/material";
+import { Button, IconButton, InputAdornment } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import AccountSidebar from "../../components/AccountSidebar";
 import { MyContext } from "../../App";
@@ -9,6 +9,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { Collapse } from "react-collapse";
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 const MyAccount = () => {
 
@@ -17,6 +18,7 @@ const MyAccount = () => {
   const [userId, setUserId] = useState("");
   const [isChangePasswordFormShow, setisChangePasswordFormShow] = useState(false);
   const [phone, setPhone] = useState('');
+  const [showPw, setShowPw] = useState({ old: false, new: false, confirm: false });
 
   const [formFields, setFormsFields] = useState({
     name: '',
@@ -152,6 +154,8 @@ const MyAccount = () => {
       if (res?.error !== true) {
         setIsLoading2(false);
         context.alertBox("success", res?.message);
+        setChangePassword(prev => ({ email: prev.email, oldPassword: '', newPassword: '', confirmPassword: '' }));
+        setisChangePasswordFormShow(false);
       } else {
         context.alertBox("error", res?.message);
         setIsLoading2(false);
@@ -259,14 +263,24 @@ const MyAccount = () => {
                     context?.userData?.signUpWithGoogle === false &&
                     <div className="col">
                       <TextField
+                        type={showPw.old ? "text" : "password"}
                         label="Contraseña actual"
                         variant="outlined"
                         size="small"
                         className="w-full"
                         name="oldPassword"
                         value={changePassword.oldPassword || ""}
-                        disabled={isLoading2 === true ? true : false}
+                        disabled={isLoading2}
                         onChange={onChangeInput}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton size="small" onClick={() => setShowPw(p => ({ ...p, old: !p.old }))}>
+                                {showPw.old ? <IoMdEyeOff /> : <IoMdEye />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
                       />
                     </div>
                   }
@@ -275,7 +289,7 @@ const MyAccount = () => {
 
                   <div className="col">
                     <TextField
-                      type="text"
+                      type={showPw.new ? "text" : "password"}
                       label="Nueva contraseña"
                       variant="outlined"
                       size="small"
@@ -283,11 +297,21 @@ const MyAccount = () => {
                       name="newPassword"
                       value={changePassword.newPassword || ""}
                       onChange={onChangeInput}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton size="small" onClick={() => setShowPw(p => ({ ...p, new: !p.new }))}>
+                              {showPw.new ? <IoMdEyeOff /> : <IoMdEye />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
                   </div>
 
                   <div className="col">
                     <TextField
+                      type={showPw.confirm ? "text" : "password"}
                       label="Confirmar contraseña"
                       variant="outlined"
                       size="small"
@@ -295,6 +319,15 @@ const MyAccount = () => {
                       name="confirmPassword"
                       value={changePassword.confirmPassword || ""}
                       onChange={onChangeInput}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton size="small" onClick={() => setShowPw(p => ({ ...p, confirm: !p.confirm }))}>
+                              {showPw.confirm ? <IoMdEyeOff /> : <IoMdEye />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
                   </div>
 
