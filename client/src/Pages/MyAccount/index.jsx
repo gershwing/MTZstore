@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Button, IconButton, InputAdornment } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import AccountSidebar from "../../components/AccountSidebar";
@@ -24,6 +24,16 @@ const MyAccount = () => {
   const [otpStep, setOtpStep] = useState("idle");
   const [otpCode, setOtpCode] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef(null);
+
+  // Countdown timer para reenvío
+  useEffect(() => {
+    if (cooldown > 0) {
+      cooldownRef.current = setTimeout(() => setCooldown(c => c - 1), 1000);
+    }
+    return () => clearTimeout(cooldownRef.current);
+  }, [cooldown]);
 
   const [formFields, setFormsFields] = useState({
     name: '',
@@ -124,13 +134,18 @@ const MyAccount = () => {
   const handleSendOtp = async () => {
     const email = formFields.email || context?.userData?.email;
     if (!email) return context.alertBox("error", "No se encontró el email");
+    if (cooldown > 0) return;
     setOtpLoading(true);
     const res = await postData("/api/user/forgot-password", { email });
     setOtpLoading(false);
     if (res?.error !== true) {
       context.alertBox("success", "Código enviado a tu email");
       setOtpStep("verifying");
+      setCooldown(60); // 60 segundos de cooldown
     } else {
+      // Extraer segundos del mensaje del servidor si hay cooldown
+      const match = res?.message?.match(/(\d+)s/);
+      if (match) setCooldown(parseInt(match[1]));
       context.alertBox("error", res?.message || "No se pudo enviar el código");
     }
   };
@@ -184,6 +199,7 @@ const MyAccount = () => {
       setisChangePasswordFormShow(false);
       setOtpStep("idle");
       setOtpCode("");
+      setCooldown(0);
       setChangePassword({ newPassword: '', confirmPassword: '' });
     } else {
       setisChangePasswordFormShow(true);
@@ -310,8 +326,8 @@ const MyAccount = () => {
                           Verificar
                         </Button>
                       </div>
-                      <Button size="small" className="!mt-3 !text-xs" onClick={handleSendOtp}>
-                        Reenviar código
+                      <Button size="small" className="!mt-3 !text-xs" onClick={handleSendOtp} disabled={cooldown > 0}>
+                        {cooldown > 0 ? `Reenviar en ${cooldown}s` : "Reenviar código"}
                       </Button>
                     </>
                   )}
