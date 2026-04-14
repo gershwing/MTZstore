@@ -772,7 +772,7 @@ export async function resetpassword(req, res, next) {
         }
 
         const normEmail = String(email).trim().toLowerCase();
-        const user = await UserModel.findOne({ email: normEmail });
+        const user = await UserModel.findOne({ email: normEmail }).select("+password +signUpWithGoogle");
         if (!user) throw ERR.VALIDATION('Email is not available');
 
         if (String(newPassword).length < 8) throw ERR.VALIDATION('Password must be at least 8 characters');
