@@ -187,6 +187,7 @@ const MyAccount = () => {
       setChangePassword({ newPassword: '', confirmPassword: '' });
     } else {
       setisChangePasswordFormShow(true);
+      setOtpStep("verifying");
       handleSendOtp();
     }
   };
@@ -204,7 +205,7 @@ const MyAccount = () => {
             <div className="flex items-center pb-3">
               <h2 className="pb-0">Mi perfil</h2>
               <Button className="!ml-auto" onClick={handleTogglePasswordPanel}>
-                {otpLoading && otpStep === "idle" ? <CircularProgress size={20} /> : "Cambiar contraseña"}
+                Cambiar contraseña
               </Button>
             </div>
             <hr />
@@ -285,26 +286,35 @@ const MyAccount = () => {
               {/* Paso 1: Verificar OTP */}
               {otpStep === "verifying" && (
                 <div className="mt-8">
-                  <p className="text-sm text-gray-600 mb-4">
-                    Enviamos un código de verificación a tu email. Ingrésalo para continuar.
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <TextField
-                      label="Código OTP"
-                      variant="outlined"
-                      size="small"
-                      className="w-[200px]"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      inputProps={{ maxLength: 6, inputMode: "numeric" }}
-                    />
-                    <Button onClick={handleVerifyOtp} disabled={otpLoading || otpCode.length < 6} className="btn-org btn-sm">
-                      {otpLoading ? <CircularProgress size={20} color="inherit" /> : "Verificar"}
-                    </Button>
-                  </div>
-                  <Button size="small" className="!mt-3 !text-xs" onClick={handleSendOtp} disabled={otpLoading}>
-                    Reenviar código
-                  </Button>
+                  {otpLoading ? (
+                    <div className="flex items-center gap-3 text-sm text-gray-600">
+                      <CircularProgress size={20} />
+                      <span>Enviando código a tu email...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Enviamos un código de verificación a tu email. Ingrésalo para continuar.
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <TextField
+                          label="Código OTP"
+                          variant="outlined"
+                          size="small"
+                          className="w-[200px]"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          inputProps={{ maxLength: 6, inputMode: "numeric" }}
+                        />
+                        <Button onClick={handleVerifyOtp} disabled={otpCode.length < 6} className="btn-org btn-sm">
+                          Verificar
+                        </Button>
+                      </div>
+                      <Button size="small" className="!mt-3 !text-xs" onClick={handleSendOtp}>
+                        Reenviar código
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
 
