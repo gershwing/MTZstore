@@ -34,7 +34,10 @@ function App() {
     open: false,
     item: {},
   });
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(() => {
+    const t = localStorage.getItem("accessToken");
+    return !!t && t !== "undefined" && t !== "null";
+  });
   const [userData, setUserData] = useState(null);
   const [catData, setCatData] = useState([]);
   const [cartData, setCartData] = useState([]);
