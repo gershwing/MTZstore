@@ -73,21 +73,8 @@ const MyAccount = () => {
 
   const onChangeInput = (e) => {
     const { name, value } = e.target;
-    setFormsFields(() => {
-      return {
-        ...formFields,
-        [name]: value
-      }
-    })
-
-    setChangePassword(() => {
-      return {
-        ...formFields,
-        [name]: value
-      }
-    })
-
-
+    setFormsFields(prev => ({ ...prev, [name]: value }));
+    setChangePassword(prev => ({ ...prev, [name]: value }));
   }
 
 
@@ -99,19 +86,17 @@ const MyAccount = () => {
     setIsLoading(true);
 
     if (formFields.name === "") {
-      context.alertBox("error", "Please enter full name");
+      context.alertBox("error", "Por favor ingrese su nombre");
       return false
     }
-
 
     if (formFields.email === "") {
-      context.alertBox("error", "Please enter email id");
+      context.alertBox("error", "Por favor ingrese su correo");
       return false
     }
 
-
     if (formFields.mobile === "") {
-      context.alertBox("error", "Please enter mobile number");
+      context.alertBox("error", "Por favor ingrese su celular");
       return false
     }
 
@@ -142,24 +127,22 @@ const MyAccount = () => {
     setIsLoading2(true);
 
     if (changePassword.oldPassword === "") {
-      context.alertBox("error", "Please enter old password");
+      context.alertBox("error", "Ingrese su contraseña actual");
       return false
     }
-
 
     if (changePassword.newPassword === "") {
-      context.alertBox("error", "Please enter new password");
+      context.alertBox("error", "Ingrese la nueva contraseña");
       return false
     }
 
-
     if (changePassword.confirmPassword === "") {
-      context.alertBox("error", "Please enter confirm password");
+      context.alertBox("error", "Confirme su contraseña");
       return false
     }
 
     if (changePassword.confirmPassword !== changePassword.newPassword) {
-      context.alertBox("error", "password and confirm password not match");
+      context.alertBox("error", "Las contraseñas no coinciden");
       return false
     }
 
@@ -199,7 +182,7 @@ const MyAccount = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 ">
                 <div className="col">
                   <TextField
-                    label="Full Name"
+                    label="Nombre completo"
                     variant="outlined"
                     size="small"
                     className="w-full"
@@ -213,7 +196,7 @@ const MyAccount = () => {
                 <div className="col">
                   <TextField
                     type="email"
-                    label="Email"
+                    label="Correo"
                     variant="outlined"
                     size="small"
                     className="w-full"
@@ -233,9 +216,7 @@ const MyAccount = () => {
                     disabled={isLoading === true ? true : false}
                     onChange={(phone) => {
                       setPhone(phone);
-                      setFormsFields({
-                        mobile: phone
-                      })
+                      setFormsFields(prev => ({ ...prev, mobile: phone }));
                     }}
                   />
 
@@ -251,7 +232,7 @@ const MyAccount = () => {
                   {
                     isLoading === true ? <CircularProgress color="inherit" />
                       :
-                      'Update Profile'
+                      'Actualizar Perfil'
                   }
                 </Button>
 
@@ -278,7 +259,7 @@ const MyAccount = () => {
                     context?.userData?.signUpWithGoogle === false &&
                     <div className="col">
                       <TextField
-                        label="Old Password"
+                        label="Contraseña actual"
                         variant="outlined"
                         size="small"
                         className="w-full"
@@ -295,7 +276,7 @@ const MyAccount = () => {
                   <div className="col">
                     <TextField
                       type="text"
-                      label="New Password"
+                      label="Nueva contraseña"
                       variant="outlined"
                       size="small"
                       className="w-full"
@@ -307,7 +288,7 @@ const MyAccount = () => {
 
                   <div className="col">
                     <TextField
-                      label="Confirm Password"
+                      label="Confirmar contraseña"
                       variant="outlined"
                       size="small"
                       className="w-full"
@@ -328,7 +309,7 @@ const MyAccount = () => {
                     {
                       isLoading2 === true ? <CircularProgress color="inherit" />
                         :
-                        'Change Password'
+                        'Cambiar Contraseña'
                     }
                   </Button>
 

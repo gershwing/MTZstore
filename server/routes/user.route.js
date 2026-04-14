@@ -56,6 +56,14 @@ router.post("/verifyEmail", verifyEmailController);
 router.post("/login", loginUserController);
 router.post("/authWithGoogle", authWithGoogle);
 
+// Cambio de contraseña desde perfil (requiere oldPassword)
+router.post("/reset-password", auth, resetpassword);
+
+// Flujo forgot-password (público, sin auth)
+router.post("/forgot-password", forgotPasswordController);
+router.post("/verify-forgot-password-otp", verifyForgotPasswordOtp);
+router.post("/forgot-password/change-password", changePasswordController);
+
 // Logout tolerante (GET/POST/etc) y sin auth para ser idempotente
 router.all("/logout", logoutController);
 
