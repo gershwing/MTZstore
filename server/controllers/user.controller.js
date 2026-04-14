@@ -91,12 +91,13 @@ export async function registerUserController(req, res, next) {
             });
         }
 
-        await sendEmailFun({
+        // Fire-and-forget: no bloquear la respuesta esperando el SMTP
+        sendEmailFun({
             sendTo: normEmail,
             subject: 'Verify email from Ecommerce App',
             text: '',
             html: VerificationEmail(user.name, verifyCode),
-        });
+        }).catch(err => console.error('OTP email failed:', err));
 
         const token = jwt.sign(
             { id: user._id.toString(), email: user.email },
