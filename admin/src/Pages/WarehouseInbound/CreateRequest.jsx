@@ -71,7 +71,7 @@ export default function CreateWarehouseInboundRequest() {
   const setProductQty = (productId, qty) => {
     setSelections((prev) => ({
       ...prev,
-      [productId]: { ...prev[productId], quantity: Math.max(1, Number(qty) || 1) },
+      [productId]: { ...prev[productId], quantity: qty === "" ? "" : Math.max(0, Number(qty) || 0) },
     }));
   };
 
@@ -114,20 +114,21 @@ export default function CreateWarehouseInboundRequest() {
             productId,
             productName: product.name,
             variantId,
-            variantName: variant
+            variantLabel: variant
               ? variant.name || variant.label || Object.values(variant.attributes || {}).join(" / ")
               : variantId,
             sku: variant?.sku || product.sku || "",
-            quantity: qty,
+            qty,
           });
         }
       } else {
-        if (sel.quantity <= 0) continue;
+        const q = Number(sel.quantity) || 0;
+        if (q <= 0) continue;
         items.push({
           productId,
           productName: product.name,
           sku: product.sku || "",
-          quantity: sel.quantity,
+          qty: q,
         });
       }
     }
@@ -145,7 +146,7 @@ export default function CreateWarehouseInboundRequest() {
 
     setSubmitting(true);
     try {
-      const payload = { items, notes: notes.trim() || undefined };
+      const payload = { lineItems: items, notes: notes.trim() || undefined };
       const res = await createRequest(payload);
 
       if (res?.error) {
