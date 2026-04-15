@@ -71,8 +71,11 @@ export const PERMISSIONS = {
     "product:rw", "order:rw", "delivery:rw", "payment:rw",
 
     // 🔹 Permisos específicos de apps de vendedor
-    "sellerApp:approve",
-    "sellerApp:admin", // ← añadido para que no sea “desconocido” si lo usa el menú
+    “sellerApp:approve”,
+    “sellerApp:admin”, // ← añadido para que no sea “desconocido” si lo usa el menú
+
+    // --- WAREHOUSE INBOUND ---
+    “warehouse:read”, “warehouse:write”,
   ],
 
   [ROLES.STORE_OWNER]: [
@@ -113,6 +116,9 @@ export const PERMISSIONS = {
     "support:read", "support:reply", "support:close",
 
     "product:rw", "order:rw", "delivery:rw", "payment:rw",
+
+    // --- WAREHOUSE INBOUND ---
+    "warehouse:read", "warehouse:write",
   ],
 
   [ROLES.FINANCE_MANAGER]: [
@@ -322,6 +328,10 @@ export const GROUP_PERMISSION_OF = Object.freeze({
   // 🔹 Permisos específicos
   "sellerApp:approve": "seller:applications:write",
   "sellerApp:admin": "seller:applications:read", // ← añadido
+
+  // Warehouse Inbound
+  "warehouse:read": "warehouse:read",
+  "warehouse:write": "warehouse:read",
 });
 export function groupPermissionFor(p) {
   return GROUP_PERMISSION_OF[p] || null;
@@ -344,6 +354,7 @@ export const PERMISSION_ALIASES = Object.freeze({
 export const PERMISSION_REGISTRY = new Set([
   "store:read", "store:create", "store:update", "store:delete", "store:members",
   "sellerApp:approve", "sellerApp:admin",
+  "warehouse:read", "warehouse:write",
 ]);
 
 /**

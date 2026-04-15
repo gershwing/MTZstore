@@ -7,6 +7,7 @@ import StoresPage from "../Pages/Stores";
 import DeliveryApplicationsAdmin from "../Pages/Delivery/AdminList";
 import DeliveryAgents from "../Pages/Delivery/DeliveryAgents";
 import SellerApplicationsAdminList from "../Pages/Stores/AdminList";
+import WarehouseInboundAdminList from "../Pages/WarehouseInbound/AdminList";
 
 export const superAdminRoutes = [
   { path: "users", element: <Users /> },
@@ -16,4 +17,5 @@ export const superAdminRoutes = [
   { path: "delivery-agents", element: <DeliveryAgents /> },
   { path: "delivery-applications/admin", element: <DeliveryApplicationsAdmin /> },
   { path: "seller-applications/admin", element: <SellerApplicationsAdminList /> },
+  { path: "warehouse-inbound", element: <WarehouseInboundAdminList /> },
 ];

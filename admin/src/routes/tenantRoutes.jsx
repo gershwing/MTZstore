@@ -39,6 +39,8 @@ import AccountsReceivablePage from "../Pages/AccountsReceivable";
 import InventoryPage from "../Pages/Inventory";
 import SettlementsPage from "../Pages/Settlements";
 import AddAddress from "../Pages/Address/addAddress";
+import WarehouseInboundAdminList from "../Pages/WarehouseInbound/AdminList";
+import CreateWarehouseInboundRequest from "../Pages/WarehouseInbound/CreateRequest";
 
 const SuperDashboard = () => <Dashboard scope="super" />;
 const StoreDashboard = () => <Dashboard scope="store" />;
@@ -87,4 +89,7 @@ export const tenantRoutes = [
 
   { path: "reports", element: <ReportsPage /> },
   { path: "reports/print", element: <ReportsPrint /> },
+
+  { path: "warehouse-inbound", element: <WarehouseInboundAdminList /> },
+  { path: "warehouse-inbound/create", element: <CreateWarehouseInboundRequest /> },
 ];

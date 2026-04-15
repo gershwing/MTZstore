@@ -63,6 +63,7 @@ export const STORE_TENANT_PREFIXES = [
   "/admin/banners",          // (en App.jsx usas bannerV1/list y bannerlist2/List)
   "/admin/blog",             // blog/List
   "/admin/reports",
+  "/admin/warehouse-inbound",
 ];
 
 /* Rutas permitidas sin tenant aunque el rol sea de tienda */
@@ -314,6 +315,7 @@ export const PLATFORM_MENU = [
     onlySuper: true,
     children: [
       { label: "Inventario", icon: "MdWarehouse", to: "inventory", required: [MODULE_PERMS.inventory.read] },
+      { label: "Envios al almacen", icon: "MdLocalShipping", to: "warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
     ],
   },
 
@@ -412,6 +414,7 @@ export const BASE_STORE_MENU = [
     required: [MODULE_PERMS.inventory.read],
     children: [
       { label: "Inventario", icon: "MdWarehouse", to: "/admin/inventory", required: [MODULE_PERMS.inventory.read] },
+      { label: "Envios al almacen", icon: "MdLocalShipping", to: "/admin/warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
     ],
   },
 
@@ -455,6 +458,7 @@ export const ROLE_MENU_TEMPLATES = {
       required: [MODULE_PERMS.inventory.read],
       children: [
         { label: "Inventario", icon: "MdWarehouse", to: "/admin/inventory", required: [MODULE_PERMS.inventory.read] },
+        { label: "Envios al almacen", icon: "MdLocalShipping", to: "/admin/warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
       ],
     },
     BASE_STORE_MENU[3], // Productos

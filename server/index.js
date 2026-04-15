@@ -223,6 +223,9 @@ app.use('/api/sale-payments', salePaymentsRouter);
 import shippingRouter from './routes/shipping.route.js';
 app.use('/api/shipping', shippingRouter);
 
+import warehouseInboundRouter from './routes/warehouseInbound.route.js';
+app.use('/api/warehouse-inbound', warehouseInboundRouter);
+
 /* ========= Rutas con tenant ========= */
 app.use(
     '/api/promotion',
