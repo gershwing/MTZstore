@@ -312,9 +312,8 @@ export const PLATFORM_MENU = [
     label: "Almacen",
     icon: "MdWarehouse",
     required: [MODULE_PERMS.inventory.read],
-    onlySuper: true,
     children: [
-      { label: "Inventario", icon: "MdWarehouse", to: "inventory", required: [MODULE_PERMS.inventory.read] },
+      { label: "Inventario", icon: "MdWarehouse", to: "inventory", required: [MODULE_PERMS.inventory.read], onlySuper: true },
       { label: "Envios al almacen", icon: "MdLocalShipping", to: "warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
     ],
   },
@@ -415,6 +414,7 @@ export const BASE_STORE_MENU = [
     children: [
       { label: "Inventario", icon: "MdWarehouse", to: "/admin/inventory", required: [MODULE_PERMS.inventory.read] },
       { label: "Envios al almacen", icon: "MdLocalShipping", to: "/admin/warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
+      { label: "Historial envios", icon: "MdHistory", to: "/admin/warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
     ],
   },
 

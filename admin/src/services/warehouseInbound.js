@@ -1,4 +1,4 @@
-import { fetchDataFromApi, postData, editData } from "../utils/api";
+import { fetchDataFromApi, postData } from "../utils/api";
 
 const BASE = "/api/warehouse-inbound";
 
@@ -21,11 +21,11 @@ export function createRequest(payload) {
 }
 
 export function approveRequest(id, body = {}) {
-  return editData(`${BASE}/${id}/approve`, body, { withCredentials: true });
+  return postData(`${BASE}/${id}/approve`, body, { withCredentials: true });
 }
 
 export function rejectRequest(id, body) {
-  return editData(`${BASE}/${id}/reject`, body, { withCredentials: true });
+  return postData(`${BASE}/${id}/reject`, body, { withCredentials: true });
 }
 
 export function resubmitRequest(id, body = {}) {

@@ -15,8 +15,8 @@ router.get('/mine', auth, listMine);
 // Admin endpoints
 router.get('/admin', auth, withTenant({ required: false }), requirePermission('warehouse:read'), listAdmin);
 router.get('/admin/:id', auth, withTenant({ required: false }), requirePermission('warehouse:read'), getById);
-router.patch('/:id/approve', auth, withTenant({ required: false }), requirePermission('warehouse:write'), approve);
-router.patch('/:id/reject', auth, withTenant({ required: false }), requirePermission('warehouse:write'), reject);
+router.post('/:id/approve', auth, withTenant({ required: false }), requirePermission('warehouse:write'), approve);
+router.post('/:id/reject', auth, withTenant({ required: false }), requirePermission('warehouse:write'), reject);
 
 // Seller resubmit rejected request
 router.post('/:id/resubmit', auth, withTenant({ required: true }), resubmit);
