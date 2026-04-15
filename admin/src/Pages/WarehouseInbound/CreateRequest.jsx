@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { toast } from "react-toastify";
+import { IoMdClose } from "react-icons/io";
 import { fetchDataFromApi } from "../../utils/api";
 import { createRequest } from "../../services/warehouseInbound";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import UploadBox from "../../Components/UploadBox";
 
 export default function CreateWarehouseInboundRequest() {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ export default function CreateWarehouseInboundRequest() {
   const [submitting, setSubmitting] = useState(false);
   const [notes, setNotes] = useState("");
   const [search, setSearch] = useState("");
+  const [shipmentImages, setShipmentImages] = useState([]);
 
   // Map of productId -> { selected, quantity, variants: { variantId: quantity } }
   const [selections, setSelections] = useState({});
@@ -148,7 +151,11 @@ export default function CreateWarehouseInboundRequest() {
 
     setSubmitting(true);
     try {
-      const payload = { lineItems: items, notes: notes.trim() || undefined };
+      const payload = {
+        lineItems: items,
+        notes: notes.trim() || undefined,
+        shipmentImages: shipmentImages.length > 0 ? shipmentImages : undefined,
+      };
       const res = await createRequest(payload);
 
       if (res?.error === true || res?.success === false) {
@@ -239,8 +246,8 @@ export default function CreateWarehouseInboundRequest() {
                         <label className="text-xs text-gray-500">Cantidad:</label>
                         <input
                           type="number"
-                          min={1}
-                          value={sel?.quantity || 1}
+                          min={0}
+                          value={sel?.quantity ?? ""}
                           onChange={(e) => setProductQty(pid, e.target.value)}
                           className="border rounded px-2 py-1 text-sm w-20 text-center"
                         />
@@ -293,6 +300,34 @@ export default function CreateWarehouseInboundRequest() {
           className="w-full border rounded px-3 py-2 text-sm"
           placeholder="Instrucciones especiales, detalles de empaque, etc."
         />
+      </div>
+
+      {/* Fotos del cargo */}
+      <div className="bg-white border rounded-lg p-4 space-y-2">
+        <label className="block text-sm font-medium">Fotos del cargo (opcional)</label>
+        <p className="text-xs text-gray-500">Sube fotos del empaque/etiquetado para facilitar la recepcion en almacen</p>
+        <div className="flex gap-3 flex-wrap items-start">
+          {shipmentImages.map((img, i) => (
+            <div key={i} className="relative">
+              <img src={img} alt="" className="w-20 h-20 object-cover rounded border" />
+              <button
+                type="button"
+                onClick={() => setShipmentImages(prev => prev.filter((_, idx) => idx !== i))}
+                className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full flex items-center justify-center"
+              >
+                <IoMdClose className="text-white text-xs" />
+              </button>
+            </div>
+          ))}
+          <UploadBox
+            multiple={false}
+            name="images"
+            url="/api/homeSlides/uploadImages"
+            setPreviewsFun={(urls) => setShipmentImages(prev => [...prev, ...urls])}
+            placeholder="Subir foto"
+            className="!h-20 !w-20"
+          />
+        </div>
       </div>
 
       {/* Submit */}
