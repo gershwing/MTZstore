@@ -71,11 +71,11 @@ export const PERMISSIONS = {
     "product:rw", "order:rw", "delivery:rw", "payment:rw",
 
     // 🔹 Permisos específicos de apps de vendedor
-    “sellerApp:approve”,
-    “sellerApp:admin”, // ← añadido para que no sea “desconocido” si lo usa el menú
+    "sellerApp:approve",
+    "sellerApp:admin", // ← añadido para que no sea "desconocido" si lo usa el menú
 
     // --- WAREHOUSE INBOUND ---
-    “warehouse:read”, “warehouse:write”,
+    "warehouse:read", "warehouse:write",
   ],
 
   [ROLES.STORE_OWNER]: [
@@ -206,7 +206,7 @@ export function roleHasAnyPermission(role, ...perms) {
   return perms.some((p) => roleHasPermission(role, p));
 }
 
-/** “Permisos agregados” que cubren varios granulares */
+/** "Permisos agregados" que cubren varios granulares */
 export const GROUP_PERMISSION_OF = Object.freeze({
   // Users
   "user:read": "user:read",
@@ -347,7 +347,7 @@ export const PERMISSION_ALIASES = Object.freeze({
 });
 
 /**
- * Catálogo explícito de códigos de permisos “conocidos”.
+ * Catálogo explícito de códigos de permisos "conocidos".
  * Útil para evitar warnings del validador cuando el menú referencia permisos
  * que no están aún asignados a roles.
  */
