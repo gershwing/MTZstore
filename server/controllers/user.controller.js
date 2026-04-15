@@ -860,7 +860,7 @@ export async function refreshToken(req, res, next) {
     try {
         // 1) tomar el refresh token de cookie o Authorization: Bearer
         const headerToken = req?.headers?.authorization?.split(' ')[1];
-        const token = req.cookies?.refreshToken || req.cookies?.refresh_token || headerToken;
+        const token = req.cookies?.refreshToken || req.cookies?.refresh_token || req.body?.refreshToken || headerToken;
 
         if (!token) {
             return res.err(401, 'UNAUTHORIZED', 'Invalid token');
