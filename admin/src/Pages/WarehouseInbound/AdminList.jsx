@@ -33,14 +33,18 @@ function getRequesterInfo(row) {
   };
 }
 
-function getStoreName(row) {
-  return row?.store?.name || row?.storeName || row?.store?.businessName || "—";
+function getStoreInfo(row) {
+  const s = row?.storeId || row?.store || {};
+  const name = s?.name || s?.businessName || row?.storeName || "—";
+  const id = s?._id || row?.storeId?._id || "";
+  const shortId = id ? String(id).slice(-6).toUpperCase() : "";
+  return { name, id, shortId };
 }
 
 function getLineItemsSummary(row) {
   const items = row?.items || row?.lineItems || [];
   const count = items.length;
-  const totalUnits = items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0);
+  const totalUnits = items.reduce((sum, it) => sum + (Number(it.qty) || Number(it.quantity) || 0), 0);
   return { count, totalUnits };
 }
 
@@ -214,7 +218,7 @@ export default function WarehouseInboundAdminList() {
         <div className="space-y-2">
           {rows.map((row) => {
             const requester = getRequesterInfo(row);
-            const storeName = getStoreName(row);
+            const store = getStoreInfo(row);
             const { count, totalUnits } = getLineItemsSummary(row);
             const s = row.status || "PENDING";
             const isPending = s === "PENDING";
@@ -227,7 +231,8 @@ export default function WarehouseInboundAdminList() {
                 {/* Info principal */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-sm truncate">{storeName}</span>
+                    <span className="font-semibold text-sm truncate">{store.name}</span>
+                    {store.shortId && <span className="text-xs text-gray-400 font-mono">#{store.shortId}</span>}
                     <span className="text-xs text-gray-400 truncate">{requester.name}</span>
                     {requester.email && (
                       <span className="text-xs text-gray-400 truncate">{requester.email}</span>
@@ -262,23 +267,25 @@ export default function WarehouseInboundAdminList() {
                   {STATUS_LABELS[s] || s}
                 </span>
 
-                {/* Acciones */}
-                <div className="flex gap-1.5 shrink-0">
-                  <button
-                    onClick={() => handleApprove(row)}
-                    disabled={!isPending || loading}
-                    className="bg-green-600 text-white rounded px-3 py-1 text-xs font-medium hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    Aprobar
-                  </button>
-                  <button
-                    onClick={() => handleRejectOpen(row._id)}
-                    disabled={!isPending || loading}
-                    className="bg-orange-500 text-white rounded px-3 py-1 text-xs font-medium hover:bg-orange-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    Rechazar
-                  </button>
-                </div>
+                {/* Acciones — solo SUPER_ADMIN puede aprobar/rechazar */}
+                {isSuper && isPending && (
+                  <div className="flex gap-1.5 shrink-0">
+                    <button
+                      onClick={() => handleApprove(row)}
+                      disabled={loading}
+                      className="bg-green-600 text-white rounded px-3 py-1 text-xs font-medium hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      Aprobar
+                    </button>
+                    <button
+                      onClick={() => handleRejectOpen(row._id)}
+                      disabled={loading}
+                      className="bg-orange-500 text-white rounded px-3 py-1 text-xs font-medium hover:bg-orange-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      Rechazar
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -330,7 +337,8 @@ export default function WarehouseInboundAdminList() {
 
             <div className="text-sm space-y-1">
               <p>
-                <span className="font-medium">Tienda:</span> {getStoreName(detailRow)}
+                <span className="font-medium">Tienda:</span> {getStoreInfo(detailRow).name}
+                {getStoreInfo(detailRow).shortId && <span className="text-xs text-gray-400 font-mono ml-1">#{getStoreInfo(detailRow).shortId}</span>}
               </p>
               <p>
                 <span className="font-medium">Solicitante:</span> {getRequesterInfo(detailRow).name}
@@ -358,13 +366,13 @@ export default function WarehouseInboundAdminList() {
                   <div key={idx} className="px-3 py-2 flex justify-between items-center text-sm">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{item.productName || item.name || "Producto"}</p>
-                      {item.variantName && (
-                        <p className="text-xs text-gray-500">{item.variantName}</p>
+                      {(item.variantLabel || item.variantName) && (
+                        <p className="text-xs text-gray-500">{item.variantLabel || item.variantName}</p>
                       )}
                       {item.sku && <p className="text-xs text-gray-400">SKU: {item.sku}</p>}
                     </div>
                     <span className="font-semibold text-gray-700 shrink-0 ml-3">
-                      {item.quantity} uds.
+                      {item.qty || item.quantity} uds.
                     </span>
                   </div>
                 ))}
