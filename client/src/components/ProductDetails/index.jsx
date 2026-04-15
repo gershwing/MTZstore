@@ -127,7 +127,7 @@ export const ProductDetailsComponent = (props) => {
 
   const displayStock = selectedVariant
     ? selectedVariant.stock
-    : (props?.item?.countInStock ?? 0);
+    : ((props?.item?.countInStock ?? 0) + (props?.item?.warehouseStock ?? 0));
 
   // Precios mayoristas por niveles
   const wholesaleTiers = props?.item?.wholesaleTiers;

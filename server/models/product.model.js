@@ -240,6 +240,7 @@ const productSchema = new Schema(
          (SIMPLE PRODUCT)
       ========================= */
       countInStock: { type: Number, default: 0 },
+      warehouseStock: { type: Number, default: 0 },  // stock en almacén MTZ
       stockMinimo: { type: Number, default: 0 },
 
       /* =========================

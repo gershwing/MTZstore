@@ -109,6 +109,18 @@ export async function enrichProductsWithFx(rows, snapshot) {
     p.marginPct = marginPct;
     p.fxAsOf = snapshot?.asOf || null;
 
+    // Multi-location inventory: totalStock and available shipping methods
+    const storeStock = Number(p.countInStock || 0);
+    const wStock = Number(p.warehouseStock || 0);
+    p.totalStock = storeStock + wStock;
+
+    p.availableShipping = {
+      mtzExpress:    !!(p.shipping?.mtzExpress && wStock > 0),
+      mtzStandard:   !!(p.shipping?.mtzStandard && wStock > 0),
+      storeExpress:  !!(p.shipping?.storeExpress && storeStock > 0),
+      storeStandard: !!(p.shipping?.storeStandard && storeStock > 0),
+    };
+
     // Enriquecer wholesaleTiers con precios convertidos
     if (p.wholesaleTiers?.enabled) {
       const convertTierPrice = (tierPrice) => {

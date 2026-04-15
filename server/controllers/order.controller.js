@@ -77,7 +77,7 @@ export const createOrderController = async (req, res, next) => {
 
                 const product = await ProductModel.findById(p.productId)
                     .select(
-                        "storeId name images basePrice baseCurrency productType countInStock salesConfig"
+                        "storeId name images basePrice baseCurrency productType countInStock warehouseStock salesConfig"
                     )
                     .lean();
 
@@ -125,10 +125,19 @@ export const createOrderController = async (req, res, next) => {
                     product.basePrice ??
                     0;
 
-                const stockAvailable =
-                    productType === "VARIANT"
-                        ? variant.countInStock
-                        : product.countInStock;
+                // Determine which stock to check based on shipping method
+                const isMtzShipping = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(shippingMethod);
+
+                let stockAvailable;
+                if (isMtzShipping) {
+                    stockAvailable = productType === "VARIANT"
+                        ? (variant.warehouseStock || 0)
+                        : (product.warehouseStock || 0);
+                } else {
+                    stockAvailable = productType === "VARIANT"
+                        ? (variant.stock ?? variant.countInStock ?? 0)
+                        : (product.countInStock || 0);
+                }
 
                 if (stockAvailable < qty) {
                     throw ERR.CONFLICT(
@@ -282,43 +291,34 @@ export const createOrderController = async (req, res, next) => {
         order = await order.save();
 
         /* ======================================================
-           7) Discount stock
+           7) Discount stock (based on shipping method)
         ====================================================== */
+        const isMtzShipping = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(shippingMethod);
+        const stockField = isMtzShipping ? "warehouseStock" : "countInStock";
+
         for (const line of normalizedProducts) {
             const qty = line.quantity;
 
             if (line.productType === "VARIANT" && line.variantId) {
-                const v = await ProductVariantModel.findById(
-                    line.variantId
-                ).lean();
-
-                if (!v) continue;
-
+                // For variants: store stock field is "stock", warehouse is "warehouseStock"
+                const variantStockField = isMtzShipping ? "warehouseStock" : "stock";
                 await ProductVariantModel.findByIdAndUpdate(
                     line.variantId,
                     {
-                        countInStock: Math.max(
-                            0,
-                            v.countInStock - qty
-                        ),
-                        sale: Number(v.sale || 0) + qty,
+                        $inc: {
+                            [variantStockField]: -qty,
+                            sale: qty,
+                        },
                     }
                 );
             } else {
-                const p = await ProductModel.findById(
-                    line.productId
-                ).lean();
-
-                if (!p) continue;
-
                 await ProductModel.findByIdAndUpdate(
                     line.productId,
                     {
-                        countInStock: Math.max(
-                            0,
-                            p.countInStock - qty
-                        ),
-                        sale: Number(p.sale || 0) + qty,
+                        $inc: {
+                            [stockField]: -qty,
+                            sale: qty,
+                        },
                     }
                 );
             }
@@ -942,19 +942,24 @@ export const updateOrderStatusController = async (req, res, next) => {
         // 5) Reponer stock si se cancela por primera vez
         if (to === 'cancelled' && from !== 'cancelled') {
             try {
+                const orderMethod = order.shippingMethod || "MTZSTORE_STANDARD";
+                const isMtz = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(orderMethod);
+                const restoreField = isMtz ? "warehouseStock" : "countInStock";
+
                 for (const line of order.products || []) {
                     const pid = line.productId;
                     const qty = Number(line.quantity || 0);
                     if (!pid || !qty) continue;
 
-                    const prod = await ProductModel.findById(pid).lean();
-                    if (prod) {
-                        const nextCount = Math.max(0, Number(prod.countInStock || 0) + qty);
-                        await ProductModel.findByIdAndUpdate(
-                            pid,
-                            { countInStock: nextCount, sale: Math.max(0, Number(prod.sale || 0) - qty) },
-                            { new: true }
-                        );
+                    if (line.productType === "VARIANT" && line.variantId) {
+                        const variantField = isMtz ? "warehouseStock" : "stock";
+                        await ProductVariantModel.findByIdAndUpdate(line.variantId, {
+                            $inc: { [variantField]: qty, sale: -qty }
+                        });
+                    } else {
+                        await ProductModel.findByIdAndUpdate(pid, {
+                            $inc: { [restoreField]: qty, sale: -qty }
+                        });
                     }
                 }
             } catch (invErr) {
@@ -1474,20 +1479,25 @@ export const cancelMyOrder = async (req, res, next) => {
             }
         }
 
-        // Restaurar stock
+        // Restaurar stock (al campo correcto según método de envío)
         try {
+            const orderMethod = order.shippingMethod || "MTZSTORE_STANDARD";
+            const isMtz = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(orderMethod);
+            const restoreField = isMtz ? "warehouseStock" : "countInStock";
+
             for (const line of order.products || []) {
                 const pid = line.productId;
                 const qty = Number(line.quantity || 0);
                 if (!pid || !qty) continue;
 
                 if (line.productType === "VARIANT" && line.variantId) {
+                    const variantField = isMtz ? "warehouseStock" : "stock";
                     await ProductVariantModel.findByIdAndUpdate(line.variantId, {
-                        $inc: { countInStock: qty, sale: -qty }
+                        $inc: { [variantField]: qty, sale: -qty }
                     });
                 } else {
                     await ProductModel.findByIdAndUpdate(pid, {
-                        $inc: { countInStock: qty, sale: -qty }
+                        $inc: { [restoreField]: qty, sale: -qty }
                     });
                 }
             }

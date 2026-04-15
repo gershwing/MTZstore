@@ -18,6 +18,7 @@ const productVariantSchema = new Schema(
     price: { type: Number },
     wholesalePrice: { type: Number, default: 0 },
     stock: { type: Number, default: 0 },
+    warehouseStock: { type: Number, default: 0 },  // stock en almacén MTZ
     images: [{ type: Schema.Types.Mixed }],
 
     isActive: { type: Boolean, default: true },

@@ -218,14 +218,31 @@ export async function approve(req, res, next) {
       });
     });
 
-    // Update qtyReceived on each line item
+    // Update qtyReceived on each line item and increment warehouseStock
+    const stockUpdates = [];
     for (const item of request.lineItems) {
       item.qtyReceived = item.qty;
+
+      // Increment warehouseStock on the product or variant
+      if (item.variantId) {
+        stockUpdates.push(
+          ProductVariant.findByIdAndUpdate(item.variantId, {
+            $inc: { warehouseStock: item.qty }
+          })
+        );
+      } else {
+        stockUpdates.push(
+          Product.findByIdAndUpdate(item.productId, {
+            $inc: { warehouseStock: item.qty }
+          })
+        );
+      }
     }
 
     await Promise.all([
       request.save(),
       ...movementPromises,
+      ...stockUpdates,
     ]);
 
     return res.ok(request);

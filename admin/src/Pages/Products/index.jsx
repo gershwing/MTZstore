@@ -113,6 +113,11 @@ function ProductRow({ p, onCheck, onEdit, onDelete }) {
             <TableCell>
                 <b className="text-sm">{p.totalStock || 0}</b>
                 <span className="text-xs text-gray-400">/{p.stockMinimo || 0}</span>
+                {(p.warehouseStock > 0 || p.countInStock > 0) && (
+                    <div className="text-[10px] text-gray-400 leading-tight mt-0.5">
+                        T:{p.countInStock || 0} / A:{p.warehouseStock || 0}
+                    </div>
+                )}
             </TableCell>
             {/* VARIANTES */}
             <TableCell className="text-center text-sm">{p.variantsCount || 0}</TableCell>

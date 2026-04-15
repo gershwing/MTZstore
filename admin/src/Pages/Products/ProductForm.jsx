@@ -836,9 +836,9 @@ export default function ProductForm({
             {/* Inventario */}
             <div>
               <h3 className="font-semibold mb-2">Inventario {isVariantProduct ? "(stock base)" : ""}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Stock disponible</label>
+                  <label className="block text-sm font-medium mb-1">Stock en tienda</label>
                   <input
                     type="number"
                     min="0"
@@ -847,6 +847,13 @@ export default function ProductForm({
                     className="w-full border rounded px-3 py-2"
                     placeholder="0"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Stock en almacén MTZ</label>
+                  <div className="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700">
+                    {initialData?.warehouseStock ?? 0}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">Gestionado por MTZstore</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Alerta de stock bajo</label>

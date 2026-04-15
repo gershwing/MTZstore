@@ -58,7 +58,12 @@ export async function getAllProducts(req, res, next) {
     const productIds = products.map(p => p._id);
     const variantStats = await ProductVariantModel.aggregate([
       { $match: { productId: { $in: productIds }, isActive: true } },
-      { $group: { _id: "$productId", totalStock: { $sum: "$stock" }, variantsCount: { $sum: 1 } } },
+      { $group: {
+        _id: "$productId",
+        totalStock: { $sum: "$stock" },
+        totalWarehouseStock: { $sum: "$warehouseStock" },
+        variantsCount: { $sum: 1 },
+      } },
     ]);
     const statsMap = Object.fromEntries(variantStats.map(s => [String(s._id), s]));
 
@@ -100,7 +105,8 @@ export async function getAllProducts(req, res, next) {
         catName: catL1,
         subCat: catL2,
         thirdsubCat: catL3,
-        totalStock: stats.totalStock || p.countInStock || 0,
+        totalStock: (stats.totalStock || p.countInStock || 0) + (stats.totalWarehouseStock || p.warehouseStock || 0),
+        warehouseStock: stats.totalWarehouseStock || p.warehouseStock || 0,
         variantsCount: stats.variantsCount,
       };
     });

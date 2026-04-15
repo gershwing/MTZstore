@@ -179,12 +179,19 @@ export const ProductDetails = () => {
                   <div className="border border-gray-200 rounded-lg p-4 space-y-3">
                     {(() => {
                       const ship = productData?.shipping;
+                      const avail = productData?.availableShipping;
+                      const wStock = productData?.warehouseStock ?? 0;
+                      const sStock = productData?.countInStock ?? 0;
                       const sName = storeInfo?.isPlatformStore ? "MTZstore" : storeInfo?.name;
                       const methods = [];
-                      if (ship?.mtzExpress) methods.push({ label: "MTZstore Express", sub: "1-2 días" });
-                      if (ship?.mtzStandard) methods.push({ label: "MTZstore Estándar", sub: "3-5 días" });
-                      if (ship?.storeExpress) methods.push({ label: (sName || "Tienda") + " Express", sub: "1-2 días" });
-                      if (ship?.storeStandard) methods.push({ label: (sName || "Tienda") + " Estándar", sub: "3-5 días" });
+                      if (ship?.mtzExpress && (avail ? avail.mtzExpress : wStock > 0))
+                        methods.push({ label: "MTZstore Express", sub: "1-2 días" });
+                      if (ship?.mtzStandard && (avail ? avail.mtzStandard : wStock > 0))
+                        methods.push({ label: "MTZstore Estándar", sub: "3-5 días" });
+                      if (ship?.storeExpress && (avail ? avail.storeExpress : sStock > 0))
+                        methods.push({ label: (sName || "Tienda") + " Express", sub: "1-2 días" });
+                      if (ship?.storeStandard && (avail ? avail.storeStandard : sStock > 0))
+                        methods.push({ label: (sName || "Tienda") + " Estándar", sub: "3-5 días" });
                       if (methods.length === 0 && ship?.storeSelf) methods.push({ label: sName || "Tienda", sub: "3-5 días" });
                       if (methods.length === 0) methods.push({ label: sName || "Tienda", sub: "3-5 días" });
                       return methods.map((m, i) => (

@@ -68,6 +68,25 @@ const Checkout = () => {
     }).catch(() => {});
   }, []);
 
+  // Auto-seleccionar método de envío si el actual no tiene stock
+  useEffect(() => {
+    if (!availableShippingRates.length || !context?.cartData?.length) return;
+    const items = context.cartData;
+    const hasWarehouse = items.some(i => (i.warehouseStock ?? 0) > 0);
+    const hasStore = items.some(i => (i.countInStock ?? 0) > 0);
+
+    const isAvailable = (method) => {
+      if (["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(method)) return hasWarehouse;
+      if (["STORE_EXPRESS", "STORE_STANDARD"].includes(method)) return hasStore;
+      return true;
+    };
+
+    if (!isAvailable(shippingMethod)) {
+      const fallback = availableShippingRates.find(r => isAvailable(r.method));
+      if (fallback) setShippingMethod(fallback.method);
+    }
+  }, [availableShippingRates, context?.cartData, shippingMethod]);
+
   // Calcular costo de envío al seleccionar dirección o método
   useEffect(() => {
     if (!selectedAddress || !context?.cartData?.length) {
@@ -429,7 +448,21 @@ const Checkout = () => {
               <div className="py-3 border-t border-[rgba(0,0,0,0.1)]">
                 <p className="text-[13px] font-[600] mb-2">Método de envío</p>
                 <div className="space-y-1.5">
-                  {availableShippingRates.map((rate) => {
+                  {availableShippingRates.filter((rate) => {
+                    // Filtrar métodos según stock disponible en los productos del carrito
+                    const items = context?.cartData || [];
+                    const isMtzMethod = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(rate.method);
+                    const isStoreMethod = ["STORE_EXPRESS", "STORE_STANDARD"].includes(rate.method);
+                    if (isMtzMethod) {
+                      // MTZ methods require warehouseStock > 0 on at least one item
+                      return items.some(i => (i.warehouseStock ?? 0) > 0);
+                    }
+                    if (isStoreMethod) {
+                      // Store methods require countInStock > 0 on at least one item
+                      return items.some(i => (i.countInStock ?? 0) > 0);
+                    }
+                    return true;
+                  }).map((rate) => {
                     const isSelected = shippingMethod === rate.method;
                     const isMtz = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(rate.method);
                     const isFree = !isMtz && rate.baseRate === 0;
