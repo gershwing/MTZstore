@@ -73,6 +73,9 @@ export default function WarehouseInboundAdminList() {
   const [approveRow, setApproveRow] = useState(null);
   const [approveQtys, setApproveQtys] = useState({});
   const [approveNotes, setApproveNotes] = useState("");
+
+  // Zoom modal
+  const [zoomSrc, setZoomSrc] = useState(null);
   const [approveImages, setApproveImages] = useState([]);
   const [rejImages, setRejImages] = useState([]);
 
@@ -269,7 +272,7 @@ export default function WarehouseInboundAdminList() {
                 {row.shipmentImages?.length > 0 && (
                   <div className="flex gap-1 shrink-0">
                     {row.shipmentImages.slice(0, 3).map((img, i) => (
-                      <img key={i} src={img} alt="" className="w-8 h-8 object-cover rounded border" />
+                      <img key={i} src={img} alt="" onClick={() => setZoomSrc(img)} className="w-8 h-8 object-cover rounded border cursor-zoom-in hover:border-blue-400" />
                     ))}
                   </div>
                 )}
@@ -407,7 +410,7 @@ export default function WarehouseInboundAdminList() {
                 {(detailRow.items || detailRow.lineItems || []).map((item, idx) => (
                   <div key={idx} className="px-3 py-2 flex items-center gap-3 text-sm">
                     {item.productImage && (
-                      <img src={item.productImage} alt="" className="w-10 h-10 object-cover rounded border shrink-0" />
+                      <img src={item.productImage} alt="" onClick={() => setZoomSrc(item.productImage)} className="w-10 h-10 object-cover rounded border shrink-0 cursor-zoom-in hover:border-blue-400" />
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{item.productName || item.name || "Producto"}</p>
@@ -439,9 +442,7 @@ export default function WarehouseInboundAdminList() {
                 <h3 className="font-semibold text-sm mb-1">Fotos de revision</h3>
                 <div className="flex gap-2 flex-wrap">
                   {detailRow.reviewImages.map((img, i) => (
-                    <a key={i} href={img} target="_blank" rel="noopener noreferrer">
-                      <img src={img} alt="" className="w-20 h-20 object-cover rounded border hover:opacity-80 transition-opacity" />
-                    </a>
+                    <img key={i} src={img} alt="" onClick={() => setZoomSrc(img)} className="w-20 h-20 object-cover rounded border cursor-zoom-in hover:border-blue-400" />
                   ))}
                 </div>
               </div>
@@ -452,9 +453,7 @@ export default function WarehouseInboundAdminList() {
                 <h3 className="font-semibold text-sm mb-1">Fotos del cargo</h3>
                 <div className="flex gap-2 flex-wrap">
                   {detailRow.shipmentImages.map((img, i) => (
-                    <a key={i} href={img} target="_blank" rel="noopener noreferrer">
-                      <img src={img} alt="" className="w-20 h-20 object-cover rounded border hover:opacity-80 transition-opacity" />
-                    </a>
+                    <img key={i} src={img} alt="" onClick={() => setZoomSrc(img)} className="w-20 h-20 object-cover rounded border cursor-zoom-in hover:border-blue-400" />
                   ))}
                 </div>
               </div>
@@ -477,7 +476,7 @@ export default function WarehouseInboundAdminList() {
             <div className="border rounded divide-y">
               {(approveRow.lineItems || approveRow.items || []).map((item, idx) => (
                 <div key={idx} className="px-3 py-2 flex items-center gap-3 text-sm">
-                  {item.productImage && <img src={item.productImage} alt="" className="w-8 h-8 object-cover rounded border shrink-0" />}
+                  {item.productImage && <img src={item.productImage} alt="" onClick={() => setZoomSrc(item.productImage)} className="w-8 h-8 object-cover rounded border shrink-0 cursor-zoom-in hover:border-blue-400" />}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate text-xs">{item.productName || item.name || "Producto"}</p>
                     <p className="text-xs text-gray-400">Solicitadas: {item.qty || item.quantity}</p>
@@ -601,6 +600,18 @@ export default function WarehouseInboundAdminList() {
                 Confirmar rechazo
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Zoom */}
+      {zoomSrc && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={() => setZoomSrc(null)}>
+          <div className="relative max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-end mb-2">
+              <button onClick={() => setZoomSrc(null)} className="text-white hover:text-gray-300 text-2xl">&times;</button>
+            </div>
+            <img src={zoomSrc} alt="zoom" className="w-full h-auto rounded-lg" />
           </div>
         </div>
       )}
