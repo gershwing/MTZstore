@@ -113,6 +113,7 @@ export default function CreateWarehouseInboundRequest() {
           items.push({
             productId,
             productName: product.name,
+            productImage: product.images?.[0] || product.image || '',
             variantId,
             variantLabel: variant
               ? variant.name || variant.label || Object.values(variant.attributes || {}).join(" / ")
@@ -127,6 +128,7 @@ export default function CreateWarehouseInboundRequest() {
         items.push({
           productId,
           productName: product.name,
+          productImage: product.images?.[0] || product.image || '',
           sku: product.sku || "",
           qty: q,
         });

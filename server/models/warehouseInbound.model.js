@@ -9,6 +9,7 @@ const lineItemSchema = new Schema({
   variantLabel: { type: String, default: '' }, // e.g. "Rojo / XL"
   qty: { type: Number, required: true, min: 1 },
   qtyReceived: { type: Number, default: 0, min: 0 },
+  productImage: { type: String, default: '' },  // main product image snapshot
 }, { _id: true });
 
 const warehouseInboundSchema = new Schema({
@@ -18,6 +19,9 @@ const warehouseInboundSchema = new Schema({
   lineItems: { type: [lineItemSchema], required: true, validate: v => v.length > 0 },
   notes: { type: String, default: '' },
   rejectionReason: { type: String, default: '' },
+  shipmentImages: [{ type: String }],   // photos of the shipment (uploaded by seller)
+  reviewImages: [{ type: String }],     // photos from warehouse review (uploaded by admin)
+  reviewNotes: { type: String, default: '' },  // admin message on approve/reject
   reviewedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   reviewedAt: { type: Date, default: null },
   deletedAt: { type: Date },

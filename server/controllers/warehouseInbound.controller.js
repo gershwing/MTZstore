@@ -15,7 +15,7 @@ export async function create(req, res, next) {
     const storeId = req?.tenant?.storeId;
     if (!storeId) throw ERR.VALIDATION('Falta storeId (tenant).');
 
-    const { lineItems, notes = '' } = req.body;
+    const { lineItems, notes = '', shipmentImages = [] } = req.body;
     if (!Array.isArray(lineItems) || lineItems.length === 0) {
       throw ERR.VALIDATION('lineItems es requerido y debe contener al menos un item.');
     }
@@ -62,6 +62,7 @@ export async function create(req, res, next) {
         variantId: item.variantId || null,
         sku,
         productName: product.name,
+        productImage: product.images?.[0] || '',
         variantLabel,
         qty: Math.floor(item.qty),
         qtyReceived: 0,
@@ -73,6 +74,7 @@ export async function create(req, res, next) {
       userId: req.userId,
       lineItems: populatedItems,
       notes,
+      shipmentImages,
     });
 
     return res.created(doc);
@@ -190,6 +192,7 @@ export async function getById(req, res, next) {
 export async function approve(req, res, next) {
   try {
     const { id } = req.params;
+    const { lineItems: approvedItems, reviewNotes = '', reviewImages = [] } = req.body;
 
     const request = await WarehouseInbound.findById(id);
     if (!request) throw ERR.NOT_FOUND('Solicitud de ingreso no encontrada.');
@@ -202,40 +205,59 @@ export async function approve(req, res, next) {
     request.status = 'APPROVED';
     request.reviewedBy = req.userId;
     request.reviewedAt = new Date();
+    request.reviewNotes = reviewNotes;
+    request.reviewImages = reviewImages;
 
     // Create inventory movements for each line item
-    const movementPromises = request.lineItems.map((item) => {
-      return InventoryMovement.create({
-        storeId: request.storeId,
-        productId: item.productId,
-        action: 'RECEIVE',
-        locationTo: 'warehouse-mtz',
-        qty: item.qty,
-        refType: 'WAREHOUSE_INBOUND',
-        refId: String(request._id),
-        performedBy: req.userId,
-        notes: `Inbound aprobado | ${item.productName}${item.variantLabel ? ` (${item.variantLabel})` : ''}`,
-      });
-    });
+    const movementPromises = [];
 
     // Update qtyReceived on each line item and increment warehouseStock
     const stockUpdates = [];
     for (const item of request.lineItems) {
-      item.qtyReceived = item.qty;
+      // If approvedItems provided, find matching item and use its qtyReceived
+      let received = item.qty; // default: full qty (backward compat)
+      if (Array.isArray(approvedItems) && approvedItems.length > 0) {
+        const match = approvedItems.find(
+          (ai) =>
+            String(ai.productId) === String(item.productId) &&
+            String(ai.variantId || null) === String(item.variantId || null)
+        );
+        if (match && typeof match.qtyReceived === 'number') {
+          received = Math.max(0, Math.min(match.qtyReceived, item.qty));
+        }
+      }
 
-      // Increment warehouseStock on the product or variant
-      if (item.variantId) {
-        stockUpdates.push(
-          ProductVariant.findByIdAndUpdate(item.variantId, {
-            $inc: { warehouseStock: item.qty }
+      item.qtyReceived = received;
+
+      if (received > 0) {
+        movementPromises.push(
+          InventoryMovement.create({
+            storeId: request.storeId,
+            productId: item.productId,
+            action: 'RECEIVE',
+            locationTo: 'warehouse-mtz',
+            qty: received,
+            refType: 'WAREHOUSE_INBOUND',
+            refId: String(request._id),
+            performedBy: req.userId,
+            notes: `Inbound aprobado | ${item.productName}${item.variantLabel ? ` (${item.variantLabel})` : ''} | recibido ${received}/${item.qty}`,
           })
         );
-      } else {
-        stockUpdates.push(
-          Product.findByIdAndUpdate(item.productId, {
-            $inc: { warehouseStock: item.qty }
-          })
-        );
+
+        // Increment warehouseStock by qtyReceived (not qty)
+        if (item.variantId) {
+          stockUpdates.push(
+            ProductVariant.findByIdAndUpdate(item.variantId, {
+              $inc: { warehouseStock: received }
+            })
+          );
+        } else {
+          stockUpdates.push(
+            Product.findByIdAndUpdate(item.productId, {
+              $inc: { warehouseStock: received }
+            })
+          );
+        }
       }
     }
 
@@ -258,7 +280,7 @@ export async function approve(req, res, next) {
 export async function reject(req, res, next) {
   try {
     const { id } = req.params;
-    const { reason = '' } = req.body;
+    const { reason = '', reviewNotes = '', reviewImages = [] } = req.body;
 
     const request = await WarehouseInbound.findById(id);
     if (!request) throw ERR.NOT_FOUND('Solicitud de ingreso no encontrada.');
@@ -269,12 +291,56 @@ export async function reject(req, res, next) {
 
     request.status = 'REJECTED';
     request.rejectionReason = reason;
+    request.reviewNotes = reviewNotes;
+    request.reviewImages = reviewImages;
     request.reviewedBy = req.userId;
     request.reviewedAt = new Date();
 
     await request.save();
 
     return res.ok(request);
+  } catch (e) {
+    return next(e);
+  }
+}
+
+/**
+ * POST /api/warehouse-inbound/:id/resubmit
+ * Seller resubmits a rejected inbound request as a new request.
+ */
+export async function resubmit(req, res, next) {
+  try {
+    const { id } = req.params;
+    const original = await WarehouseInbound.findById(id);
+    if (!original) throw ERR.NOT_FOUND('Solicitud no encontrada.');
+    if (original.status !== 'REJECTED') {
+      throw ERR.CONFLICT('Solo se pueden reenviar solicitudes rechazadas.');
+    }
+    // Verify ownership
+    if (String(original.userId) !== String(req.userId)) {
+      throw ERR.FORBIDDEN('No tiene permiso para reenviar esta solicitud.');
+    }
+
+    const { notes = '' } = req.body;
+
+    const newDoc = await WarehouseInbound.create({
+      storeId: original.storeId,
+      userId: req.userId,
+      lineItems: original.lineItems.map(item => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        sku: item.sku,
+        productName: item.productName,
+        productImage: item.productImage,
+        variantLabel: item.variantLabel,
+        qty: item.qty,
+        qtyReceived: 0,
+      })),
+      notes: notes || original.notes,
+      shipmentImages: original.shipmentImages || [],
+    });
+
+    return res.created(newDoc);
   } catch (e) {
     return next(e);
   }

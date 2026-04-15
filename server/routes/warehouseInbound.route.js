@@ -3,7 +3,7 @@ import auth from '../middlewares/auth.js';
 import withTenant from '../middlewares/withTenant.js';
 import { requirePermission } from '../middlewares/requirePermission.js';
 import {
-  create, listMine, listAdmin, getById, approve, reject
+  create, listMine, listAdmin, getById, approve, reject, resubmit
 } from '../controllers/warehouseInbound.controller.js';
 
 const router = Router();
@@ -17,5 +17,8 @@ router.get('/admin', auth, withTenant({ required: false }), requirePermission('w
 router.get('/admin/:id', auth, withTenant({ required: false }), requirePermission('warehouse:read'), getById);
 router.patch('/:id/approve', auth, withTenant({ required: false }), requirePermission('warehouse:write'), approve);
 router.patch('/:id/reject', auth, withTenant({ required: false }), requirePermission('warehouse:write'), reject);
+
+// Seller resubmit rejected request
+router.post('/:id/resubmit', auth, withTenant({ required: true }), resubmit);
 
 export default router;

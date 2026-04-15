@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { listAdmin, approveRequest, rejectRequest } from "../../services/warehouseInbound";
+import { listAdmin, approveRequest, rejectRequest, resubmitRequest } from "../../services/warehouseInbound";
 import { useAuth } from "../../hooks/useAuth";
 
 const STATUS_OPTIONS = [
@@ -66,6 +66,11 @@ export default function WarehouseInboundAdminList() {
 
   // Detail modal
   const [detailRow, setDetailRow] = useState(null);
+
+  // Approve modal
+  const [approveRow, setApproveRow] = useState(null);
+  const [approveQtys, setApproveQtys] = useState({});
+  const [approveNotes, setApproveNotes] = useState("");
 
   const fetchList = async (pg = page, opts = {}) => {
     setLoading(true);
@@ -267,11 +272,32 @@ export default function WarehouseInboundAdminList() {
                   {STATUS_LABELS[s] || s}
                 </span>
 
+                {/* Reenviar — vendedor puede reenviar solicitudes rechazadas */}
+                {!isSuper && s === "REJECTED" && (
+                  <button onClick={async () => {
+                    try {
+                      await resubmitRequest(row._id, {});
+                      toast.success("Solicitud reenviada");
+                      fetchList(page);
+                    } catch (e) {
+                      toast.error(e?.response?.data?.message || "Error al reenviar");
+                    }
+                  }} className="bg-blue-600 text-white rounded px-3 py-1 text-xs font-medium hover:bg-blue-700 shrink-0">
+                    Reenviar
+                  </button>
+                )}
+
                 {/* Acciones — solo SUPER_ADMIN puede aprobar/rechazar */}
                 {isSuper && isPending && (
                   <div className="flex gap-1.5 shrink-0">
                     <button
-                      onClick={() => handleApprove(row)}
+                      onClick={() => {
+                        setApproveRow(row);
+                        const qtys = {};
+                        (row.lineItems || row.items || []).forEach((item, idx) => { qtys[idx] = item.qty || item.quantity; });
+                        setApproveQtys(qtys);
+                        setApproveNotes("");
+                      }}
                       disabled={loading}
                       className="bg-green-600 text-white rounded px-3 py-1 text-xs font-medium hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
@@ -363,7 +389,10 @@ export default function WarehouseInboundAdminList() {
               <h3 className="font-semibold text-sm mb-2">Productos ({(detailRow.items || detailRow.lineItems || []).length})</h3>
               <div className="border rounded divide-y">
                 {(detailRow.items || detailRow.lineItems || []).map((item, idx) => (
-                  <div key={idx} className="px-3 py-2 flex justify-between items-center text-sm">
+                  <div key={idx} className="px-3 py-2 flex items-center gap-3 text-sm">
+                    {item.productImage && (
+                      <img src={item.productImage} alt="" className="w-10 h-10 object-cover rounded border shrink-0" />
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{item.productName || item.name || "Producto"}</p>
                       {(item.variantLabel || item.variantName) && (
@@ -371,12 +400,94 @@ export default function WarehouseInboundAdminList() {
                       )}
                       {item.sku && <p className="text-xs text-gray-400">SKU: {item.sku}</p>}
                     </div>
-                    <span className="font-semibold text-gray-700 shrink-0 ml-3">
-                      {item.qty || item.quantity} uds.
-                    </span>
+                    <div className="text-right shrink-0">
+                      <span className="font-semibold">{item.qty || item.quantity} uds.</span>
+                      {item.qtyReceived > 0 && item.qtyReceived !== (item.qty || item.quantity) && (
+                        <p className="text-xs text-orange-600">Recibidas: {item.qtyReceived}</p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {detailRow.reviewNotes && (
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Notas de revision</h3>
+                <p className="text-sm text-gray-600 bg-gray-50 rounded p-2">{detailRow.reviewNotes}</p>
+              </div>
+            )}
+
+            {detailRow.reviewImages && detailRow.reviewImages.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Fotos de revision</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {detailRow.reviewImages.map((img, i) => (
+                    <a key={i} href={img} target="_blank" rel="noopener noreferrer">
+                      <img src={img} alt="" className="w-20 h-20 object-cover rounded border hover:opacity-80 transition-opacity" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Aprobacion */}
+      {approveRow && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-lg p-6 space-y-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-bold">Aprobar solicitud</h2>
+              <button onClick={() => setApproveRow(null)} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+            </div>
+
+            <p className="text-sm text-gray-600">Confirme las cantidades recibidas por cada producto:</p>
+
+            <div className="border rounded divide-y">
+              {(approveRow.lineItems || approveRow.items || []).map((item, idx) => (
+                <div key={idx} className="px-3 py-2 flex items-center gap-3 text-sm">
+                  {item.productImage && <img src={item.productImage} alt="" className="w-8 h-8 object-cover rounded border shrink-0" />}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate text-xs">{item.productName || item.name || "Producto"}</p>
+                    <p className="text-xs text-gray-400">Solicitadas: {item.qty || item.quantity}</p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <label className="text-xs text-gray-500">Recibidas:</label>
+                    <input type="number" min={0} max={item.qty || item.quantity} value={approveQtys[idx] ?? (item.qty || item.quantity)}
+                      onChange={e => setApproveQtys(prev => ({...prev, [idx]: Math.min(item.qty || item.quantity, Math.max(0, Number(e.target.value) || 0))}))}
+                      className="border rounded px-2 py-1 text-sm w-16 text-center" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Notas de revision (opcional)</label>
+              <textarea rows={2} value={approveNotes} onChange={e => setApproveNotes(e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm" placeholder="Ej: 5 unidades en mal estado..." />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setApproveRow(null)} className="border rounded px-4 py-1.5 text-sm hover:bg-gray-50">Cancelar</button>
+              <button onClick={async () => {
+                try {
+                  const lineItems = (approveRow.lineItems || approveRow.items || []).map((item, idx) => ({
+                    productId: item.productId,
+                    variantId: item.variantId,
+                    qtyReceived: approveQtys[idx] ?? (item.qty || item.quantity),
+                  }));
+                  await approveRequest(approveRow._id, { lineItems, reviewNotes: approveNotes });
+                  setApproveRow(null);
+                  toast.success("Solicitud aprobada");
+                  fetchList(page);
+                } catch (e) {
+                  toast.error(e?.response?.data?.message || e?.message || "Error al aprobar");
+                }
+              }} className="bg-green-600 text-white rounded px-4 py-1.5 text-sm font-medium hover:bg-green-700">
+                Confirmar aprobacion
+              </button>
             </div>
           </div>
         </div>

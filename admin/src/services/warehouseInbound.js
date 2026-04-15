@@ -27,3 +27,7 @@ export function approveRequest(id, body = {}) {
 export function rejectRequest(id, body) {
   return editData(`${BASE}/${id}/reject`, body, { withCredentials: true });
 }
+
+export function resubmitRequest(id, body = {}) {
+  return postData(`${BASE}/${id}/resubmit`, body, { withCredentials: true });
+}
