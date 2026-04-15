@@ -350,6 +350,22 @@ connectDB()
             console.log('Índices sincronizados ✅');
         }
 
+        // Seed shipping rates si no existen
+        try {
+            const ShippingRate = (await import('./models/shippingRate.model.js')).default;
+            const seedRates = [
+                { method: 'STORE_EXPRESS', zone: 'DEFAULT', baseRate: 0, perKgRate: 0, freeAbove: 0, estimatedDays: { min: 1, max: 2 }, active: true },
+                { method: 'STORE_STANDARD', zone: 'DEFAULT', baseRate: 0, perKgRate: 0, freeAbove: 0, estimatedDays: { min: 3, max: 5 }, active: true },
+            ];
+            for (const rate of seedRates) {
+                await ShippingRate.findOneAndUpdate(
+                    { method: rate.method, zone: rate.zone },
+                    { $setOnInsert: rate },
+                    { upsert: true }
+                );
+            }
+        } catch (e) { console.error('Seed shipping rates:', e.message); }
+
         server.listen(process.env.PORT || 8000, () => {
             console.log('Server is running', process.env.PORT || 8000);
             console.log('[socket.io] transports:', SOCKET_TRANSPORTS.join(', '));

@@ -125,12 +125,15 @@ export const ProductDetailsComponent = (props) => {
     ? (oldPriceRatio > 0 ? Math.round(variantToBob(selectedVariant.price) * oldPriceRatio * 100) / 100 : null)
     : (Number(props?.item?.oldPriceBob || 0) > 0 ? Number(props.item.oldPriceBob) : null);
 
+  // Stock del producto base (para SIMPLE y como fallback para VARIANT)
+  const productWarehouseStock = props?.item?.warehouseStock ?? 0;
   const storeStock = selectedVariant
     ? (selectedVariant.stock || 0)
     : (props?.item?.countInStock ?? 0);
+  // Para variantes: sumar warehouseStock de la variante + del producto base
   const warehouseStock = selectedVariant
-    ? (selectedVariant.warehouseStock || 0)
-    : (props?.item?.warehouseStock ?? 0);
+    ? (selectedVariant.warehouseStock || 0) + productWarehouseStock
+    : productWarehouseStock;
   const displayStock = storeStock + warehouseStock;
 
   // Precios mayoristas por niveles
