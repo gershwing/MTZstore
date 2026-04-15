@@ -414,7 +414,6 @@ export const BASE_STORE_MENU = [
     children: [
       { label: "Inventario", icon: "MdWarehouse", to: "/admin/inventory", required: [MODULE_PERMS.inventory.read] },
       { label: "Envios al almacen", icon: "MdLocalShipping", to: "/admin/warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
-      { label: "Historial envios", icon: "MdHistory", to: "/admin/warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
     ],
   },
 
