@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { listAdmin, approveRequest, rejectRequest } from "../../services/warehouseInbound";
 import { useAuth } from "../../hooks/useAuth";
@@ -137,7 +138,14 @@ export default function WarehouseInboundAdminList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Solicitudes de Envio al Almacen</h1>
-        <span className="text-sm text-gray-500">{total} solicitudes</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500">{total} solicitudes</span>
+          <Link to="create">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+              + Nueva Solicitud
+            </button>
+          </Link>
+        </div>
       </div>
 
       {/* Filtros */}
