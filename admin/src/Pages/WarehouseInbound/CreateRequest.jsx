@@ -23,9 +23,11 @@ export default function CreateWarehouseInboundRequest() {
     const fetchProducts = async () => {
       setLoadingProducts(true);
       try {
-        const res = await fetchDataFromApi("/api/product", { withCredentials: true });
+        const res = await fetchDataFromApi("/api/product/getAllProducts", { withCredentials: true });
         const list = Array.isArray(res?.products)
           ? res.products
+          : Array.isArray(res?.data?.products)
+          ? res.data.products
           : Array.isArray(res?.data)
           ? res.data
           : Array.isArray(res)
