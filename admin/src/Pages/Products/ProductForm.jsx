@@ -107,7 +107,8 @@ export default function ProductForm({
   const [shipping, setShipping] = useState({
     mtzExpress: initialData?.shipping?.mtzExpress ?? false,
     mtzStandard: initialData?.shipping?.mtzStandard ?? false,
-    storeSelf: initialData?.shipping?.storeSelf ?? true,
+    storeExpress: initialData?.shipping?.storeExpress ?? false,
+    storeStandard: initialData?.shipping?.storeStandard ?? true,
   });
 
   /* DIMENSIONES */
@@ -669,7 +670,8 @@ export default function ProductForm({
                 {[
                   { key: "mtzExpress", label: "MTZstore Express", desc: "Envio rapido por la plataforma (1-2 dias)" },
                   { key: "mtzStandard", label: "MTZstore Estandar", desc: "Envio estandar por la plataforma (3-5 dias)" },
-                  { key: "storeSelf", label: storeName || "Mi tienda", desc: "El vendedor se encarga del envio" },
+                  { key: "storeExpress", label: (storeName || "Mi tienda") + " Express", desc: "Envio rapido por el vendedor (1-2 dias)" },
+                  { key: "storeStandard", label: (storeName || "Mi tienda") + " Estandar", desc: "Envio estandar por el vendedor (3-5 dias)" },
                 ].map((opt) => (
                   <label
                     key={opt.key}
@@ -689,11 +691,12 @@ export default function ProductForm({
                       onChange={(e) => {
                         const newShipping = { ...shipping, [opt.key]: e.target.checked };
                         // Al menos uno debe estar activo
-                        if (!newShipping.mtzExpress && !newShipping.mtzStandard && !newShipping.storeSelf) return;
+                        if (!newShipping.mtzExpress && !newShipping.mtzStandard && !newShipping.storeExpress && !newShipping.storeStandard) return;
                         setShipping(newShipping);
                         // Sync legacy shippedBy (prioridad: express > standard > store)
                         if (newShipping.mtzExpress) setShippedBy("MTZSTORE_EXPRESS");
                         else if (newShipping.mtzStandard) setShippedBy("MTZSTORE_STANDARD");
+                        else if (newShipping.storeExpress || newShipping.storeStandard) setShippedBy("STORE");
                         else setShippedBy("STORE");
                       }}
                       className="w-5 h-5 accent-blue-600"

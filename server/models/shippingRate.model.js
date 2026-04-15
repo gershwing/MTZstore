@@ -4,7 +4,7 @@ const shippingRateSchema = new mongoose.Schema(
   {
     method: {
       type: String,
-      enum: ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD", "STORE"],
+      enum: ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD", "STORE_EXPRESS", "STORE_STANDARD", "STORE"],
       required: true,
     },
     zone: {

@@ -20,7 +20,7 @@ const Checkout = () => {
   const [totalAmountBOB, setTotalAmountBOB] = useState(0);
   const [shippingCost, setShippingCost] = useState(0);
   const [shippingInfo, setShippingInfo] = useState(null);
-  const [shippingMethod, setShippingMethod] = useState("MTZSTORE_STANDARD");
+  const [shippingMethod, setShippingMethod] = useState("STORE_STANDARD");
   const [availableShippingRates, setAvailableShippingRates] = useState([]);
   const [isLoading, setIsloading] = useState(false);
   const context = useContext(MyContext);
@@ -435,6 +435,8 @@ const Checkout = () => {
                     const isFree = !isMtz && rate.baseRate === 0;
                     const methodLabel = rate.method === "MTZSTORE_EXPRESS" ? "MTZstore Express"
                       : rate.method === "MTZSTORE_STANDARD" ? "MTZstore Estándar"
+                      : rate.method === "STORE_EXPRESS" ? "Mi tienda Express"
+                      : rate.method === "STORE_STANDARD" ? "Mi tienda Estándar"
                       : "Envío por tienda";
 
                     return (

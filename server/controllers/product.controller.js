@@ -125,7 +125,7 @@ export async function createProduct(req, res, next) {
                 ? req.body.details.filter(d => d.key?.trim())
                 : [],
             shippedBy: req.body.shippedBy || "STORE",
-            shipping: req.body.shipping || { mtzExpress: false, mtzStandard: false, storeSelf: true },
+            shipping: req.body.shipping || { mtzExpress: false, mtzStandard: false, storeExpress: false, storeStandard: true, storeSelf: true },
             dimensions: req.body.dimensions || { weight: 0, length: 0, width: 0, height: 0 },
             attributes: req.body.attributes || {},
         };

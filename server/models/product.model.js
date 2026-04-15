@@ -187,9 +187,11 @@ const productSchema = new Schema(
 
       // Nuevo: múltiples métodos de envío habilitados
       shipping: {
-         mtzExpress:  { type: Boolean, default: false },
-         mtzStandard: { type: Boolean, default: false },
-         storeSelf:   { type: Boolean, default: true },
+         mtzExpress:    { type: Boolean, default: false },
+         mtzStandard:   { type: Boolean, default: false },
+         storeExpress:  { type: Boolean, default: false },
+         storeStandard: { type: Boolean, default: true },
+         storeSelf:     { type: Boolean, default: true }, // legacy compat
       },
 
       // Dimensiones del producto (para cálculo de envío)

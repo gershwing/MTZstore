@@ -181,10 +181,12 @@ export const ProductDetails = () => {
                       const ship = productData?.shipping;
                       const sName = storeInfo?.isPlatformStore ? "MTZstore" : storeInfo?.name;
                       const methods = [];
-                      if (ship?.mtzExpress) methods.push({ label: "MTZstore Express", sub: "menos de 24h" });
-                      if (ship?.mtzStandard) methods.push({ label: "MTZstore Estándar", sub: "1-3 días" });
-                      if (ship?.storeSelf) methods.push({ label: sName || "Tienda", sub: "2-5 días" });
-                      if (methods.length === 0) methods.push({ label: sName || "Tienda", sub: "2-5 días" });
+                      if (ship?.mtzExpress) methods.push({ label: "MTZstore Express", sub: "1-2 días" });
+                      if (ship?.mtzStandard) methods.push({ label: "MTZstore Estándar", sub: "3-5 días" });
+                      if (ship?.storeExpress) methods.push({ label: (sName || "Tienda") + " Express", sub: "1-2 días" });
+                      if (ship?.storeStandard) methods.push({ label: (sName || "Tienda") + " Estándar", sub: "3-5 días" });
+                      if (methods.length === 0 && ship?.storeSelf) methods.push({ label: sName || "Tienda", sub: "3-5 días" });
+                      if (methods.length === 0) methods.push({ label: sName || "Tienda", sub: "3-5 días" });
                       return methods.map((m, i) => (
                         <div key={i} className="flex items-center gap-2 text-[13px]">
                           <span className="text-green-600">✓</span>
