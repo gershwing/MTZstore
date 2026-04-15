@@ -149,8 +149,8 @@ export default function CreateWarehouseInboundRequest() {
       const payload = { lineItems: items, notes: notes.trim() || undefined };
       const res = await createRequest(payload);
 
-      if (res?.error) {
-        toast.error(res?.message || "Error al crear la solicitud.");
+      if (res?.error === true || res?.success === false) {
+        toast.error(res?.message || res?.data?.message || "Error al crear la solicitud.");
         return;
       }
 

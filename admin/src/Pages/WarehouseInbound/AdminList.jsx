@@ -71,12 +71,14 @@ export default function WarehouseInboundAdminList() {
       const st = opts.status ?? status;
       if (st && st !== "ALL") params.status = st;
       if (qVal) params.q = qVal;
-      const res = await listAdmin(params);
-      const items = Array.isArray(res?.items) ? res.items : Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+      const raw = await listAdmin(params);
+      // res.ok() wraps in { success, error, data: { items, total, ... } }
+      const d = raw?.data || raw;
+      const items = Array.isArray(d?.items) ? d.items : Array.isArray(d) ? d : [];
       setRows(items.map((it) => ({ id: it._id || it.id, _id: it._id || it.id, ...it })));
-      setTotal(Number(res?.total || res?.totalCount || items.length || 0));
-      setTotalPages(Number(res?.totalPages || Math.ceil((res?.total || items.length) / limit) || 1));
-      setPage(Number(res?.page || pg));
+      setTotal(Number(d?.total || items.length || 0));
+      setTotalPages(Number(d?.totalPages || Math.ceil((d?.total || items.length) / limit) || 1));
+      setPage(Number(d?.page || pg));
     } catch (e) {
       console.error("fetchList error:", e);
       setRows([]);
