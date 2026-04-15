@@ -5,6 +5,8 @@ import Product from '../models/product.model.js';
 import ProductVariant from '../models/productVariant.model.js';
 import InventoryMovement from '../models/inventoryMovement.model.js';
 import { ERR } from '../utils/httpError.js';
+import User from '../models/user.model.js';
+import sendEmailFun from '../config/sendEmail.js';
 
 /**
  * POST /api/warehouse-inbound
@@ -76,6 +78,22 @@ export async function create(req, res, next) {
       notes,
       shipmentImages,
     });
+
+    // Email notification to seller
+    const user = await User.findById(req.userId).select('name email');
+    if (user?.email) {
+      sendEmailFun({
+        sendTo: user.email,
+        subject: 'Solicitud de envio al almacen enviada - MTZstore',
+        html: `<div style="font-family:Arial;max-width:600px;margin:auto;padding:20px">
+          <h2 style="color:#1d4ed8">Solicitud enviada</h2>
+          <p>Hola <strong>${user.name}</strong>,</p>
+          <p>Tu solicitud de envio al almacen ha sido registrada con <strong>${populatedItems.length}</strong> producto(s).</p>
+          <p>Te notificaremos cuando sea revisada por nuestro equipo.</p>
+          <p style="color:#666;font-size:13px">MTZstore - Tu mercado local</p>
+        </div>`,
+      }).catch(err => console.error('Inbound create email failed:', err));
+    }
 
     return res.created(doc);
   } catch (e) {
@@ -267,6 +285,38 @@ export async function approve(req, res, next) {
       ...stockUpdates,
     ]);
 
+    // Email notification to seller
+    const seller = await User.findById(request.userId).select('name email');
+    if (seller?.email) {
+      const totalRequested = request.lineItems.reduce((s, i) => s + i.qty, 0);
+      const totalReceived = request.lineItems.reduce((s, i) => s + i.qtyReceived, 0);
+      const isPartial = totalReceived < totalRequested;
+
+      const itemsHtml = request.lineItems.map(i =>
+        `<tr><td style="padding:4px 8px;border-bottom:1px solid #eee">${i.productName}${i.variantLabel ? ` (${i.variantLabel})` : ''}</td>
+         <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">${i.qty}</td>
+         <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">${i.qtyReceived}</td></tr>`
+      ).join('');
+
+      sendEmailFun({
+        sendTo: seller.email,
+        subject: isPartial
+          ? 'Solicitud aprobada con observaciones - MTZstore'
+          : 'Solicitud aprobada - MTZstore',
+        html: `<div style="font-family:Arial;max-width:600px;margin:auto;padding:20px">
+          <h2 style="color:#16a34a">${isPartial ? 'Solicitud aprobada con observaciones' : 'Solicitud aprobada'}</h2>
+          <p>Hola <strong>${seller.name}</strong>,</p>
+          <p>Tu solicitud de envio al almacen ha sido <strong>aprobada</strong>.</p>
+          <table style="width:100%;border-collapse:collapse;margin:12px 0">
+            <tr style="background:#f3f4f6"><th style="padding:6px 8px;text-align:left">Producto</th><th style="padding:6px 8px">Solicitadas</th><th style="padding:6px 8px">Recibidas</th></tr>
+            ${itemsHtml}
+          </table>
+          ${request.reviewNotes ? `<p><strong>Notas del almacen:</strong> ${request.reviewNotes}</p>` : ''}
+          <p style="color:#666;font-size:13px">MTZstore - Tu mercado local</p>
+        </div>`,
+      }).catch(err => console.error('Inbound approve email failed:', err));
+    }
+
     return res.ok(request);
   } catch (e) {
     return next(e);
@@ -297,6 +347,24 @@ export async function reject(req, res, next) {
     request.reviewedAt = new Date();
 
     await request.save();
+
+    // Email notification to seller
+    const seller = await User.findById(request.userId).select('name email');
+    if (seller?.email) {
+      sendEmailFun({
+        sendTo: seller.email,
+        subject: 'Solicitud rechazada - MTZstore',
+        html: `<div style="font-family:Arial;max-width:600px;margin:auto;padding:20px">
+          <h2 style="color:#dc2626">Solicitud rechazada</h2>
+          <p>Hola <strong>${seller.name}</strong>,</p>
+          <p>Tu solicitud de envio al almacen ha sido <strong>rechazada</strong>.</p>
+          ${reason ? `<p><strong>Motivo:</strong> ${reason}</p>` : ''}
+          ${reviewNotes ? `<p><strong>Notas:</strong> ${reviewNotes}</p>` : ''}
+          <p>Puedes corregir los problemas y reenviar la solicitud desde tu panel.</p>
+          <p style="color:#666;font-size:13px">MTZstore - Tu mercado local</p>
+        </div>`,
+      }).catch(err => console.error('Inbound reject email failed:', err));
+    }
 
     return res.ok(request);
   } catch (e) {

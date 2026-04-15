@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { IoMdClose } from "react-icons/io";
 import { listAdmin, approveRequest, rejectRequest, resubmitRequest } from "../../services/warehouseInbound";
 import { useAuth } from "../../hooks/useAuth";
+import UploadBox from "../../Components/UploadBox";
 
 const STATUS_OPTIONS = [
   { value: "ALL", label: "Todas" },
@@ -56,7 +58,7 @@ export default function WarehouseInboundAdminList() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [q, setQ] = useState("");
-  const [status, setStatus] = useState("PENDING");
+  const [status, setStatus] = useState("ALL");
   const [loading, setLoading] = useState(false);
 
   // Reject modal
@@ -71,6 +73,8 @@ export default function WarehouseInboundAdminList() {
   const [approveRow, setApproveRow] = useState(null);
   const [approveQtys, setApproveQtys] = useState({});
   const [approveNotes, setApproveNotes] = useState("");
+  const [approveImages, setApproveImages] = useState([]);
+  const [rejImages, setRejImages] = useState([]);
 
   const fetchList = async (pg = page, opts = {}) => {
     setLoading(true);
@@ -119,6 +123,7 @@ export default function WarehouseInboundAdminList() {
   const handleRejectOpen = (id) => {
     setRejId(id);
     setRejReason("");
+    setRejImages([]);
     setRejOpen(true);
   };
 
@@ -131,10 +136,11 @@ export default function WarehouseInboundAdminList() {
     }
     setLoading(true);
     try {
-      await rejectRequest(rejId, { reason: clean, notes: clean });
+      await rejectRequest(rejId, { reason: clean, notes: clean, reviewImages: rejImages });
       setRejOpen(false);
       setRejId(null);
       setRejReason("");
+      setRejImages([]);
       await fetchList(page);
       toast.success("Solicitud rechazada");
     } catch (e) {
@@ -259,6 +265,15 @@ export default function WarehouseInboundAdminList() {
                   )}
                 </div>
 
+                {/* Fotos del cargo */}
+                {row.shipmentImages?.length > 0 && (
+                  <div className="flex gap-1 shrink-0">
+                    {row.shipmentImages.slice(0, 3).map((img, i) => (
+                      <img key={i} src={img} alt="" className="w-8 h-8 object-cover rounded border" />
+                    ))}
+                  </div>
+                )}
+
                 {/* Detalle */}
                 <button
                   onClick={() => setDetailRow(row)}
@@ -297,6 +312,7 @@ export default function WarehouseInboundAdminList() {
                         (row.lineItems || row.items || []).forEach((item, idx) => { qtys[idx] = item.qty || item.quantity; });
                         setApproveQtys(qtys);
                         setApproveNotes("");
+                        setApproveImages([]);
                       }}
                       disabled={loading}
                       className="bg-green-600 text-white rounded px-3 py-1 text-xs font-medium hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -430,6 +446,19 @@ export default function WarehouseInboundAdminList() {
                 </div>
               </div>
             )}
+
+            {detailRow.shipmentImages?.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Fotos del cargo</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {detailRow.shipmentImages.map((img, i) => (
+                    <a key={i} href={img} target="_blank" rel="noopener noreferrer">
+                      <img src={img} alt="" className="w-20 h-20 object-cover rounded border hover:opacity-80 transition-opacity" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -455,8 +484,12 @@ export default function WarehouseInboundAdminList() {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <label className="text-xs text-gray-500">Recibidas:</label>
-                    <input type="number" min={0} max={item.qty || item.quantity} value={approveQtys[idx] ?? (item.qty || item.quantity)}
-                      onChange={e => setApproveQtys(prev => ({...prev, [idx]: Math.min(item.qty || item.quantity, Math.max(0, Number(e.target.value) || 0))}))}
+                    <input type="number" min={0} max={item.qty || item.quantity}
+                      value={approveQtys[idx] ?? (item.qty || item.quantity)}
+                      onChange={e => {
+                        const v = e.target.value;
+                        setApproveQtys(prev => ({...prev, [idx]: v === "" ? "" : Math.min(item.qty || item.quantity, Math.max(0, Number(v) || 0))}));
+                      }}
                       className="border rounded px-2 py-1 text-sm w-16 text-center" />
                   </div>
                 </div>
@@ -469,8 +502,26 @@ export default function WarehouseInboundAdminList() {
                 className="w-full border rounded px-3 py-2 text-sm" placeholder="Ej: 5 unidades en mal estado..." />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-1">Fotos de revision (opcional)</label>
+              <div className="flex gap-2 flex-wrap items-start">
+                {approveImages.map((img, i) => (
+                  <div key={i} className="relative">
+                    <img src={img} alt="" className="w-16 h-16 object-cover rounded border" />
+                    <button type="button" onClick={() => setApproveImages(prev => prev.filter((_, idx) => idx !== i))}
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 rounded-full flex items-center justify-center">
+                      <IoMdClose className="text-white text-[10px]" />
+                    </button>
+                  </div>
+                ))}
+                <UploadBox multiple={false} name="images" url="/api/homeSlides/uploadImages"
+                  setPreviewsFun={(urls) => setApproveImages(prev => [...prev, ...urls])}
+                  placeholder="Subir" className="!h-16 !w-16" />
+              </div>
+            </div>
+
             <div className="flex justify-end gap-2">
-              <button onClick={() => setApproveRow(null)} className="border rounded px-4 py-1.5 text-sm hover:bg-gray-50">Cancelar</button>
+              <button onClick={() => { setApproveRow(null); setApproveImages([]); }} className="border rounded px-4 py-1.5 text-sm hover:bg-gray-50">Cancelar</button>
               <button onClick={async () => {
                 try {
                   const lineItems = (approveRow.lineItems || approveRow.items || []).map((item, idx) => ({
@@ -478,8 +529,9 @@ export default function WarehouseInboundAdminList() {
                     variantId: item.variantId,
                     qtyReceived: approveQtys[idx] ?? (item.qty || item.quantity),
                   }));
-                  await approveRequest(approveRow._id, { lineItems, reviewNotes: approveNotes });
+                  await approveRequest(approveRow._id, { lineItems, reviewNotes: approveNotes, reviewImages: approveImages });
                   setApproveRow(null);
+                  setApproveImages([]);
                   toast.success("Solicitud aprobada");
                   fetchList(page);
                 } catch (e) {
@@ -517,9 +569,26 @@ export default function WarehouseInboundAdminList() {
                 placeholder="Ej.: Cantidades exceden el espacio disponible."
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Fotos de revision (opcional)</label>
+              <div className="flex gap-2 flex-wrap items-start">
+                {rejImages.map((img, i) => (
+                  <div key={i} className="relative">
+                    <img src={img} alt="" className="w-16 h-16 object-cover rounded border" />
+                    <button type="button" onClick={() => setRejImages(prev => prev.filter((_, idx) => idx !== i))}
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 rounded-full flex items-center justify-center">
+                      <IoMdClose className="text-white text-[10px]" />
+                    </button>
+                  </div>
+                ))}
+                <UploadBox multiple={false} name="images" url="/api/homeSlides/uploadImages"
+                  setPreviewsFun={(urls) => setRejImages(prev => [...prev, ...urls])}
+                  placeholder="Subir" className="!h-16 !w-16" />
+              </div>
+            </div>
             <div className="flex gap-2">
               <button
-                onClick={() => setRejOpen(false)}
+                onClick={() => { setRejOpen(false); setRejImages([]); }}
                 className="flex-1 border rounded py-2 text-sm hover:bg-gray-50"
               >
                 Cancelar
