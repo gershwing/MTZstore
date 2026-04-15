@@ -381,7 +381,7 @@ const Header = () => {
                 </MenuItem>
                 <Divider />
 
-                <Link to="/profile">
+                <Link to="/admin/profile">
                   <MenuItem onClick={handleCloseMyAcc} className="flex items-center gap-3">
                     <FaRegUser className="text-[16px]" />
                     <span className="text-[14px]">Mi Perfil</span>
