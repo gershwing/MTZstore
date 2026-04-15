@@ -125,9 +125,13 @@ export const ProductDetailsComponent = (props) => {
     ? (oldPriceRatio > 0 ? Math.round(variantToBob(selectedVariant.price) * oldPriceRatio * 100) / 100 : null)
     : (Number(props?.item?.oldPriceBob || 0) > 0 ? Number(props.item.oldPriceBob) : null);
 
-  const displayStock = selectedVariant
-    ? selectedVariant.stock
-    : ((props?.item?.countInStock ?? 0) + (props?.item?.warehouseStock ?? 0));
+  const storeStock = selectedVariant
+    ? (selectedVariant.stock || 0)
+    : (props?.item?.countInStock ?? 0);
+  const warehouseStock = selectedVariant
+    ? (selectedVariant.warehouseStock || 0)
+    : (props?.item?.warehouseStock ?? 0);
+  const displayStock = storeStock + warehouseStock;
 
   // Precios mayoristas por niveles
   const wholesaleTiers = props?.item?.wholesaleTiers;
@@ -154,13 +158,13 @@ export const ProductDetailsComponent = (props) => {
   useEffect(() => {
     props.onActionsReady?.({
       quantity, setQuantity: handleSelecteQty,
-      effectivePrice, displayPrice, displayStock,
+      effectivePrice, displayPrice, displayStock, storeStock, warehouseStock,
       addToCart: () => addToCart(props?.item, context?.userData?._id, quantity),
       addToMyList: () => handleAddToMyList(props?.item),
       isLoading, isAdded, isAddedInMyList,
       hasVariants, selectedVariant,
     });
-  }, [quantity, effectivePrice, displayPrice, displayStock, isLoading, isAdded, isAddedInMyList, selectedVariant]);
+  }, [quantity, effectivePrice, displayPrice, displayStock, storeStock, warehouseStock, isLoading, isAdded, isAddedInMyList, selectedVariant]);
 
   const handleSelectAttr = (key, val) => {
     setSelectedAttrs(prev => ({ ...prev, [key]: val }));
@@ -302,6 +306,11 @@ export const ProductDetailsComponent = (props) => {
         </div>
         <span className="text-[14px]">
           Disponible en stock: <span className="text-green-600 font-bold">{displayStock} items</span>
+          {(storeStock > 0 || warehouseStock > 0) && (
+            <span className="text-[11px] text-gray-400 ml-1">
+              ({storeStock > 0 ? `${storeStock} tienda` : ""}{storeStock > 0 && warehouseStock > 0 ? " · " : ""}{warehouseStock > 0 ? `${warehouseStock} almacén MTZ` : ""})
+            </span>
+          )}
         </span>
       </div>
 
