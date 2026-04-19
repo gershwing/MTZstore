@@ -284,6 +284,11 @@ export async function approveSellerApplicationController(req, res, next) {
     const user = await UserModel.findById(app.userId).session(session);
     if (!user) throw ERR.NOT_FOUND("User not found for this application");
 
+    // 2.1) No aprobar si el usuario no verificó su email
+    if (user.verify_email !== true) {
+      throw ERR.VALIDATION("Cannot approve: user has not verified their email yet");
+    }
+
     // 3) Determinar nombre y slug de la tienda
     const nameFromForm =
       app.formData?.storeName ||

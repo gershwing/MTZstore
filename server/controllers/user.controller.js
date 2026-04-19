@@ -93,7 +93,7 @@ export async function registerUserController(req, res, next) {
                 otpExpires: Date.now() + 600_000,
                 verify_email: false,
                 signUpWithGoogle: false,
-                status: 'active',
+                status: 'pending',
             });
         }
 
@@ -225,12 +225,14 @@ export async function authWithGoogle(req, res, next) {
                 status: "active", // opcional: asegura estado inicial activo si aplica a tu negocio
             });
         } else {
-            // valida estado (no permitas login si está suspendido)
-            if (String(user.status).toLowerCase() !== "active") {
+            // valida estado (no permitas login si está suspendido, pero pending se activa con Google)
+            const st = String(user.status).toLowerCase();
+            if (st !== "active" && st !== "pending") {
                 throw ERR.FORBIDDEN("Account is suspended");
             }
             // asegura flags y actualiza avatar si faltaba
             let touched = false;
+            if (st === "pending") { user.status = "active"; touched = true; }
             if (user.verify_email !== true) { user.verify_email = true; touched = true; }
             if (user.signUpWithGoogle !== true) { user.signUpWithGoogle = true; touched = true; }
             if (avatar && !user.avatar) { user.avatar = avatar; touched = true; }
@@ -305,7 +307,11 @@ export async function loginUserController(req, res, next) {
         if (!user) throw ERR.UNAUTHORIZED("Invalid credentials");
 
         // estado de la cuenta
-        if (String(user.status).toLowerCase() !== "active") {
+        const st = String(user.status).toLowerCase();
+        if (st === "pending") {
+            throw ERR.VALIDATION("Your email is not verified yet. Please verify your email first.");
+        }
+        if (st !== "active") {
             throw ERR.FORBIDDEN("Account is suspended");
         }
 
