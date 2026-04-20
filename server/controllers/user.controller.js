@@ -8,6 +8,7 @@ import VerificationEmail from '../utils/verifyEmailTemplate.js';
 import generatedAccessToken from '../utils/generatedAccessToken.js';
 import generatedRefreshToken from '../utils/generatedRefreshToken.js';
 import { ERR } from '../utils/httpError.js';
+import PasswordChangedEmail from '../utils/passwordChangedTemplate.js';
 
 
 import { v2 as cloudinary } from 'cloudinary';
@@ -47,7 +48,7 @@ function getCookieClearOpts(req) {
 /** ========== Registro con OTP ========== */
 export async function registerUserController(req, res, next) {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, birthDate, gender, mobile } = req.body;
 
         if (!name || !email || !password) {
             throw ERR.VALIDATION('provide email, name, password');
@@ -57,7 +58,10 @@ export async function registerUserController(req, res, next) {
         const trimName = String(name).trim();
         const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normEmail);
         if (!isEmailValid) throw ERR.VALIDATION('Invalid email format');
-        if (String(password).length < 8) throw ERR.VALIDATION('Password must be at least 8 characters');
+        const strongPwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+        if (!strongPwRegex.test(String(password))) {
+            throw ERR.VALIDATION('Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number, and 1 special character');
+        }
 
         const exists = await UserModel.findOne({ email: normEmail }).select("+password +verify_email +signUpWithGoogle");
 
@@ -102,7 +106,8 @@ export async function registerUserController(req, res, next) {
         const otpExpires = Date.now() + 600_000;
 
         const registrationToken = jwt.sign(
-            { name: trimName, email: normEmail, hashedPassword: hashPassword, otp: verifyCode, otpExpires },
+            { name: trimName, email: normEmail, hashedPassword: hashPassword, otp: verifyCode, otpExpires,
+              birthDate: birthDate || null, gender: gender || "", mobile: mobile || "" },
             process.env.JSON_WEB_TOKEN_SECRET_KEY,
             { expiresIn: '15m' }
         );
@@ -190,6 +195,9 @@ export async function verifyEmailController(req, res, next) {
             name: payload.name,
             email: normEmail,
             password: payload.hashedPassword,
+            mobile: payload.mobile || "",
+            birthDate: payload.birthDate || null,
+            gender: payload.gender || "",
             verify_email: true,
             signUpWithGoogle: false,
             status: 'active',
@@ -658,7 +666,7 @@ export async function removeImageFromCloudinary(req, res, next) {
 export async function updateUserDetails(req, res, next) {
     try {
         const userId = req.userId;
-        const { name, email, mobile } = req.body;
+        const { name, email, mobile, birthDate, gender } = req.body;
 
         const user = await UserModel.findById(userId);
         if (!user) throw ERR.VALIDATION('The user cannot be Updated!');
@@ -667,6 +675,10 @@ export async function updateUserDetails(req, res, next) {
         const $set = {};
         if (typeof name === 'string' && name.trim()) $set.name = name.trim();
         if (typeof mobile === 'string') $set.mobile = mobile.trim();
+        if (birthDate !== undefined) $set.birthDate = birthDate || null;
+        if (gender !== undefined && ["male", "female", "other", "prefer_not_to_say", ""].includes(gender)) {
+            $set.gender = gender;
+        }
 
         // 2) Cambio de email (opcional, con verificación)
         if (typeof email === 'string' && email.trim()) {
@@ -711,6 +723,8 @@ export async function updateUserDetails(req, res, next) {
                     name: user.name,
                     email: user.email,
                     mobile: user.mobile,
+                    birthDate: user.birthDate,
+                    gender: user.gender,
                     avatar: user.avatar,
                     verify_email: user.verify_email,
                 },
@@ -733,6 +747,8 @@ export async function updateUserDetails(req, res, next) {
                 name: updated?.name,
                 email: updated?.email,
                 mobile: updated?.mobile,
+                birthDate: updated?.birthDate,
+                gender: updated?.gender,
                 avatar: updated?.avatar,
                 verify_email: updated?.verify_email,
             },
@@ -866,7 +882,10 @@ export async function resetpassword(req, res, next) {
         const user = await UserModel.findOne({ email: normEmail }).select("+password +signUpWithGoogle");
         if (!user) throw ERR.VALIDATION('Email is not available');
 
-        if (String(newPassword).length < 8) throw ERR.VALIDATION('Password must be at least 8 characters');
+        const strongPwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+        if (!strongPwRegex.test(String(newPassword))) {
+            throw ERR.VALIDATION('Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number, and 1 special character');
+        }
         if (newPassword !== confirmPassword) throw ERR.VALIDATION('newPassword and confirmPassword must be same.');
 
         // Si NO es cuenta Google, exigir oldPassword válido
@@ -884,6 +903,14 @@ export async function resetpassword(req, res, next) {
         user.signUpWithGoogle = false; // ya tiene pass local
         user.refresh_token = '';       // revocar sesiones activas
         await user.save();
+
+        // Notificar por email
+        sendEmailFun({
+            sendTo: normEmail,
+            subject: 'Tu contrasena fue actualizada - MTZstore',
+            text: '',
+            html: PasswordChangedEmail(user.name),
+        }).catch(err => console.error('Password changed email failed:', err));
 
         return res.ok({ message: 'Password updated successfully.' });
     } catch (error) {
@@ -903,7 +930,10 @@ export async function changePasswordController(req, res, next) {
         const user = await UserModel.findOne({ email: normEmail }).select('+password');
         if (!user) throw ERR.VALIDATION('Email is not available');
 
-        if (String(newPassword).length < 8) throw ERR.VALIDATION('Password must be at least 8 characters');
+        const strongPwRegex2 = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+        if (!strongPwRegex2.test(String(newPassword))) {
+            throw ERR.VALIDATION('Password must be at least 8 characters with 1 uppercase, 1 lowercase, 1 number, and 1 special character');
+        }
         if (newPassword !== confirmPassword) throw ERR.VALIDATION('newPassword and confirmPassword must be same.');
 
         // evitar reutilizar la misma contraseña
@@ -919,6 +949,14 @@ export async function changePasswordController(req, res, next) {
         user.signUpWithGoogle = false; // ya tiene pass local
         user.refresh_token = '';       // revocar sesiones
         await user.save();
+
+        // Notificar por email
+        sendEmailFun({
+            sendTo: normEmail,
+            subject: 'Tu contrasena fue actualizada - MTZstore',
+            text: '',
+            html: PasswordChangedEmail(user.name),
+        }).catch(err => console.error('Password changed email failed:', err));
 
         return res.ok({ message: 'Password updated successfully.' });
     } catch (error) {

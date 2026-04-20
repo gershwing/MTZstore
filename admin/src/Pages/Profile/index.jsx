@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import CircularProgress from '@mui/material/CircularProgress';
-import { Button, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Button, IconButton, InputAdornment, TextField, MenuItem } from '@mui/material';
 import { editData, fetchDataFromApi, postData, uploadImage } from "../../utils/api";
 import { useNavigate } from 'react-router-dom';
 import { PhoneInput } from 'react-international-phone';
@@ -28,7 +28,7 @@ const Profile = () => {
     const cooldownRef = useRef(null);
     const [showPw, setShowPw] = useState({ new: false, confirm: false });
 
-    const [formFields, setFormsFields] = useState({ name: '', email: '', mobile: '' });
+    const [formFields, setFormsFields] = useState({ name: '', email: '', mobile: '', birthDate: '', gender: '' });
     const [changePassword, setChangePassword] = useState({ newPassword: '', confirmPassword: '' });
 
     const history = useNavigate();
@@ -51,7 +51,11 @@ const Profile = () => {
         const u = me || user;
         if (u?._id) {
             setUserId(u._id);
-            setFormsFields({ name: u.name || '', email: u.email || '', mobile: u.mobile || '' });
+            setFormsFields({
+                name: u.name || '', email: u.email || '', mobile: u.mobile || '',
+                birthDate: u.birthDate ? new Date(u.birthDate).toISOString().split('T')[0] : '',
+                gender: u.gender || '',
+            });
             setPhone(u?.mobile ? String(u.mobile) : '');
         }
     }, [me, user]);
@@ -235,6 +239,18 @@ const Profile = () => {
                         <div className="col">
                             <PhoneInput defaultCountry="bo" value={phone} disabled={isLoading} onChange={(val) => { setPhone(val); setFormsFields(prev => ({ ...prev, mobile: val })); }} />
                         </div>
+                        <div className="col">
+                            <input type="date" className="w-full h-[40px] border border-[rgba(0,0,0,0.2)] focus:outline-none focus:border-[rgba(0,0,0,0.4)] rounded-sm p-3 text-sm" name="birthDate" value={formFields.birthDate || ""} disabled={isLoading} onChange={onChangeInput} />
+                        </div>
+                        <div className="col">
+                            <select className="w-full h-[40px] border border-[rgba(0,0,0,0.2)] focus:outline-none focus:border-[rgba(0,0,0,0.4)] rounded-sm p-3 text-sm" name="gender" value={formFields.gender || ""} disabled={isLoading} onChange={onChangeInput}>
+                                <option value="">Genero</option>
+                                <option value="male">Masculino</option>
+                                <option value="female">Femenino</option>
+                                <option value="other">Otro</option>
+                                <option value="prefer_not_to_say">Prefiero no decir</option>
+                            </select>
+                        </div>
                     </div>
                     <br />
                     <div className="flex items-center gap-4">
@@ -302,11 +318,27 @@ const Profile = () => {
                                             ),
                                         }}
                                     />
+                                    {changePassword.newPassword && (
+                                        <div className="mt-1 text-[11px] space-y-0.5">
+                                            <div className={changePassword.newPassword.length >= 8 ? "text-green-600" : "text-gray-400"}>
+                                                {changePassword.newPassword.length >= 8 ? "✓" : "○"} 8 caracteres
+                                            </div>
+                                            <div className={/[A-Z]/.test(changePassword.newPassword) ? "text-green-600" : "text-gray-400"}>
+                                                {/[A-Z]/.test(changePassword.newPassword) ? "✓" : "○"} 1 mayuscula
+                                            </div>
+                                            <div className={/\d/.test(changePassword.newPassword) ? "text-green-600" : "text-gray-400"}>
+                                                {/\d/.test(changePassword.newPassword) ? "✓" : "○"} 1 numero
+                                            </div>
+                                            <div className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(changePassword.newPassword) ? "text-green-600" : "text-gray-400"}>
+                                                {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(changePassword.newPassword) ? "✓" : "○"} 1 especial
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="col">
                                     <TextField
                                         type={showPw.confirm ? "text" : "password"}
-                                        label="Confirmar contraseña"
+                                        label="Confirmar contrasena"
                                         variant="outlined"
                                         size="small"
                                         className="w-full"

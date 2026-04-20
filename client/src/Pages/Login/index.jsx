@@ -169,28 +169,30 @@ const Login = () => {
           <form className="w-full mt-5" onSubmit={handleSubmit}>
             <div className="form-group w-full mb-5">
               <TextField
-                type="emai"
+                type="email"
                 id="email"
                 name="email"
                 value={formFields.email}
-                disabled={isLoading === true ? true : false}
-                label="Correo electrónico"
+                disabled={isLoading}
+                label="Correo electronico"
                 variant="outlined"
                 className="w-full"
+                InputLabelProps={{ shrink: true }}
                 onChange={onChangeInput}
               />
             </div>
 
             <div className="form-group w-full mb-5 relative">
               <TextField
-                type={isPasswordShow === false ? 'password' : 'text'}
+                type={isPasswordShow ? 'text' : 'password'}
                 id="password"
-                label="Contraseña"
+                label="Contrasena"
                 variant="outlined"
                 className="w-full"
                 name="password"
                 value={formFields.password}
-                disabled={isLoading === true ? true : false}
+                disabled={isLoading}
+                InputLabelProps={{ shrink: true }}
                 onChange={onChangeInput}
               />
               <Button className="!absolute top-[10px] right-[10px] z-50 !w-[35px] !h-[35px] !min-w-[35px] !rounded-full !text-black" onClick={() => {

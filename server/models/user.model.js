@@ -46,7 +46,13 @@ const userSchema = new Schema(
         avatar: { type: String, default: "" },
         avatarPublicId: { type: String, default: "" },
 
-        mobile: { type: Number, default: null },
+        mobile: { type: String, default: "" },
+        birthDate: { type: Date, default: null },
+        gender: {
+            type: String,
+            enum: ["male", "female", "other", "prefer_not_to_say", ""],
+            default: "",
+        },
         verify_email: { type: Boolean, default: false },
         access_token: { type: String, default: "" },
         refresh_token: { type: String, default: "" },

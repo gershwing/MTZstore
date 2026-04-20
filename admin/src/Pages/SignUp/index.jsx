@@ -10,6 +10,9 @@ import { CgLogIn } from "react-icons/cg";
 import { FaRegUser, FaRegEye, FaEyeSlash } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 
+import { PhoneInput } from "react-international-phone";
+import "react-international-phone/style.css";
+
 import { fetchDataFromApi, postData } from "../../utils/api.js";
 import { useAuthFull as useAuth } from "../../hooks/useAuth";
 import { afterLogin } from "../../utils/session.js";
@@ -51,11 +54,17 @@ const SignUp = () => {
     const [loadingGoogle, setLoadingGoogle] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isPasswordShow, setIsPasswordShow] = useState(false);
+    const [isConfirmPasswordShow, setIsConfirmPasswordShow] = useState(false);
 
     const [formFields, setFormFields] = useState({
-        name: "",
+        firstName: "",
+        lastName: "",
+        birthDate: "",
+        gender: "",
+        mobile: "",
         email: "",
         password: "",
+        confirmPassword: "",
     });
 
     // OTP inline step
@@ -130,19 +139,39 @@ const SignUp = () => {
         setFormFields((prev) => ({ ...prev, [name]: value }));
     };
 
-    const valideValue = Object.values(formFields).every(Boolean);
+    const handlePhoneChange = (phone) => setFormFields((prev) => ({ ...prev, mobile: phone }));
+
+    const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+    const canSubmit = formFields.firstName && formFields.lastName && formFields.email
+        && formFields.password && formFields.confirmPassword;
 
     // Paso 1: Registrar
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
-        if (!formFields.name) { alertBox?.("error", "Por favor ingrese su nombre completo"); setIsLoading(false); return; }
+        if (!formFields.firstName || !formFields.lastName) { alertBox?.("error", "Por favor ingrese sus nombres y apellidos"); setIsLoading(false); return; }
         if (!formFields.email) { alertBox?.("error", "Por favor ingrese su correo"); setIsLoading(false); return; }
-        if (!formFields.password) { alertBox?.("error", "Por favor ingrese su contrasena"); setIsLoading(false); return; }
+        if (!PASSWORD_REGEX.test(formFields.password)) {
+            alertBox?.("error", "La contrasena debe tener al menos 8 caracteres, 1 mayuscula, 1 numero y 1 caracter especial");
+            setIsLoading(false); return;
+        }
+        if (formFields.password !== formFields.confirmPassword) {
+            alertBox?.("error", "Las contrasenas no coinciden");
+            setIsLoading(false); return;
+        }
 
         try {
-            const res = await postData("/api/user/register", formFields);
+            const payload = {
+                name: `${formFields.firstName.trim()} ${formFields.lastName.trim()}`,
+                email: formFields.email,
+                password: formFields.password,
+                mobile: formFields.mobile,
+                birthDate: formFields.birthDate || null,
+                gender: formFields.gender,
+            };
+            const res = await postData("/api/user/register", payload);
             if (res?.error !== true) {
                 alertBox?.("success", res?.message);
                 setRegEmail(formFields.email);
@@ -290,16 +319,67 @@ const SignUp = () => {
                             <span className="flex items-center w-[100px] h-[1px] bg-[rgba(0,0,0,0.2)]"></span>
                         </div>
 
-                        <form className="w-full px-8 mt-3" onSubmit={handleSubmit}>
+                        <form className="w-full px-8 mt-3" onSubmit={handleSubmit} autoComplete="off">
                             <div className="form-group mb-4 w-full">
-                                <h4 className="text-[14px] font-[500] mb-1">Nombre Completo</h4>
+                                <h4 className="text-[14px] font-[500] mb-1">Nombres</h4>
                                 <input
                                     type="text"
-                                    name="name"
-                                    value={formFields.name}
+                                    name="firstName"
+                                    value={formFields.firstName}
                                     disabled={isLoading}
                                     onChange={onChangeInput}
                                     className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
+                                />
+                            </div>
+
+                            <div className="form-group mb-4 w-full">
+                                <h4 className="text-[14px] font-[500] mb-1">Apellidos</h4>
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    value={formFields.lastName}
+                                    disabled={isLoading}
+                                    onChange={onChangeInput}
+                                    className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
+                                />
+                            </div>
+
+                            <div className="form-group mb-4 w-full">
+                                <h4 className="text-[14px] font-[500] mb-1">Fecha de nacimiento</h4>
+                                <input
+                                    type="date"
+                                    name="birthDate"
+                                    value={formFields.birthDate}
+                                    disabled={isLoading}
+                                    onChange={onChangeInput}
+                                    className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
+                                />
+                            </div>
+
+                            <div className="form-group mb-4 w-full">
+                                <h4 className="text-[14px] font-[500] mb-1">Genero</h4>
+                                <select
+                                    name="gender"
+                                    value={formFields.gender}
+                                    disabled={isLoading}
+                                    onChange={onChangeInput}
+                                    className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
+                                >
+                                    <option value="">Seleccionar</option>
+                                    <option value="male">Masculino</option>
+                                    <option value="female">Femenino</option>
+                                    <option value="other">Otro</option>
+                                    <option value="prefer_not_to_say">Prefiero no decir</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group mb-4 w-full">
+                                <h4 className="text-[14px] font-[500] mb-1">Telefono WhatsApp</h4>
+                                <PhoneInput
+                                    defaultCountry="bo"
+                                    value={formFields.mobile}
+                                    onChange={handlePhoneChange}
+                                    disabled={isLoading}
                                 />
                             </div>
 
@@ -315,7 +395,7 @@ const SignUp = () => {
                                 />
                             </div>
 
-                            <div className="form-group mb-4 w-full">
+                            <div className="form-group mb-1 w-full">
                                 <h4 className="text-[14px] font-[500] mb-1">Contrasena</h4>
                                 <div className="relative w-full">
                                     <input
@@ -334,6 +414,53 @@ const SignUp = () => {
                                         {isPasswordShow ? <FaEyeSlash className="text-[18px]" /> : <FaRegEye className="text-[18px]" />}
                                     </Button>
                                 </div>
+                                {formFields.password && (
+                                    <div className="mt-1 mb-2 text-[12px] space-y-0.5">
+                                        <div className={formFields.password.length >= 8 ? "text-green-600" : "text-gray-400"}>
+                                            {formFields.password.length >= 8 ? "✓" : "○"} 8 caracteres minimo
+                                        </div>
+                                        <div className={/[A-Z]/.test(formFields.password) ? "text-green-600" : "text-gray-400"}>
+                                            {/[A-Z]/.test(formFields.password) ? "✓" : "○"} 1 mayuscula
+                                        </div>
+                                        <div className={/[a-z]/.test(formFields.password) ? "text-green-600" : "text-gray-400"}>
+                                            {/[a-z]/.test(formFields.password) ? "✓" : "○"} 1 minuscula
+                                        </div>
+                                        <div className={/\d/.test(formFields.password) ? "text-green-600" : "text-gray-400"}>
+                                            {/\d/.test(formFields.password) ? "✓" : "○"} 1 numero
+                                        </div>
+                                        <div className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formFields.password) ? "text-green-600" : "text-gray-400"}>
+                                            {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formFields.password) ? "✓" : "○"} 1 caracter especial
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="form-group mb-4 w-full">
+                                <h4 className="text-[14px] font-[500] mb-1">Repite tu contrasena</h4>
+                                <div className="relative w-full">
+                                    <input
+                                        type={isConfirmPasswordShow ? "text" : "password"}
+                                        name="confirmPassword"
+                                        value={formFields.confirmPassword}
+                                        disabled={isLoading}
+                                        onChange={onChangeInput}
+                                        className={`w-full h-[50px] border-2 rounded-md focus:outline-none px-3 ${
+                                            formFields.confirmPassword && formFields.password !== formFields.confirmPassword
+                                                ? "border-red-400 focus:border-red-500"
+                                                : "border-[rgba(0,0,0,0.1)] focus:border-[rgba(0,0,0,0.7)]"
+                                        }`}
+                                    />
+                                    <Button
+                                        type="button"
+                                        className="!absolute top-[7px] right-[10px] z-50 !rounded-full !w-[35px] !h-[35px] !min-w-[35px] !text-gray-600"
+                                        onClick={() => setIsConfirmPasswordShow(!isConfirmPasswordShow)}
+                                    >
+                                        {isConfirmPasswordShow ? <FaEyeSlash className="text-[18px]" /> : <FaRegEye className="text-[18px]" />}
+                                    </Button>
+                                </div>
+                                {formFields.confirmPassword && formFields.password !== formFields.confirmPassword && (
+                                    <p className="text-red-500 text-[12px] mt-1">Las contrasenas no coinciden</p>
+                                )}
                             </div>
 
                             <div className="flex items-center justify-between mb-4">
@@ -343,7 +470,7 @@ const SignUp = () => {
                                 </Link>
                             </div>
 
-                            <Button type="submit" className="btn-blue btn-lg w-full" disabled={!valideValue || isLoading}>
+                            <Button type="submit" className="btn-blue btn-lg w-full" disabled={!canSubmit || isLoading}>
                                 {isLoading ? <CircularProgress color="inherit" size={22} /> : "Registrarse"}
                             </Button>
                         </form>

@@ -10,6 +10,7 @@ import { Collapse } from "react-collapse";
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
+import MenuItem from "@mui/material/MenuItem";
 
 const MyAccount = () => {
 
@@ -38,7 +39,9 @@ const MyAccount = () => {
   const [formFields, setFormsFields] = useState({
     name: '',
     email: '',
-    mobile: ''
+    mobile: '',
+    birthDate: '',
+    gender: '',
   });
 
   const [changePassword, setChangePassword] = useState({
@@ -65,7 +68,9 @@ const MyAccount = () => {
         setFormsFields({
           name: context?.userData?.name,
           email: context?.userData?.email,
-          mobile: context?.userData?.mobile
+          mobile: context?.userData?.mobile,
+          birthDate: context?.userData?.birthDate ? new Date(context.userData.birthDate).toISOString().split('T')[0] : '',
+          gender: context?.userData?.gender || '',
         })
       }, 200);
       setPhone(
@@ -259,13 +264,48 @@ const MyAccount = () => {
                   <PhoneInput
                     defaultCountry="bo"
                     value={phone}
-                    disabled={isLoading === true ? true : false}
+                    disabled={isLoading}
                     onChange={(phone) => {
                       setPhone(phone);
                       setFormsFields(prev => ({ ...prev, mobile: phone }));
                     }}
                   />
+                </div>
 
+                <div className="col">
+                  <TextField
+                    type="date"
+                    label="Fecha de nacimiento"
+                    variant="outlined"
+                    size="small"
+                    className="w-full"
+                    name="birthDate"
+                    value={formFields.birthDate || ""}
+                    disabled={isLoading}
+                    InputLabelProps={{ shrink: true }}
+                    onChange={onChangeInput}
+                  />
+                </div>
+
+                <div className="col">
+                  <TextField
+                    select
+                    label="Genero"
+                    variant="outlined"
+                    size="small"
+                    className="w-full"
+                    name="gender"
+                    value={formFields.gender || ""}
+                    disabled={isLoading}
+                    InputLabelProps={{ shrink: true }}
+                    onChange={onChangeInput}
+                  >
+                    <MenuItem value="">Seleccionar</MenuItem>
+                    <MenuItem value="male">Masculino</MenuItem>
+                    <MenuItem value="female">Femenino</MenuItem>
+                    <MenuItem value="other">Otro</MenuItem>
+                    <MenuItem value="prefer_not_to_say">Prefiero no decir</MenuItem>
+                  </TextField>
                 </div>
 
               </div>
@@ -339,7 +379,7 @@ const MyAccount = () => {
                     <div className="col">
                       <TextField
                         type={showPw.new ? "text" : "password"}
-                        label="Nueva contraseña"
+                        label="Nueva contrasena"
                         variant="outlined"
                         size="small"
                         className="w-full"
@@ -355,12 +395,28 @@ const MyAccount = () => {
                           ),
                         }}
                       />
+                      {changePassword.newPassword && (
+                        <div className="mt-1 text-[11px] space-y-0.5">
+                          <div className={changePassword.newPassword.length >= 8 ? "text-green-600" : "text-gray-400"}>
+                            {changePassword.newPassword.length >= 8 ? "✓" : "○"} 8 caracteres
+                          </div>
+                          <div className={/[A-Z]/.test(changePassword.newPassword) ? "text-green-600" : "text-gray-400"}>
+                            {/[A-Z]/.test(changePassword.newPassword) ? "✓" : "○"} 1 mayuscula
+                          </div>
+                          <div className={/\d/.test(changePassword.newPassword) ? "text-green-600" : "text-gray-400"}>
+                            {/\d/.test(changePassword.newPassword) ? "✓" : "○"} 1 numero
+                          </div>
+                          <div className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(changePassword.newPassword) ? "text-green-600" : "text-gray-400"}>
+                            {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(changePassword.newPassword) ? "✓" : "○"} 1 especial
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="col">
                       <TextField
                         type={showPw.confirm ? "text" : "password"}
-                        label="Confirmar contraseña"
+                        label="Confirmar contrasena"
                         variant="outlined"
                         size="small"
                         className="w-full"

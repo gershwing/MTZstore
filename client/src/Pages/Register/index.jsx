@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import { IoMdEye } from "react-icons/io";
 import { IoMdEyeOff } from "react-icons/io";
@@ -10,17 +11,47 @@ import { postData } from "../../utils/api";
 import CircularProgress from '@mui/material/CircularProgress';
 import { useNavigate } from "react-router-dom";
 import OtpBox from "../../components/OtpBox";
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 import { googleSignInInteractive, completeGoogleRedirectIfAny } from "../../firebase";
+
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+const PasswordChecklist = ({ password }) => {
+  const checks = [
+    { label: "8 caracteres minimo", ok: password.length >= 8 },
+    { label: "1 mayuscula", ok: /[A-Z]/.test(password) },
+    { label: "1 minuscula", ok: /[a-z]/.test(password) },
+    { label: "1 numero", ok: /\d/.test(password) },
+    { label: "1 caracter especial", ok: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) },
+  ];
+  if (!password) return null;
+  return (
+    <div className="mt-1 mb-2 text-[12px] space-y-0.5">
+      {checks.map((c) => (
+        <div key={c.label} className={c.ok ? "text-green-600" : "text-gray-400"}>
+          {c.ok ? "✓" : "○"} {c.label}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const Register = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordShow, setIsPasswordShow] = useState(false);
+  const [isConfirmPasswordShow, setIsConfirmPasswordShow] = useState(false);
   const [formFields, setFormFields] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
+    birthDate: "",
+    gender: "",
+    mobile: "",
     email: "",
-    password: ""
+    password: "",
+    confirmPassword: "",
   });
 
   // OTP inline step
@@ -79,30 +110,47 @@ const Register = () => {
     setFormFields((prev) => ({ ...prev, [name]: value }));
   };
 
-  const valideValue = Object.values(formFields).every(el => el);
+  const handlePhoneChange = (phone) => setFormFields(prev => ({ ...prev, mobile: phone }));
+
+  const canSubmit = formFields.firstName && formFields.lastName && formFields.email
+    && formFields.password && formFields.confirmPassword;
 
   // Paso 1: Registrar y obtener token
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!formFields.name) {
-      context?.alertBox("error", "Por favor ingresa tu nombre completo");
+    if (!formFields.firstName || !formFields.lastName) {
+      context?.alertBox("error", "Por favor ingresa tus nombres y apellidos");
       setIsLoading(false);
       return;
     }
     if (!formFields.email) {
-      context?.alertBox("error", "Por favor ingresa tu correo electrónico");
+      context?.alertBox("error", "Por favor ingresa tu correo electronico");
       setIsLoading(false);
       return;
     }
-    if (!formFields.password) {
-      context?.alertBox("error", "Por favor ingresa tu contraseña");
+    if (!PASSWORD_REGEX.test(formFields.password)) {
+      context?.alertBox("error", "La contrasena debe tener al menos 8 caracteres, 1 mayuscula, 1 numero y 1 caracter especial");
+      setIsLoading(false);
+      return;
+    }
+    if (formFields.password !== formFields.confirmPassword) {
+      context?.alertBox("error", "Las contrasenas no coinciden");
       setIsLoading(false);
       return;
     }
 
-    postData("/api/user/register", formFields).then((res) => {
+    const payload = {
+      name: `${formFields.firstName.trim()} ${formFields.lastName.trim()}`,
+      email: formFields.email,
+      password: formFields.password,
+      mobile: formFields.mobile,
+      birthDate: formFields.birthDate || null,
+      gender: formFields.gender,
+    };
+
+    postData("/api/user/register", payload).then((res) => {
       setIsLoading(false);
       if (res?.error !== true) {
         context?.alertBox("success", res?.message);
@@ -177,18 +225,79 @@ const Register = () => {
                 Registrate con una cuenta nueva
               </h3>
 
-              <form className="w-full mt-5" onSubmit={handleSubmit}>
+              <form className="w-full mt-5" onSubmit={handleSubmit} autoComplete="off">
                 <div className="form-group w-full mb-5">
                   <TextField
                     type="text"
-                    id="name"
-                    name="name"
-                    value={formFields.name}
+                    id="firstName"
+                    name="firstName"
+                    value={formFields.firstName}
                     disabled={isLoading}
-                    label="Nombre completo"
+                    label="Nombres"
                     variant="outlined"
                     className="w-full"
+                    InputLabelProps={{ shrink: true }}
                     onChange={onChangeInput}
+                  />
+                </div>
+
+                <div className="form-group w-full mb-5">
+                  <TextField
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formFields.lastName}
+                    disabled={isLoading}
+                    label="Apellidos"
+                    variant="outlined"
+                    className="w-full"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={onChangeInput}
+                  />
+                </div>
+
+                <div className="form-group w-full mb-5">
+                  <TextField
+                    type="date"
+                    id="birthDate"
+                    name="birthDate"
+                    value={formFields.birthDate}
+                    disabled={isLoading}
+                    label="Fecha de nacimiento"
+                    variant="outlined"
+                    className="w-full"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={onChangeInput}
+                  />
+                </div>
+
+                <div className="form-group w-full mb-5">
+                  <TextField
+                    select
+                    id="gender"
+                    name="gender"
+                    value={formFields.gender}
+                    disabled={isLoading}
+                    label="Genero"
+                    variant="outlined"
+                    className="w-full"
+                    InputLabelProps={{ shrink: true }}
+                    onChange={onChangeInput}
+                  >
+                    <MenuItem value="male">Masculino</MenuItem>
+                    <MenuItem value="female">Femenino</MenuItem>
+                    <MenuItem value="other">Otro</MenuItem>
+                    <MenuItem value="prefer_not_to_say">Prefiero no decir</MenuItem>
+                  </TextField>
+                </div>
+
+                <div className="form-group w-full mb-5">
+                  <label className="text-[14px] text-gray-600 mb-1 block">Telefono WhatsApp</label>
+                  <PhoneInput
+                    defaultCountry="bo"
+                    value={formFields.mobile}
+                    onChange={handlePhoneChange}
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -202,11 +311,12 @@ const Register = () => {
                     disabled={isLoading}
                     variant="outlined"
                     className="w-full"
+                    InputLabelProps={{ shrink: true }}
                     onChange={onChangeInput}
                   />
                 </div>
 
-                <div className="form-group w-full mb-5 relative">
+                <div className="form-group w-full mb-1 relative">
                   <TextField
                     type={isPasswordShow ? 'text' : 'password'}
                     id="password"
@@ -216,6 +326,7 @@ const Register = () => {
                     className="w-full"
                     value={formFields.password}
                     disabled={isLoading}
+                    InputLabelProps={{ shrink: true }}
                     onChange={onChangeInput}
                   />
                   <Button className="!absolute top-[10px] right-[10px] z-50 !w-[35px] !h-[35px] !min-w-[35px] !rounded-full !text-black" onClick={() => setIsPasswordShow(!isPasswordShow)}>
@@ -223,8 +334,30 @@ const Register = () => {
                   </Button>
                 </div>
 
+                <PasswordChecklist password={formFields.password} />
+
+                <div className="form-group w-full mb-5 relative">
+                  <TextField
+                    type={isConfirmPasswordShow ? 'text' : 'password'}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    label="Repite tu contrasena"
+                    variant="outlined"
+                    className="w-full"
+                    value={formFields.confirmPassword}
+                    disabled={isLoading}
+                    InputLabelProps={{ shrink: true }}
+                    onChange={onChangeInput}
+                    error={formFields.confirmPassword.length > 0 && formFields.password !== formFields.confirmPassword}
+                    helperText={formFields.confirmPassword.length > 0 && formFields.password !== formFields.confirmPassword ? "Las contrasenas no coinciden" : ""}
+                  />
+                  <Button className="!absolute top-[10px] right-[10px] z-50 !w-[35px] !h-[35px] !min-w-[35px] !rounded-full !text-black" onClick={() => setIsConfirmPasswordShow(!isConfirmPasswordShow)}>
+                    {isConfirmPasswordShow ? <IoMdEyeOff className="text-[20px] opacity-75" /> : <IoMdEye className="text-[20px] opacity-75" />}
+                  </Button>
+                </div>
+
                 <div className="flex items-center w-full mt-3 mb-3">
-                  <Button type="submit" disabled={!valideValue || isLoading} className="btn-org btn-lg w-full flex gap-3">
+                  <Button type="submit" disabled={!canSubmit || isLoading} className="btn-org btn-lg w-full flex gap-3">
                     {isLoading ? <CircularProgress color="inherit" size={24} /> : 'Registrarse'}
                   </Button>
                 </div>
