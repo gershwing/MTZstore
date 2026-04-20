@@ -275,27 +275,8 @@ const Login = () => {
   }
 
   // ---- Forgot password (pública)
-  const forgotPassword = async () => {
-    if (!formFields.email) {
-      return notify("error", "Por favor ingresa tu correo electrónico");
-    }
-    try {
-      const res = await postData(
-        "/api/user/forgot-password",
-        { email: formFields.email },
-        { __public: true }
-      );
-      if (res?.error) {
-        notify("error", extractErrorMsg(res, "No se pudo enviar el código"));
-        return;
-      }
-      notify("success", res?.message || "Te enviamos un código");
-      localStorage.setItem("userEmail", formFields.email);
-      localStorage.setItem("actionType", "forgot-password");
-      navigate("/verify-account");
-    } catch {
-      notify("error", "Error de red. Intenta más tarde.");
-    }
+  const forgotPassword = () => {
+    navigate("/forgot-password");
   };
 
   // ---- Login con Google (firebase; popup + fallback redirect)
