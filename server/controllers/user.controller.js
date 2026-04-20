@@ -414,8 +414,8 @@ export async function loginUserController(req, res, next) {
         }
 
         // cuenta creada con Google y sin password local
-        if (user.signUpWithGoogle === true && !user.password) {
-            throw ERR.VALIDATION("This account was created with Google. Please sign in with Google or set a password.");
+        if (user.signUpWithGoogle === true && (!user.password || user.password === "null")) {
+            throw ERR.VALIDATION("Esta cuenta fue creada con Google. Por favor inicia sesion con Google o establece una contrasena.");
         }
 
         // password check
