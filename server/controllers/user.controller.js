@@ -146,8 +146,8 @@ export async function verifyEmailController(req, res, next) {
         const isCodeValid = String(payload.otp || "") === String(otp);
         const isNotExpired = (payload.otpExpires || 0) > Date.now();
 
-        if (!isCodeValid) throw ERR.VALIDATION("Invalid OTP");
-        if (!isNotExpired) throw ERR.VALIDATION("OTP expired");
+        if (!isCodeValid) throw ERR.VALIDATION("El codigo OTP no es correcto. Verifica e intenta de nuevo.");
+        if (!isNotExpired) throw ERR.VALIDATION("El codigo OTP ha expirado. Solicita uno nuevo.");
 
         // Flujo legacy: cuenta Google-only agregando password (usuario ya existe en BD)
         if (payload._legacy && payload.id) {
@@ -811,11 +811,11 @@ export async function verifyForgotPasswordOtp(req, res, next) {
         if (!user) throw ERR.VALIDATION('Email not available');
 
         const isCodeValid = String(user.otp || '') === String(otp);
-        if (!isCodeValid) throw ERR.VALIDATION('Invalid OTP');
+        if (!isCodeValid) throw ERR.VALIDATION('El codigo OTP no es correcto. Verifica e intenta de nuevo.');
 
         const now = Date.now();
         const notExpired = typeof user.otpExpires === 'number' && user.otpExpires > now;
-        if (!notExpired) throw ERR.VALIDATION('Otp is expired');
+        if (!notExpired) throw ERR.VALIDATION('El codigo OTP ha expirado. Solicita uno nuevo.');
 
         // Limpiar OTP
         user.otp = null;
@@ -939,7 +939,7 @@ export async function changePasswordController(req, res, next) {
         // evitar reutilizar la misma contraseña
         if (user.password && user.password !== 'null') {
             const same = await bcryptjs.compare(String(newPassword), user.password);
-            if (same) throw ERR.VALIDATION('New password must be different from the current password');
+            if (same) throw ERR.VALIDATION('Esta contrasena ya fue utilizada anteriormente. Por favor elige una diferente.');
         }
 
         const salt = await bcryptjs.genSalt(10);
