@@ -95,7 +95,6 @@ const Header = () => {
     setisSidebarOpen = () => { },
     windowWidth = (typeof window !== "undefined" ? window.innerWidth : 1200),
     viewer: uiViewer = { activeStoreId: null },
-    setCatData = () => { },
   } = ui || {};
 
   const appCtx = useContext(AppContext) || {};
@@ -103,6 +102,7 @@ const Header = () => {
   const {
     me: _me, viewer: _viewer, user: _user,
     isAuthenticated = false, authReady = true, refreshMe, isSuper,
+    setCatData = () => { },
   } = useAuth() || {};
   const me = _me || _viewer || _user || null;
   const authViewer = _viewer || null;
@@ -171,18 +171,7 @@ const Header = () => {
     return () => { try { window.removeEventListener("logo:updated", onLogoUpdated); } catch { } };
   }, []);
 
-  // Carga categorías globales una sola vez
-  const didFetchGlobals = useRef(false);
-  useEffect(() => {
-    if (didFetchGlobals.current) return;
-    didFetchGlobals.current = true;
-    fetchDataFromApi("/api/category")
-      .then((res) => {
-        const list = Array.isArray(res?.category) ? res.category : (res?.data || []);
-        setCatData(list);
-      })
-      .catch(() => { });
-  }, [setCatData]);
+  // Categories se cargan en AppContext (singleton)
 
   // 🔁 Reaccionar a auth:updated (sin tocar tenant) + refrescar logo desde cache
   const [, setTick] = useState(0);

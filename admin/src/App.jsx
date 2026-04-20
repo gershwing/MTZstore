@@ -50,7 +50,7 @@ function SocketEventsBridge({ token }) {
 }
 
 function InnerApp() {
-  const { authReady, catData, setCatData } = useAuth();
+  const { authReady } = useAuth();
 
   // ── UI state for sidebar + responsive ──
   const [isSidebarOpen, setisSidebarOpen] = React.useState(true);
@@ -65,8 +65,8 @@ function InnerApp() {
   }, []);
 
   const uiValue = React.useMemo(
-    () => ({ isSidebarOpen, setisSidebarOpen, windowWidth, catData, setCatData }),
-    [isSidebarOpen, windowWidth, catData, setCatData]
+    () => ({ isSidebarOpen, setisSidebarOpen, windowWidth }),
+    [isSidebarOpen, windowWidth]
   );
 
   const router = React.useMemo(() => createBrowserRouter(routes), []);

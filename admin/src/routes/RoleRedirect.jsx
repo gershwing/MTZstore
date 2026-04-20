@@ -61,7 +61,7 @@ export default function RoleRedirect() {
     if (hasTenant || hasMembership) return `${BASE}/dashboard/store`;
 
     // 4) CUSTOMER nuevo (sin roles ni tienda) → onboarding
-    return `${BASE}/applications`;
+    return `${BASE}/get-started`;
   }, [roles, isSuper, hasTenant, hasMembership]);
 
   return <Navigate to={target} replace />;

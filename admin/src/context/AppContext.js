@@ -2,7 +2,7 @@
 import React from "react";
 import { hydrateMeAndNormalizeScope } from "../utils/session";
 import { attachAppListeners } from "../utils/socket";
-import { api } from "@/utils/api";
+import { api, fetchDataFromApi } from "@/utils/api";
 import { setTenantId, getTenantId } from "@/utils/tenant";
 
 export const AppContext = React.createContext(null);
@@ -11,6 +11,9 @@ export const AppContext = React.createContext(null);
 export function useAuth() {
   return React.useContext(AppContext);
 }
+
+// Module-level flag: previene re-fetch de categories en StrictMode
+let _didFetchCategories = false;
 
 export default function AppProvider({ children }) {
   const [authReady, setAuthReady] = React.useState(false);
@@ -25,6 +28,18 @@ export default function AppProvider({ children }) {
 
   // Flag para evitar el doble boot en StrictMode
   const didBoot = React.useRef(false);
+
+  // Carga categorías globales UNA sola vez (module-level flag, inmune a StrictMode)
+  React.useEffect(() => {
+    if (_didFetchCategories) return;
+    _didFetchCategories = true;
+    fetchDataFromApi("/api/category")
+      .then((res) => {
+        const list = Array.isArray(res?.category) ? res.category : (res?.data || []);
+        setCatData(list);
+      })
+      .catch(() => { });
+  }, []);
 
   // Adjunta listeners globales de la app (socket) una sola vez
   React.useEffect(() => {

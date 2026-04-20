@@ -7,49 +7,39 @@ import { MyContext } from "../../App";
 
 const Verify = () => {
   const [otp, setOtp] = useState("");
+  const history = useNavigate();
+  const context = useContext(MyContext);
+
+  const actionType = localStorage.getItem("actionType");
+
+  // Si no es forgot-password, redirigir a register
+  useEffect(() => {
+    if (actionType !== "forgot-password") {
+      history("/register");
+    }
+  }, [actionType, history]);
+
   const handleOtpChange = (value) => {
     setOtp(value);
   };
 
-  const history = useNavigate();
-  const context = useContext(MyContext)
-
-  const verityOTP = (e) => {
+  const verifyOTP = (e) => {
     e.preventDefault();
 
-    const actionType = localStorage.getItem("actionType");
+    postData("/api/user/verify-forgot-password-otp", {
+      email: localStorage.getItem("userEmail"),
+      otp: otp,
+    }).then((res) => {
+      if (res?.error === false) {
+        context?.alertBox("success", res?.message);
+        history("/forgot-password");
+      } else {
+        context?.alertBox("error", res?.message || "OTP verification failed");
+      }
+    });
+  };
 
-    if (actionType !== "forgot-password") {
-
-      postData("/api/user/verifyEmail", {
-        email: localStorage.getItem("userEmail"),
-        otp: otp
-      }).then((res) => {
-        if (res?.error === false) {
-          context.alertBox("success", res?.message);
-          localStorage.removeItem("userEmail")
-          history("/login")
-        } else {
-          context.alertBox("error", res?.message);
-        }
-      })
-    }
-
-    else {
-      postData("/api/user/verify-forgot-password-otp", {
-        email: localStorage.getItem("userEmail"),
-        otp: otp
-      }).then((res) => {
-        if (res?.error === false) {
-          context.alertBox("success", res?.message);
-          history("/forgot-password")
-        } else {
-          context.alertBox("error", res?.message);
-        }
-      })
-    }
-
-  }
+  if (actionType !== "forgot-password") return null;
 
   return (
     <section className="section py-5 lg:py-10">
@@ -64,14 +54,18 @@ const Verify = () => {
 
           <p className="text-center mt-0 mb-4">
             OTP enviado a{" "}
-            <span className="text-primary font-bold">{localStorage.getItem("userEmail")}</span>
+            <span className="text-primary font-bold">
+              {localStorage.getItem("userEmail")}
+            </span>
           </p>
 
-          <form onSubmit={verityOTP}>
+          <form onSubmit={verifyOTP}>
             <OtpBox length={6} onChange={handleOtpChange} />
 
             <div className="flex items-center justify-center mt-5 px-3">
-              <Button type="submit" className="w-full btn-org btn-lg">Verificar OTP</Button>
+              <Button type="submit" className="w-full btn-org btn-lg">
+                Verificar OTP
+              </Button>
             </div>
           </form>
         </div>

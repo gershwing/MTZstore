@@ -54,66 +54,69 @@ export async function registerUserController(req, res, next) {
         }
 
         const normEmail = String(email).trim().toLowerCase();
+        const trimName = String(name).trim();
         const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normEmail);
         if (!isEmailValid) throw ERR.VALIDATION('Invalid email format');
         if (String(password).length < 8) throw ERR.VALIDATION('Password must be at least 8 characters');
 
-        const exists = await UserModel.findOne({ email: normEmail }).select("+password +verify_email");
-
-        const hashPassword = await bcryptjs.hash(password, 10);
-        const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-        let user;
+        const exists = await UserModel.findOne({ email: normEmail }).select("+password +verify_email +signUpWithGoogle");
 
         if (exists && exists.verify_email === true && exists.signUpWithGoogle === true) {
             // Cuenta Google-only: permitir agregar contraseña local (requiere OTP)
+            const hashPassword = await bcryptjs.hash(password, 10);
+            const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
             exists.password = hashPassword;
             exists.otp = verifyCode;
             exists.otpExpires = Date.now() + 600_000;
-            exists.verify_email = false; // requiere re-verificar para confirmar que es el dueño
+            exists.verify_email = false;
             await exists.save();
-            user = exists;
-        } else if (exists && exists.verify_email === true) {
-            throw ERR.VALIDATION('User already registered with this email');
-        } else if (exists && !exists.verify_email) {
-            // Usuario existe pero no verificó — regenerar OTP y reenviar
-            exists.password = hashPassword;
-            exists.name = String(name).trim();
-            exists.otp = verifyCode;
-            exists.otpExpires = Date.now() + 600_000;
-            await exists.save();
-            user = exists;
-        } else {
-            // Nuevo usuario
-            user = await UserModel.create({
-                email: normEmail,
-                password: hashPassword,
-                name: String(name).trim(),
-                otp: verifyCode,
-                otpExpires: Date.now() + 600_000,
-                verify_email: false,
-                signUpWithGoogle: false,
-                status: 'pending',
+
+            sendEmailFun({
+                sendTo: normEmail,
+                subject: 'Verify email from Ecommerce App',
+                text: '',
+                html: VerificationEmail(exists.name, verifyCode),
+            }).catch(err => console.error('OTP email failed:', err));
+
+            // Para cuenta Google existente, usamos el flujo legacy con el user en BD
+            const token = jwt.sign(
+                { id: exists._id.toString(), email: exists.email, _legacy: true },
+                process.env.JSON_WEB_TOKEN_SECRET_KEY,
+                { expiresIn: '15m' }
+            );
+
+            return res.created({
+                message: 'Check your email for the OTP.',
+                registrationToken: token,
             });
         }
 
-        // Fire-and-forget: no bloquear la respuesta esperando el SMTP
-        sendEmailFun({
-            sendTo: normEmail,
-            subject: 'Verify email from Ecommerce App',
-            text: '',
-            html: VerificationEmail(user.name, verifyCode),
-        }).catch(err => console.error('OTP email failed:', err));
+        if (exists && exists.verify_email === true) {
+            throw ERR.VALIDATION('User already registered with this email');
+        }
 
-        const token = jwt.sign(
-            { id: user._id.toString(), email: user.email },
+        // Nuevo registro (o re-intento): NO crear usuario en BD
+        // Empaquetar todo en un JWT temporal
+        const hashPassword = await bcryptjs.hash(password, 10);
+        const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = Date.now() + 600_000;
+
+        const registrationToken = jwt.sign(
+            { name: trimName, email: normEmail, hashedPassword: hashPassword, otp: verifyCode, otpExpires },
             process.env.JSON_WEB_TOKEN_SECRET_KEY,
             { expiresIn: '15m' }
         );
 
+        sendEmailFun({
+            sendTo: normEmail,
+            subject: 'Verify email from Ecommerce App',
+            text: '',
+            html: VerificationEmail(trimName, verifyCode),
+        }).catch(err => console.error('OTP email failed:', err));
+
         return res.created({
-            message: 'User registered successfully! Check your email for the OTP.',
-            token,
+            message: 'Check your email for the OTP.',
+            registrationToken,
         });
     } catch (error) {
         return next(error);
@@ -123,64 +126,93 @@ export async function registerUserController(req, res, next) {
 /** ========== Verificación de email por OTP ========== */
 export async function verifyEmailController(req, res, next) {
     try {
-        const { email, otp } = req.body;
-        if (!email || !otp) throw ERR.VALIDATION("Provide email and otp");
+        const { registrationToken, otp } = req.body;
+        if (!registrationToken || !otp) throw ERR.VALIDATION("Provide registrationToken and otp");
 
-        const normEmail = String(email).trim().toLowerCase();
-        const user = await UserModel
-            .findOne({ email: normEmail })
-            .select("+password +otp +otpExpires +verify_email +status");
+        // Decodificar el JWT de registro
+        let payload;
+        try {
+            payload = jwt.verify(registrationToken, process.env.JSON_WEB_TOKEN_SECRET_KEY);
+        } catch (e) {
+            throw ERR.VALIDATION("Registration token expired or invalid. Please register again.");
+        }
 
-        if (!user) throw ERR.NOT_FOUND("User not found");
-
-        // valida OTP
-        const isCodeValid = String(user.otp || "") === String(otp);
-
-        // soporta otpExpires como Number (ms) o Date
-        const exp = user.otpExpires;
-        const expMs =
-            typeof exp === "number" ? exp :
-                exp instanceof Date ? exp.getTime() :
-                    0;
-        const isNotExpired = expMs > Date.now();
+        // Validar OTP
+        const isCodeValid = String(payload.otp || "") === String(otp);
+        const isNotExpired = (payload.otpExpires || 0) > Date.now();
 
         if (!isCodeValid) throw ERR.VALIDATION("Invalid OTP");
         if (!isNotExpired) throw ERR.VALIDATION("OTP expired");
 
-        // marca verificación
-        user.verify_email = true;
-        user.otp = null;
-        user.otpExpires = null;
-        user.verifiedAt = new Date();
+        // Flujo legacy: cuenta Google-only agregando password (usuario ya existe en BD)
+        if (payload._legacy && payload.id) {
+            const user = await UserModel
+                .findById(payload.id)
+                .select("+password +otp +otpExpires +verify_email +status");
+            if (!user) throw ERR.NOT_FOUND("User not found");
 
-        // normaliza estado a activo si fuera necesario (para que login no bloquee)
-        if (String(user.status || "").toLowerCase() !== "active") {
-            user.status = "active";
+            user.verify_email = true;
+            user.otp = null;
+            user.otpExpires = null;
+            user.verifiedAt = new Date();
+            if (String(user.status || "").toLowerCase() !== "active") {
+                user.status = "active";
+            }
+            await user.save();
+
+            const accessToken = await generatedAccessToken(user._id);
+            const refreshToken = await generatedRefreshToken(user._id);
+            const isProd = process.env.NODE_ENV === "production";
+            res.cookie("refresh_token", refreshToken, {
+                httpOnly: true, sameSite: "lax", secure: isProd,
+                maxAge: 7 * 24 * 60 * 60 * 1000, path: "/api/user",
+            });
+            const me = await buildPublicUser(user._id);
+            return res.ok?.({
+                message: "Email verified successfully", ok: true,
+                accessToken, refreshToken, user: me,
+            }) || res.status(200).json({
+                message: "Email verified successfully", ok: true,
+                accessToken, refreshToken, user: me,
+            });
         }
 
-        await user.save();
+        // Flujo normal: crear usuario por primera vez
+        const normEmail = String(payload.email).trim().toLowerCase();
 
-        // ✅ (UX) crea sesión inmediatamente tras verificar
-        //   - no invalida otras sesiones
-        const accessToken = await generatedAccessToken(user._id || user.id);
-        const refreshToken = await generatedRefreshToken(user._id || user.id);
+        // Verificar que no exista ya (race condition / doble-submit)
+        const existing = await UserModel.findOne({ email: normEmail }).select("+verify_email");
+        if (existing && existing.verify_email === true) {
+            throw ERR.VALIDATION("User already registered with this email");
+        }
 
-        // 🍪 httpOnly refresh_token, alineado con /api/user/refresh
+        const user = await UserModel.create({
+            name: payload.name,
+            email: normEmail,
+            password: payload.hashedPassword,
+            verify_email: true,
+            signUpWithGoogle: false,
+            status: 'active',
+            verifiedAt: new Date(),
+        });
+
+        const accessToken = await generatedAccessToken(user._id);
+        const refreshToken = await generatedRefreshToken(user._id);
+
         const isProd = process.env.NODE_ENV === "production";
         res.cookie("refresh_token", refreshToken, {
             httpOnly: true,
             sameSite: "lax",
             secure: isProd,
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+            maxAge: 7 * 24 * 60 * 60 * 1000,
             path: "/api/user",
         });
 
-        // perfil público + (opcional) cookie de sesión "sid"
-        const me = await buildPublicUser(user._id || user.id);
+        const me = await buildPublicUser(user._id);
         try {
             if (cookieConfig?.name && buildSessionCookie && makeSessionValue) {
                 const sessionValue = makeSessionValue(user, { name: me?.name });
-                res.cookie(cookieConfig.name /* "sid" */, sessionValue, buildSessionCookie(req));
+                res.cookie(cookieConfig.name, sessionValue, buildSessionCookie(req));
             }
         } catch { }
 
@@ -198,6 +230,65 @@ export async function verifyEmailController(req, res, next) {
             user: me,
         });
 
+    } catch (error) {
+        return next(error);
+    }
+}
+
+/** ========== Reenviar OTP de verificación de email ========== */
+export async function resendVerifyEmailController(req, res, next) {
+    try {
+        const { registrationToken } = req.body;
+        if (!registrationToken) throw ERR.VALIDATION("Registration token is required");
+
+        let payload;
+        try {
+            payload = jwt.verify(registrationToken, process.env.JSON_WEB_TOKEN_SECRET_KEY);
+        } catch (e) {
+            throw ERR.VALIDATION("Registration token expired. Please register again.");
+        }
+
+        // Rate-limit: al menos 30s entre reenvíos
+        const elapsed = Date.now() - ((payload.otpExpires || 0) - 600_000);
+        if (elapsed < 30_000) {
+            const secs = Math.ceil((30_000 - elapsed) / 1000);
+            throw ERR.VALIDATION(`Please wait ${secs}s before requesting a new code`);
+        }
+
+        // Generar nuevo OTP y nuevo token
+        const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = Date.now() + 600_000;
+
+        const newToken = jwt.sign(
+            {
+                ...payload._legacy ? { id: payload.id, _legacy: true } : {},
+                name: payload.name,
+                email: payload.email,
+                hashedPassword: payload.hashedPassword,
+                otp: verifyCode,
+                otpExpires,
+            },
+            process.env.JSON_WEB_TOKEN_SECRET_KEY,
+            { expiresIn: '15m' }
+        );
+
+        const normEmail = String(payload.email).trim().toLowerCase();
+        sendEmailFun({
+            sendTo: normEmail,
+            subject: 'Verify email from Ecommerce App',
+            text: '',
+            html: VerificationEmail(payload.name || normEmail, verifyCode),
+        }).catch(err => console.error('Resend OTP email failed:', err));
+
+        return res.ok?.({
+            message: "OTP sent successfully. Check your email.",
+            error: false,
+            registrationToken: newToken,
+        }) || res.status(200).json({
+            message: "OTP sent successfully. Check your email.",
+            error: false,
+            registrationToken: newToken,
+        });
     } catch (error) {
         return next(error);
     }
@@ -225,14 +316,12 @@ export async function authWithGoogle(req, res, next) {
                 status: "active", // opcional: asegura estado inicial activo si aplica a tu negocio
             });
         } else {
-            // valida estado (no permitas login si está suspendido, pero pending se activa con Google)
-            const st = String(user.status).toLowerCase();
-            if (st !== "active" && st !== "pending") {
+            // valida estado (no permitas login si está suspendido)
+            if (String(user.status).toLowerCase() !== "active") {
                 throw ERR.FORBIDDEN("Account is suspended");
             }
             // asegura flags y actualiza avatar si faltaba
             let touched = false;
-            if (st === "pending") { user.status = "active"; touched = true; }
             if (user.verify_email !== true) { user.verify_email = true; touched = true; }
             if (user.signUpWithGoogle !== true) { user.signUpWithGoogle = true; touched = true; }
             if (avatar && !user.avatar) { user.avatar = avatar; touched = true; }
@@ -307,11 +396,7 @@ export async function loginUserController(req, res, next) {
         if (!user) throw ERR.UNAUTHORIZED("Invalid credentials");
 
         // estado de la cuenta
-        const st = String(user.status).toLowerCase();
-        if (st === "pending") {
-            throw ERR.VALIDATION("Your email is not verified yet. Please verify your email first.");
-        }
-        if (st !== "active") {
+        if (String(user.status).toLowerCase() !== "active") {
             throw ERR.FORBIDDEN("Account is suspended");
         }
 

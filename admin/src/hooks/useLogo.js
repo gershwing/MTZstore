@@ -7,7 +7,11 @@ import { getTenantId } from "@/utils/tenant";
 const isValidUrl = (u) =>
   typeof u === "string" && /^(https?:\/\/|data:image|\/|blob:)/i.test(u || "");
 const isObjectId = (v) => typeof v === "string" && /^[a-f0-9]{24}$/i.test(v);
-const nowTs = () => Date.now();
+
+/* ---- dedup + TTL para evitar request storms ---- */
+const _cache = new Map();          // key → { url, ts }
+const _inflight = new Map();       // key → Promise
+const CACHE_TTL = 30_000;          // 30s
 
 /** Extrae una URL de logo tolerando varias formas de respuesta del backend */
 export function extractLogoUrl(res) {
@@ -54,7 +58,15 @@ function writeCache(key, val) {
  *  ⚠️ SOLO usa /api/logo?effective=true (endpoint público). NUNCA /api/logo/admin aquí.
  */
 async function fetchLogo({ storeId } = {}) {
-  const ts = nowTs();
+  const key = storeId || "__platform__";
+
+  // TTL: si ya tenemos un resultado reciente, retornarlo sin request
+  const cached = _cache.get(key);
+  if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.url;
+
+  // Dedup: si ya hay un request en vuelo para esta key, reutilizarlo
+  if (_inflight.has(key)) return _inflight.get(key);
+
   const headers = {};
   const opts = {
     headers,
@@ -63,22 +75,25 @@ async function fetchLogo({ storeId } = {}) {
   };
 
   if (storeId) {
-    // Modo tienda: mandamos X-Store-Id, dejamos tenant normal
     headers["X-Store-Id"] = storeId;
   } else {
-    // Modo plataforma: NO queremos que el wrapper meta tenant
     opts.omitTenantHeader = true;
   }
 
-  try {
-    const res = await fetchDataFromApi(
-      `/api/logo?effective=true&_ts=${ts}`,
-      opts
-    );
-    return extractLogoUrl(res) || "";
-  } catch {
-    return "";
-  }
+  const promise = fetchDataFromApi(`/api/logo?effective=true`, opts)
+    .then((res) => {
+      const url = extractLogoUrl(res) || "";
+      _cache.set(key, { url, ts: Date.now() });
+      _inflight.delete(key);
+      return url;
+    })
+    .catch(() => {
+      _inflight.delete(key);
+      return cached?.url || "";
+    });
+
+  _inflight.set(key, promise);
+  return promise;
 }
 
 /* ===================== hooks ===================== */

@@ -64,11 +64,18 @@ const VerifyAccount = () => {
         }
       } else {
         // Verifica OTP de verificación de email
-        const res = await postData("/api/user/verifyEmail", { email, otp });
+        const registrationToken = localStorage.getItem("registrationToken");
+        if (!registrationToken) {
+          context.alertBox("error", "Token de registro expirado. Por favor, regístrate de nuevo.");
+          navigate("/sign-up");
+          return;
+        }
+        const res = await postData("/api/user/verifyEmail", { registrationToken, otp });
         if (res?.error === false) {
           context.alertBox("success", res?.message || "Correo verificado correctamente.");
           localStorage.removeItem("userEmail");
           localStorage.removeItem("actionType");
+          localStorage.removeItem("registrationToken");
           navigate("/login");
         } else {
           context.alertBox("error", extractErrorMsg(res, "OTP inválido o expirado."));
@@ -99,21 +106,25 @@ const VerifyAccount = () => {
           setCooldown(COOLDOWN_SECONDS);
         }
       } else {
-        // Para verificación de email tras registro:
-        // Si tu server expone un endpoint de reenvío específico, úsalo aquí.
-        // Ejemplos comunes (ajusta al que tengas disponible):
-        //   POST /api/user/resend-verify-email  { email }
-        //   POST /api/user/send-verify-email    { email }
-        const res = await postData("/api/user/resend-verify-email", { email });
+        const registrationToken = localStorage.getItem("registrationToken");
+        if (!registrationToken) {
+          context.alertBox("error", "Token de registro expirado. Por favor, regístrate de nuevo.");
+          navigate("/sign-up");
+          return;
+        }
+        const res = await postData("/api/user/resend-verify-email", { registrationToken });
         if (res?.error) {
           context.alertBox("error", res?.message || "No se pudo reenviar el código.");
         } else {
           context.alertBox("success", res?.message || "Te enviamos un nuevo código.");
+          if (res?.registrationToken) {
+            localStorage.setItem("registrationToken", res.registrationToken);
+          }
           setCooldown(COOLDOWN_SECONDS);
         }
       }
     } catch {
-      context.alertBox("error", "Error de red al reenviar el código.");
+      context?.alertBox("error", "Error de red al reenviar el código.");
     } finally {
       setResending(false);
     }

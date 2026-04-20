@@ -17,7 +17,9 @@ import { afterLogin } from "../../utils/session.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { firebaseApp } from "../../firebase";
 
-// ✅ logo cache centralizado
+import OtpBox from "../../Components/OtpBox";
+
+// logo cache centralizado
 import { getLocalLogo, setLocalLogo } from "@/utils/logoCache";
 
 const auth = getAuth(firebaseApp);
@@ -56,7 +58,14 @@ const SignUp = () => {
         password: "",
     });
 
-    // ✅ usa helper para inicializar y re-renderizar
+    // OTP inline step
+    const [step, setStep] = useState("form"); // "form" | "otp"
+    const [regToken, setRegToken] = useState("");
+    const [regEmail, setRegEmail] = useState("");
+    const [otp, setOtp] = useState("");
+    const [cooldown, setCooldown] = useState(0);
+    const [resending, setResending] = useState(false);
+
     const [logoUrl, setLogoUrl] = useState(() => getLocalLogo());
 
     const { alertBox, authReady, isAuthenticated } = useAuth();
@@ -68,7 +77,7 @@ const SignUp = () => {
         }
     }, [authReady, isAuthenticated, navigate]);
 
-    // ✅ Carga pública del logo (solo GET) y guarda con helper (no pisa falsy)
+    // Logo fetch
     useEffect(() => {
         let mounted = true;
         (async () => {
@@ -81,17 +90,14 @@ const SignUp = () => {
                     extractLogoUrl(res) ||
                     "";
                 if (isValidUrl(url)) {
-                    setLocalLogo(url);       // centralizado: escribe doble clave + evento
+                    setLocalLogo(url);
                     if (mounted) setLogoUrl(url);
                 }
-            } catch {
-                // silencio
-            }
+            } catch { }
         })();
         return () => { mounted = false; };
     }, []);
 
-    // 🔄 Sincroniza cuando cambie el logo en otra pestaña o por evento custom
     useEffect(() => {
         const onStorage = (ev) => {
             if ((ev.key === "logo:platform" || ev.key === "logo") && isValidUrl(ev.newValue)) {
@@ -100,7 +106,6 @@ const SignUp = () => {
         };
         const onLogoUpdated = (ev) => {
             const { url, logo, storeId, scope } = ev?.detail || {};
-            // ⛔️ SignUp muestra SOLO logo GLOBAL → ignora updates de tienda
             if (storeId || scope === "store") return;
             const u = url || logo;
             if (isValidUrl(u)) setLogoUrl(u);
@@ -113,6 +118,13 @@ const SignUp = () => {
         };
     }, []);
 
+    // Cooldown timer
+    useEffect(() => {
+        if (cooldown <= 0) return;
+        const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+        return () => clearTimeout(t);
+    }, [cooldown]);
+
     const onChangeInput = (e) => {
         const { name, value } = e.target;
         setFormFields((prev) => ({ ...prev, [name]: value }));
@@ -120,38 +132,68 @@ const SignUp = () => {
 
     const valideValue = Object.values(formFields).every(Boolean);
 
+    // Paso 1: Registrar
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
-        if (!formFields.name) {
-            alertBox?.("error", "Por favor ingrese su nombre completo");
-            setIsLoading(false);
-            return;
-        }
-        if (!formFields.email) {
-            alertBox?.("error", "Por favor ingrese su correo");
-            setIsLoading(false);
-            return;
-        }
-        if (!formFields.password) {
-            alertBox?.("error", "Por favor ingrese su contraseña");
-            setIsLoading(false);
-            return;
-        }
+        if (!formFields.name) { alertBox?.("error", "Por favor ingrese su nombre completo"); setIsLoading(false); return; }
+        if (!formFields.email) { alertBox?.("error", "Por favor ingrese su correo"); setIsLoading(false); return; }
+        if (!formFields.password) { alertBox?.("error", "Por favor ingrese su contrasena"); setIsLoading(false); return; }
 
         try {
             const res = await postData("/api/user/register", formFields);
             if (res?.error !== true) {
                 alertBox?.("success", res?.message);
-                localStorage.setItem("userEmail", formFields.email);
-                setFormFields({ name: "", email: "", password: "" });
-                navigate("/verify-account");
+                setRegEmail(formFields.email);
+                const _t = res?.data?.registrationToken || res?.registrationToken;
+                if (_t) setRegToken(_t);
+                setCooldown(30);
+                setStep("otp");
             } else {
                 alertBox?.("error", extractErrorMsg(res));
             }
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    // Paso 2: Verificar OTP
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+        if (!otp || otp.length < 6) { alertBox?.("error", "Ingresa el codigo de 6 digitos"); return; }
+        setIsLoading(true);
+
+        try {
+            const res = await postData("/api/user/verifyEmail", { registrationToken: regToken, otp });
+            if (res?.error === false) {
+                alertBox?.("success", res?.message || "Correo verificado correctamente");
+                navigate("/login");
+            } else {
+                alertBox?.("error", extractErrorMsg(res, "OTP invalido o expirado"));
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Reenviar OTP
+    const handleResendOtp = async () => {
+        if (cooldown > 0 || resending || !regToken) return;
+        setResending(true);
+
+        try {
+            const res = await postData("/api/user/resend-verify-email", { registrationToken: regToken });
+            if (res?.error === false) {
+                alertBox?.("success", res?.message || "Codigo reenviado");
+                const _t = res?.data?.registrationToken || res?.registrationToken;
+                if (_t) setRegToken(_t);
+                setCooldown(30);
+            } else {
+                alertBox?.("error", res?.message || "No se pudo reenviar el codigo");
+            }
+        } finally {
+            setResending(false);
         }
     };
 
@@ -180,7 +222,7 @@ const SignUp = () => {
             }
         } catch (err) {
             console.error(err);
-            alertBox?.("error", "Error en autenticación con Google");
+            alertBox?.("error", "Error en autenticacion con Google");
         } finally {
             setLoadingGoogle(false);
             setIsLoading(false);
@@ -202,7 +244,7 @@ const SignUp = () => {
                 <div className="hidden sm:flex items-center gap-0">
                     <NavLink to="/login" className={({ isActive }) => (isActive ? "isActive" : "")}>
                         <Button className="!rounded-full !text-[rgba(0,0,0,0.8)] !px-5 flex gap-1">
-                            <CgLogIn className="text-[18px]" /> Iniciar Sesión
+                            <CgLogIn className="text-[18px]" /> Iniciar Sesion
                         </Button>
                     </NavLink>
 
@@ -217,91 +259,152 @@ const SignUp = () => {
             <img src="/patern.webp" className="w-full fixed top-0 left-0 opacity-5" alt="Pattern" />
 
             <div className="loginBox card w-full md:w-[600px] h-auto pb-20 mx-auto pt-5 lg:pt-20 relative z-50">
-                <div className="text-center">
-                    <img src="/icon.svg" className="m-auto" alt="Icon" />
-                </div>
 
-                <h1 className="text-center text-[18px] sm:text-[35px] font-[800] mt-4">
-                    ¡Únete hoy! Obtén beneficios especiales <br />y mantente al día.
-                </h1>
-
-                <div className="flex items-center justify-center w-full mt-5 gap-4">
-                    <LoadingButton
-                        size="small"
-                        onClick={authWithGoogle}
-                        endIcon={<FcGoogle />}
-                        loading={loadingGoogle}
-                        loadingPosition="end"
-                        variant="outlined"
-                        className="!bg-none !py-2 !text-[15px] !capitalize !px-5 !text-[rgba(0,0,0,0.7)]"
-                    >
-                        Iniciar con Google
-                    </LoadingButton>
-                </div>
-
-                <div className="w-full flex items-center justify-center gap-3 my-5">
-                    <span className="flex items-center w-[100px] h-[1px] bg-[rgba(0,0,0,0.2)]"></span>
-                    <span className="text-[10px] lg:text-[14px] font-[500]">O, regístrate con tu correo</span>
-                    <span className="flex items-center w-[100px] h-[1px] bg-[rgba(0,0,0,0.2)]"></span>
-                </div>
-
-                <form className="w-full px-8 mt-3" onSubmit={handleSubmit}>
-                    <div className="form-group mb-4 w-full">
-                        <h4 className="text-[14px] font-[500] mb-1">Nombre Completo</h4>
-                        <input
-                            type="text"
-                            name="name"
-                            value={formFields.name}
-                            disabled={isLoading}
-                            onChange={onChangeInput}
-                            className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
-                        />
-                    </div>
-
-                    <div className="form-group mb-4 w-full">
-                        <h4 className="text-[14px] font-[500] mb-1">Correo Electrónico</h4>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formFields.email}
-                            disabled={isLoading}
-                            onChange={onChangeInput}
-                            className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
-                        />
-                    </div>
-
-                    <div className="form-group mb-4 w-full">
-                        <h4 className="text-[14px] font-[500] mb-1">Contraseña</h4>
-                        <div className="relative w-full">
-                            <input
-                                type={isPasswordShow ? "text" : "password"}
-                                name="password"
-                                value={formFields.password}
-                                disabled={isLoading}
-                                onChange={onChangeInput}
-                                className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
-                            />
-                            <Button
-                                type="button"
-                                className="!absolute top-[7px] right-[10px] z-50 !rounded-full !w-[35px] !h-[35px] !min-w-[35px] !text-gray-600"
-                                onClick={() => setIsPasswordShow(!isPasswordShow)}
-                            >
-                                {isPasswordShow ? <FaEyeSlash className="text-[18px]" /> : <FaRegEye className="text-[18px]" />}
-                            </Button>
+                {step === "form" && (
+                    <>
+                        <div className="text-center">
+                            <img src="/icon.svg" className="m-auto" alt="Icon" />
                         </div>
-                    </div>
 
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-[14px]">¿Ya tienes una cuenta?</span>
-                        <Link to="/login" className="text-primary font-[700] text-[15px] hover:underline hover:text-gray-700 cursor-pointer">
-                            Inicia Sesión
-                        </Link>
-                    </div>
+                        <h1 className="text-center text-[18px] sm:text-[35px] font-[800] mt-4">
+                            Unete hoy! Obtiene beneficios especiales <br />y mantente al dia.
+                        </h1>
 
-                    <Button type="submit" className="btn-blue btn-lg w-full" disabled={!valideValue}>
-                        {isLoading ? <CircularProgress color="inherit" size={22} /> : "Registrarse"}
-                    </Button>
-                </form>
+                        <div className="flex items-center justify-center w-full mt-5 gap-4">
+                            <LoadingButton
+                                size="small"
+                                onClick={authWithGoogle}
+                                endIcon={<FcGoogle />}
+                                loading={loadingGoogle}
+                                loadingPosition="end"
+                                variant="outlined"
+                                className="!bg-none !py-2 !text-[15px] !capitalize !px-5 !text-[rgba(0,0,0,0.7)]"
+                            >
+                                Iniciar con Google
+                            </LoadingButton>
+                        </div>
+
+                        <div className="w-full flex items-center justify-center gap-3 my-5">
+                            <span className="flex items-center w-[100px] h-[1px] bg-[rgba(0,0,0,0.2)]"></span>
+                            <span className="text-[10px] lg:text-[14px] font-[500]">O, registrate con tu correo</span>
+                            <span className="flex items-center w-[100px] h-[1px] bg-[rgba(0,0,0,0.2)]"></span>
+                        </div>
+
+                        <form className="w-full px-8 mt-3" onSubmit={handleSubmit}>
+                            <div className="form-group mb-4 w-full">
+                                <h4 className="text-[14px] font-[500] mb-1">Nombre Completo</h4>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formFields.name}
+                                    disabled={isLoading}
+                                    onChange={onChangeInput}
+                                    className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
+                                />
+                            </div>
+
+                            <div className="form-group mb-4 w-full">
+                                <h4 className="text-[14px] font-[500] mb-1">Correo Electronico</h4>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formFields.email}
+                                    disabled={isLoading}
+                                    onChange={onChangeInput}
+                                    className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
+                                />
+                            </div>
+
+                            <div className="form-group mb-4 w-full">
+                                <h4 className="text-[14px] font-[500] mb-1">Contrasena</h4>
+                                <div className="relative w-full">
+                                    <input
+                                        type={isPasswordShow ? "text" : "password"}
+                                        name="password"
+                                        value={formFields.password}
+                                        disabled={isLoading}
+                                        onChange={onChangeInput}
+                                        className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
+                                    />
+                                    <Button
+                                        type="button"
+                                        className="!absolute top-[7px] right-[10px] z-50 !rounded-full !w-[35px] !h-[35px] !min-w-[35px] !text-gray-600"
+                                        onClick={() => setIsPasswordShow(!isPasswordShow)}
+                                    >
+                                        {isPasswordShow ? <FaEyeSlash className="text-[18px]" /> : <FaRegEye className="text-[18px]" />}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between mb-4">
+                                <span className="text-[14px]">Ya tienes una cuenta?</span>
+                                <Link to="/login" className="text-primary font-[700] text-[15px] hover:underline hover:text-gray-700 cursor-pointer">
+                                    Inicia Sesion
+                                </Link>
+                            </div>
+
+                            <Button type="submit" className="btn-blue btn-lg w-full" disabled={!valideValue || isLoading}>
+                                {isLoading ? <CircularProgress color="inherit" size={22} /> : "Registrarse"}
+                            </Button>
+                        </form>
+                    </>
+                )}
+
+                {step === "otp" && (
+                    <div className="px-8">
+                        <div className="text-center">
+                            <img src="/verify3.png" className="w-[100px] m-auto" alt="Verify" />
+                        </div>
+
+                        <h1 className="text-center text-[18px] sm:text-[28px] font-[800] mt-4">
+                            Verifica tu correo
+                        </h1>
+
+                        <p className="text-center text-[15px] mt-4 mb-6">
+                            Enviamos un codigo de 6 digitos a{" "}
+                            <span className="text-primary font-bold">{regEmail}</span>
+                        </p>
+
+                        <form onSubmit={handleVerifyOtp}>
+                            <div className="text-center flex items-center justify-center flex-col">
+                                <OtpBox length={6} onChange={setOtp} />
+                            </div>
+
+                            <div className="w-full sm:w-[300px] m-auto mt-5 flex flex-col gap-3">
+                                <Button
+                                    type="submit"
+                                    className="btn-blue w-full"
+                                    disabled={isLoading || otp.length < 6}
+                                >
+                                    {isLoading ? <CircularProgress color="inherit" size={22} /> : "Verificar OTP"}
+                                </Button>
+
+                                <Button
+                                    type="button"
+                                    variant="outlined"
+                                    className="w-full"
+                                    onClick={handleResendOtp}
+                                    disabled={resending || cooldown > 0}
+                                >
+                                    {resending
+                                        ? "Reenviando..."
+                                        : cooldown > 0
+                                            ? `Reenviar OTP (${cooldown}s)`
+                                            : "Reenviar OTP"}
+                                </Button>
+
+                                <Button
+                                    size="small"
+                                    className="!text-xs !text-gray-500"
+                                    onClick={() => { setStep("form"); setOtp(""); }}
+                                >
+                                    Volver al registro
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
             </div>
         </section>
     );

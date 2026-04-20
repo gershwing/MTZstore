@@ -14,6 +14,7 @@ import {
   logoutController,
   refreshToken,               // existente (/refresh-token)
   registerUserController,
+  resendVerifyEmailController,
   removeImageFromCloudinary,
   resetpassword,
   updateUserDetails,
@@ -52,6 +53,7 @@ const router = Router();
 
 router.post("/register", registerUserController);
 router.post("/verifyEmail", verifyEmailController);
+router.post("/resend-verify-email", resendVerifyEmailController);
 
 router.post("/login", loginUserController);
 router.post("/authWithGoogle", authWithGoogle);
