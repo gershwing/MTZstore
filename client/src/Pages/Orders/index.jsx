@@ -134,7 +134,7 @@ const Orders = () => {
           <AccountSidebar />
         </div>
 
-        <div className="col2 w-full lg:w-[80%]">
+        <div className="col2 w-full lg:flex-1">
           <div className="shadow-md rounded-md bg-white">
             <div className="py-5 px-5 border-b border-[rgba(0,0,0,0.1)]">
               <h2 className="text-[20px] font-semibold">Mis pedidos</h2>

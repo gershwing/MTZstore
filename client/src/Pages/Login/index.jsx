@@ -63,30 +63,7 @@ const Login = () => {
   }, []);
 
   const forgotPassword = () => {
-
-    if (formFields.email === "") {
-      context.alertBox("error", "Por favor ingresa tu correo electrónico");
-      return false;
-    }
-    else {
-      context.alertBox("success", `Se envió el código OTP a ${formFields.email}`);
-      localStorage.setItem("userEmail", formFields.email);
-      localStorage.setItem("actionType", 'forgot-password');
-
-      postData("/api/user/forgot-password", {
-        email: formFields.email,
-      }).then((res) => {
-        if (res?.error === false) {
-          context.alertBox("success", res?.message);
-          history("/verify")
-        } else {
-          context.alertBox("error", res?.message);
-        }
-      })
-
-
-    }
-
+    history("/forgot-password");
   }
 
   const onChangeInput = (e) => {

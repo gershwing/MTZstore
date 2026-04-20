@@ -48,7 +48,7 @@ const Address = () => {
                         <AccountSidebar />
                     </div>
 
-                    <div className="col2 w-full md:w-[70%] lg:w-[50%]">
+                    <div className="col2 w-full md:flex-1 lg:flex-1">
                         <div className="card bg-white p-5 shadow-md rounded-md mb-5">
                             <div className="flex items-center pb-3">
                                 <h2 className="pb-0">Dirección</h2>

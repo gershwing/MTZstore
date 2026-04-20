@@ -278,7 +278,7 @@ const MyAccount = () => {
           <AccountSidebar />
         </div>
 
-        <div className="col2 w-full lg:w-[50%]">
+        <div className="col2 w-full lg:flex-1">
 
           {/* Profile Header Card */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">

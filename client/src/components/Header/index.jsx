@@ -309,7 +309,7 @@ const Header = () => {
                               <Link to="/register" className="text-primary font-[500]" onClick={() => setLoginOpen(false)}>
                                 Crear cuenta
                               </Link>
-                              <Link to="/login" className="text-gray-500 hover:text-primary" onClick={() => setLoginOpen(false)}>
+                              <Link to="/forgot-password" className="text-gray-500 hover:text-primary" onClick={() => setLoginOpen(false)}>
                                 Olvidé mi contraseña
                               </Link>
                             </div>

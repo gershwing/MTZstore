@@ -22,7 +22,7 @@ const MyList = () => {
           <AccountSidebar />
         </div>
 
-        <div className="col2 w-full lg:w-[70%]">
+        <div className="col2 w-full lg:flex-1">
           <div className="shadow-md rounded-md bg-white">
             <div className="py-5 px-3 border-b border-[rgba(0,0,0,0.1)]">
               <h2>Mi Lista</h2>
