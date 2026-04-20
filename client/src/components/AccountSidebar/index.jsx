@@ -63,7 +63,7 @@ const AccountSidebar = () => {
       uploadImage("/api/user/user-avatar", formdata).then((res) => {
         setUploading(false);
         let avatar = [];
-        avatar.push(res?.data?.avtar);
+        avatar.push(res?.data?.data?.avatar || res?.data?.avatar || res?.avatar);
         setPreviews(avatar);
         context.alertBox("success", "Profile picture updated successfully!");
         fetchDataFromApi(`/api/user/user-details`).then((res) => {
@@ -104,21 +104,17 @@ const AccountSidebar = () => {
             uploading === true ? <CircularProgress color="inherit" /> :
               <>
                 {
-                  previews?.length !== 0 ? previews?.map((img, index) => {
-                    return (
-                      <img
-                        src={img}
-                        key={index}
-                        className="w-full h-full object-cover"
-                      />
-                    )
-                  })
-                    :
+                  previews?.length !== 0 && previews?.[0] ? previews?.map((img, index) => (
                     <img
-                      src={"/user.jpg"}
+                      src={img}
+                      key={index}
                       className="w-full h-full object-cover"
                     />
-
+                  ))
+                    :
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white text-[36px] font-bold">
+                      {(context?.userData?.name || "U").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                    </div>
                 }
               </>
 

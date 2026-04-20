@@ -11,6 +11,14 @@ import 'react-international-phone/style.css';
 import { Collapse } from "react-collapse";
 import { useAuth } from "../../hooks/useAuth";
 
+const ROLE_LABELS = {
+    SUPER_ADMIN: "Super Admin",
+    ADMIN: "Admin",
+    STORE_OWNER: "Vendedor",
+    WAREHOUSE_STAFF: "Almacen",
+    DELIVERY_PERSON: "Repartidor",
+};
+
 const Profile = () => {
     const [previews, setPreviews] = useState([]);
     const [uploading, setUploading] = useState(false);
@@ -28,7 +36,7 @@ const Profile = () => {
     const cooldownRef = useRef(null);
     const [showPw, setShowPw] = useState({ new: false, confirm: false });
 
-    const [formFields, setFormsFields] = useState({ name: '', email: '', mobile: '', birthDate: '', gender: '' });
+    const [formFields, setFormsFields] = useState({ firstName: '', lastName: '', email: '', mobile: '', birthDate: '', gender: '' });
     const [changePassword, setChangePassword] = useState({ newPassword: '', confirmPassword: '' });
 
     const history = useNavigate();
@@ -51,8 +59,15 @@ const Profile = () => {
         const u = me || user;
         if (u?._id) {
             setUserId(u._id);
+            const fullName = u.name || '';
+            const spaceIdx = fullName.indexOf(' ');
+            const firstName = spaceIdx > -1 ? fullName.substring(0, spaceIdx) : fullName;
+            const lastName = spaceIdx > -1 ? fullName.substring(spaceIdx + 1) : '';
             setFormsFields({
-                name: u.name || '', email: u.email || '', mobile: u.mobile || '',
+                firstName,
+                lastName,
+                email: u.email || '',
+                mobile: u.mobile || '',
                 birthDate: u.birthDate ? new Date(u.birthDate).toISOString().split('T')[0] : '',
                 gender: u.gender || '',
             });
@@ -70,16 +85,24 @@ const Profile = () => {
         setFormsFields(prev => ({ ...prev, [name]: value }));
     };
 
-    const valideValue = Boolean(formFields.name && formFields.email && formFields.mobile);
+    const valideValue = Boolean(formFields.firstName && formFields.email && formFields.mobile);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        if (!formFields.name) { setIsLoading(false); return alertBox?.("error", "Por favor ingrese nombre"); }
+        if (!formFields.firstName) { setIsLoading(false); return alertBox?.("error", "Por favor ingrese nombre"); }
         if (!formFields.email) { setIsLoading(false); return alertBox?.("error", "Por favor ingrese email"); }
         if (!formFields.mobile) { setIsLoading(false); return alertBox?.("error", "Por favor ingrese celular"); }
 
-        const res = await editData(`/api/user/${userId}`, formFields, { withCredentials: true });
+        const payload = {
+            name: (formFields.firstName + " " + formFields.lastName).trim(),
+            email: formFields.email,
+            mobile: formFields.mobile,
+            birthDate: formFields.birthDate,
+            gender: formFields.gender,
+        };
+
+        const res = await editData(`/api/user/${userId}`, payload, { withCredentials: true });
         if (res?.error !== true) {
             alertBox?.("success", res?.message || "Perfil actualizado");
             const fresh = await fetchDataFromApi(`/api/user/user-details`, { withCredentials: true });
@@ -197,54 +220,144 @@ const Profile = () => {
         }
     };
 
+    // Derive initials and display name
+    const displayName = ((formFields.firstName || '') + ' ' + (formFields.lastName || '')).trim();
+    const initials = displayName ? displayName.substring(0, 2).toUpperCase() : '??';
+    const avatarSrc = previews.length && previews[0] ? previews[0] : null;
+    const u = me || user;
+    const userRoles = u?.roles || (u?.role ? [u.role] : []);
+
+    const inputClass = "w-full h-[45px] border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none px-4 text-sm transition";
+
     return (
         <>
-            <div className="card my-2 pt-3 w-[100%] sm:w-[100%] lg:w-[65%] shadow-md sm:rounded-lg bg-white px-5 pb-5">
-                <div className='flex items-center justify-between'>
-                    <h2 className="text-[18px] font-[600]">Perfil de Usuario</h2>
-                    <Button className="!ml-auto" onClick={handleTogglePasswordPanel}>
-                        Cambiar Contraseña
-                    </Button>
-                </div>
-
-                <br />
-
-                <div className="w-[110px] h-[110px] rounded-full overflow-hidden mb-4 relative group flex items-center justify-center bg-gray-200">
-                    {uploading ? (
-                        <CircularProgress color="inherit" />
-                    ) : (
-                        <>
-                            {previews.length
-                                ? previews.map((img, i) => (
-                                    <img src={img} key={i} className="w-full h-full object-cover" alt="avatar" />
-                                ))
-                                : <img src={"/user.jpg"} className="w-full h-full object-cover" alt="avatar" />
-                            }
-                        </>
-                    )}
-                    <div className="overlay w-full h-full absolute top-0 left-0 z-50 bg-[rgba(0,0,0,0.7)] flex items-center justify-center cursor-pointer opacity-0 transition-all group-hover:opacity-100">
-                        <FaCloudUploadAlt className="text-[#fff] text-[25px]" />
-                        <input type="file" className="absolute top-0 left-0 w-full h-full opacity-0" accept="image/*" onChange={onChangeFile} name="avatar" />
+            {/* Card 1 - Profile Header */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-6">
+                <div className="flex flex-col items-center">
+                    {/* Avatar */}
+                    <div className="w-[128px] h-[128px] rounded-full overflow-hidden mb-4 relative group flex items-center justify-center">
+                        {uploading ? (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                <CircularProgress color="inherit" />
+                            </div>
+                        ) : (
+                            avatarSrc ? (
+                                <img src={avatarSrc} className="w-full h-full object-cover" alt="avatar" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white text-3xl font-bold">
+                                    {initials}
+                                </div>
+                            )
+                        )}
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer rounded-full">
+                            <FaCloudUploadAlt className="text-white text-2xl" />
+                            <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={onChangeFile} name="avatar" />
+                        </div>
                     </div>
-                </div>
 
-                <form className="form mt-8" onSubmit={handleSubmit}>
+                    {/* Name & email */}
+                    <h2 className="text-2xl font-bold text-gray-800">{displayName || 'Usuario'}</h2>
+                    <p className="text-gray-500 mt-1">{formFields.email}</p>
+
+                    {/* Role badges */}
+                    {userRoles.length > 0 && (
+                        <div className="flex items-center gap-2 mt-3">
+                            {userRoles.map((role) => (
+                                <span key={role} className="px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                                    {ROLE_LABELS[role] || role}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Card 2 - Personal Info */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-6">
+                    <span className="w-1 h-5 bg-blue-500 rounded-full"></span>
+                    Informacion personal
+                </h3>
+
+                <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div className="col">
-                            <input type="text" className="w-full h-[40px] border border-[rgba(0,0,0,0.2)] focus:outline-none focus:border-[rgba(0,0,0,0.4)] rounded-sm p-3 text-sm" name="name" value={formFields.name} disabled={isLoading} onChange={onChangeInput} placeholder="Nombre completo" />
+                        {/* Nombres */}
+                        <div>
+                            <label className="text-sm font-medium text-gray-600 mb-1.5 block">Nombres</label>
+                            <input
+                                type="text"
+                                className={inputClass}
+                                name="firstName"
+                                value={formFields.firstName}
+                                disabled={isLoading}
+                                onChange={onChangeInput}
+                                placeholder="Nombres"
+                            />
                         </div>
-                        <div className="col">
-                            <input type="email" className="w-full h-[40px] border border-[rgba(0,0,0,0.2)] focus:outline-none focus:border-[rgba(0,0,0,0.4)] rounded-sm p-3 text-sm" name="email" value={formFields.email} disabled onChange={onChangeInput} placeholder="Correo" />
+
+                        {/* Apellidos */}
+                        <div>
+                            <label className="text-sm font-medium text-gray-600 mb-1.5 block">Apellidos</label>
+                            <input
+                                type="text"
+                                className={inputClass}
+                                name="lastName"
+                                value={formFields.lastName}
+                                disabled={isLoading}
+                                onChange={onChangeInput}
+                                placeholder="Apellidos"
+                            />
                         </div>
-                        <div className="col">
-                            <PhoneInput defaultCountry="bo" value={phone} disabled={isLoading} onChange={(val) => { setPhone(val); setFormsFields(prev => ({ ...prev, mobile: val })); }} />
+
+                        {/* Correo */}
+                        <div>
+                            <label className="text-sm font-medium text-gray-600 mb-1.5 block">Correo</label>
+                            <input
+                                type="email"
+                                className={`${inputClass} bg-gray-50 text-gray-500 cursor-not-allowed`}
+                                name="email"
+                                value={formFields.email}
+                                disabled
+                                onChange={onChangeInput}
+                                placeholder="Correo"
+                            />
                         </div>
-                        <div className="col">
-                            <input type="date" className="w-full h-[40px] border border-[rgba(0,0,0,0.2)] focus:outline-none focus:border-[rgba(0,0,0,0.4)] rounded-sm p-3 text-sm" name="birthDate" value={formFields.birthDate || ""} disabled={isLoading} onChange={onChangeInput} />
+
+                        {/* Telefono */}
+                        <div>
+                            <label className="text-sm font-medium text-gray-600 mb-1.5 block">Telefono</label>
+                            <PhoneInput
+                                defaultCountry="bo"
+                                value={phone}
+                                disabled={isLoading}
+                                onChange={(val) => { setPhone(val); setFormsFields(prev => ({ ...prev, mobile: val })); }}
+                            />
                         </div>
-                        <div className="col">
-                            <select className="w-full h-[40px] border border-[rgba(0,0,0,0.2)] focus:outline-none focus:border-[rgba(0,0,0,0.4)] rounded-sm p-3 text-sm" name="gender" value={formFields.gender || ""} disabled={isLoading} onChange={onChangeInput}>
-                                <option value="">Genero</option>
+
+                        {/* Fecha nacimiento */}
+                        <div>
+                            <label className="text-sm font-medium text-gray-600 mb-1.5 block">Fecha nacimiento</label>
+                            <input
+                                type="date"
+                                className={inputClass}
+                                name="birthDate"
+                                value={formFields.birthDate || ""}
+                                disabled={isLoading}
+                                onChange={onChangeInput}
+                            />
+                        </div>
+
+                        {/* Genero */}
+                        <div>
+                            <label className="text-sm font-medium text-gray-600 mb-1.5 block">Genero</label>
+                            <select
+                                className={inputClass}
+                                name="gender"
+                                value={formFields.gender || ""}
+                                disabled={isLoading}
+                                onChange={onChangeInput}
+                            >
+                                <option value="">Seleccionar</option>
                                 <option value="male">Masculino</option>
                                 <option value="female">Femenino</option>
                                 <option value="other">Otro</option>
@@ -252,25 +365,33 @@ const Profile = () => {
                             </select>
                         </div>
                     </div>
-                    <br />
-                    <div className="flex items-center gap-4">
+
+                    <div className="mt-6">
                         <Button type="submit" disabled={!valideValue || isLoading} className="btn-blue btn-lg w-full">
-                            {isLoading ? <CircularProgress color="inherit" /> : 'Actualizar Perfil'}
+                            {isLoading ? <CircularProgress size={20} color="inherit" /> : 'Guardar cambios'}
                         </Button>
                     </div>
                 </form>
             </div>
 
-            <Collapse isOpened={isChangePasswordFormShow}>
-                <div className="card w-[100%] sm:w-[100%] lg:w-[65%] bg-white p-5 shadow-md rounded-md mt-3">
-                    <div className="flex items-center pb-3">
-                        <h2 className="text-[18px] font-[600] pb-0">Cambiar Contraseña</h2>
-                    </div>
-                    <hr />
+            {/* Card 3 - Security */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <span className="w-1 h-5 bg-blue-500 rounded-full"></span>
+                        Seguridad
+                    </h3>
+                    <Button onClick={handleTogglePasswordPanel}>
+                        {isChangePasswordFormShow ? 'Cancelar' : 'Cambiar contrasena'}
+                    </Button>
+                </div>
+
+                <Collapse isOpened={isChangePasswordFormShow}>
+                    <hr className="mb-4" />
 
                     {/* Paso 1: Verificar OTP */}
                     {otpStep === "verifying" && (
-                        <div className="mt-8">
+                        <div className="mt-4">
                             {otpLoading ? (
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <CircularProgress size={20} />
@@ -297,7 +418,7 @@ const Profile = () => {
 
                     {/* Paso 2: Nueva contraseña */}
                     {otpStep === "changing" && (
-                        <form className="mt-8" onSubmit={handleSubmitChangePassword}>
+                        <form className="mt-4" onSubmit={handleSubmitChangePassword}>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div className="col">
                                     <TextField
@@ -356,16 +477,15 @@ const Profile = () => {
                                     />
                                 </div>
                             </div>
-                            <br />
-                            <div className="flex items-center gap-4">
+                            <div className="mt-6">
                                 <Button type="submit" disabled={isLoading2} className="btn-blue btn-lg w-full">
-                                    {isLoading2 ? <CircularProgress color="inherit" /> : "Guardar Contraseña"}
+                                    {isLoading2 ? <CircularProgress size={20} color="inherit" /> : "Guardar Contraseña"}
                                 </Button>
                             </div>
                         </form>
                     )}
-                </div>
-            </Collapse>
+                </Collapse>
+            </div>
         </>
     );
 };
