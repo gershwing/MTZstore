@@ -232,7 +232,7 @@ export const MODULE_PERMS = {
 export const PLATFORM_MENU = [
   { label: "Panel de control", icon: "RxDashboard", to: "/admin", exact: true, required: [], onlySuper: true },
 
-  // --- GESTION DE PLATAFORMA ---
+  // ═══ PLATAFORMA ═══
   {
     label: "Usuarios",
     icon: "FiUsers",
@@ -242,7 +242,6 @@ export const PLATFORM_MENU = [
       { label: "Lista de usuarios", icon: "FiUsers", to: "users", required: [MODULE_PERMS.users.read] },
     ],
   },
-
   {
     label: "Tiendas",
     icon: "TbBuildingStore",
@@ -252,7 +251,6 @@ export const PLATFORM_MENU = [
       { label: "Listado", icon: "TbBuildingStore", to: "stores", required: [MODULE_PERMS.stores.read] },
     ],
   },
-
   {
     label: "Categorias",
     icon: "BiCategory",
@@ -264,7 +262,6 @@ export const PLATFORM_MENU = [
       { label: "Tercer nivel (L3)", icon: "BiCategory", to: "thirdCategory/list", required: [MODULE_PERMS.categories.read] },
     ],
   },
-
   {
     label: "Postulaciones",
     icon: "MdAssignment",
@@ -276,7 +273,7 @@ export const PLATFORM_MENU = [
     ],
   },
 
-  // --- OPERACIONES ---
+  // ═══ COMERCIO ═══
   {
     label: "Productos",
     icon: "RiProductHuntLine",
@@ -286,7 +283,6 @@ export const PLATFORM_MENU = [
       { label: "Lista de productos", icon: "RiProductHuntLine", to: "products", required: [MODULE_PERMS.products.read] },
     ],
   },
-
   {
     label: "Ventas directas",
     icon: "MdPointOfSale",
@@ -298,7 +294,6 @@ export const PLATFORM_MENU = [
       { label: "Cuentas por cobrar", icon: "MdPointOfSale", to: "accounts-receivable", required: [MODULE_PERMS.products.read] },
     ],
   },
-
   {
     label: "Órdenes en línea",
     icon: "IoBagCheckOutline",
@@ -313,33 +308,23 @@ export const PLATFORM_MENU = [
     ],
   },
 
-  // --- LOGISTICA ---
+  // ═══ LOGÍSTICA ═══
   {
-    label: "Almacen",
-    icon: "MdWarehouse",
+    label: "Logistica",
+    icon: "MdLocalShipping",
     required: [MODULE_PERMS.inventory.read],
-    children: [
-      { label: "Inventario", icon: "MdWarehouse", to: "inventory", required: [MODULE_PERMS.inventory.read], onlySuper: true },
-      { label: "Envios al almacen", icon: "MdLocalShipping", to: "warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
-    ],
-  },
-
-  {
-    label: "Delivery",
-    icon: "TbTruckDelivery",
-    required: [MODULE_PERMS.delivery.read],
     onlySuper: true,
     children: [
+      { label: "Inventario", icon: "MdWarehouse", to: "inventory", required: [MODULE_PERMS.inventory.read] },
+      { label: "Envios al almacen", icon: "MdLocalShipping", to: "warehouse-inbound", required: [MODULE_PERMS.inventory.read] },
       { label: "Entregas", icon: "TbTruckDelivery", to: "delivery", required: [MODULE_PERMS.delivery.read] },
       { label: "Rutas de reparto", icon: "MdLocalShipping", to: "delivery-routes", required: [MODULE_PERMS.delivery.assign] },
-      { label: "Entregas disponibles", icon: "MdLocalShipping", to: "available-deliveries", required: [MODULE_PERMS.delivery.read] },
       { label: "Repartidores", icon: "FiUsers", to: "delivery-agents", required: [MODULE_PERMS.delivery.read] },
       { label: "Niveles de confianza", icon: "FiUsers", to: "trust-management", required: [MODULE_PERMS.delivery.read] },
-      { label: "Mis entregas", icon: "TbTruckDelivery", to: "my-deliveries", required: [MODULE_PERMS.delivery.selfUpdate] },
     ],
   },
 
-  // --- FINANZAS ---
+  // ═══ FINANZAS ═══
   {
     label: "Finanzas",
     icon: "MdBarChart",
@@ -353,7 +338,7 @@ export const PLATFORM_MENU = [
     ],
   },
 
-  // --- CMS & SEGURIDAD ---
+  // ═══ CMS & SEGURIDAD ═══
   {
     label: "Branding & CMS",
     icon: "IoLogoBuffer",
@@ -367,7 +352,6 @@ export const PLATFORM_MENU = [
       { label: "Blog", icon: "IoLogoBuffer", to: "blog/List", required: ["blog:read"] },
     ],
   },
-
   {
     label: "Seguridad",
     icon: "FiUsers",
@@ -430,15 +414,13 @@ export const BASE_STORE_MENU = [
   },
 
   {
-    label: "Delivery",
+    label: "Entregas de tienda",
     icon: "TbTruckDelivery",
     required: [MODULE_PERMS.delivery.read],
     children: [
       { label: "Entregas", icon: "TbTruckDelivery", to: "/admin/delivery", required: [MODULE_PERMS.delivery.read] },
       { label: "Rutas de reparto", icon: "MdLocalShipping", to: "/admin/delivery-routes", required: [MODULE_PERMS.delivery.assign] },
-      { label: "Entregas disponibles", icon: "MdLocalShipping", to: "/admin/available-deliveries", required: [MODULE_PERMS.delivery.take] },
       { label: "Socios delivery", icon: "FiUsers", to: "/admin/store-partnerships", required: [MODULE_PERMS.delivery.read] },
-      { label: "Mis entregas", icon: "TbTruckDelivery", to: "/admin/my-deliveries", required: [MODULE_PERMS.delivery.selfUpdate] },
     ],
   },
 
@@ -452,12 +434,26 @@ export const BASE_STORE_MENU = [
       { label: "Reportes", icon: "MdQueryStats", to: "/admin/reports", required: [MODULE_PERMS.reports.read] },
     ],
   },
+
+  // Mi delivery — solo visible para DELIVERY_AGENT (requiere delivery:take)
+  // Posicionado al final para que siempre aparezca después de Finanzas
+  {
+    label: "Mi delivery",
+    icon: "TbTruckDelivery",
+    required: [MODULE_PERMS.delivery.take],
+    children: [
+      { label: "Entregas disponibles", icon: "MdLocalShipping", to: "/admin/available-deliveries", required: [MODULE_PERMS.delivery.take] },
+      { label: "Mis entregas", icon: "TbTruckDelivery", to: "/admin/my-deliveries", required: [MODULE_PERMS.delivery.selfUpdate] },
+      { label: "Mi ruta activa", icon: "MdLocalShipping", to: "/admin/my-routes", required: [MODULE_PERMS.delivery.selfUpdate] },
+      { label: "Mis sociedades", icon: "TbTruckDelivery", to: "/admin/my-partnerships", required: [MODULE_PERMS.delivery.read] },
+    ],
+  },
 ];
 
 /** Plantillas por rol de tienda
  * BASE_STORE_MENU indices:
  * [0] Empezar  [1] Panel  [2] Mi tienda  [3] Productos  [4] Ventas directas
- * [5] Órdenes en línea  [6] Almacen  [7] Delivery  [8] Finanzas
+ * [5] Órdenes en línea  [6] Almacen  [7] Entregas de tienda  [8] Finanzas  [9] Mi delivery
  */
 export const ROLE_MENU_TEMPLATES = {
   STORE_OWNER: BASE_STORE_MENU,
@@ -493,30 +489,7 @@ export const ROLE_MENU_TEMPLATES = {
   DELIVERY_AGENT: [
     BASE_STORE_MENU[1], // Panel de control
     BASE_STORE_MENU[2], // Mi tienda
-    {
-      label: "Entregas disponibles",
-      icon: "MdLocalShipping",
-      to: "/admin/available-deliveries",
-      required: [MODULE_PERMS.delivery.take],
-    },
-    {
-      label: "Mis entregas",
-      icon: "TbTruckDelivery",
-      to: "/admin/my-deliveries",
-      required: [MODULE_PERMS.delivery.selfUpdate],
-    },
-    {
-      label: "Mi ruta activa",
-      icon: "MdLocalShipping",
-      to: "/admin/my-routes",
-      required: [MODULE_PERMS.delivery.selfUpdate],
-    },
-    {
-      label: "Mis sociedades",
-      icon: "TbTruckDelivery",
-      to: "/admin/my-partnerships",
-      required: [MODULE_PERMS.delivery.read],
-    },
+    BASE_STORE_MENU[9], // Mi delivery (al final del BASE_STORE_MENU)
   ],
 
   SUPPORT_AGENT: [
@@ -577,8 +550,14 @@ export function buildSidebarMenuByRoles(user, hasPerm = () => true) {
   const rolesClean = uniq(arr(user?.roles).filter((r) => r && r !== "SUPER_ADMIN"));
   const rolesToUse = rolesClean.length ? rolesClean : ["CUSTOMER"];
 
+  // Ordenar roles: DELIVERY_AGENT siempre al final para que "Mi delivery" quede abajo
+  const roleOrder = [...rolesToUse].sort((a, b) => {
+    if (a === "DELIVERY_AGENT") return 1;
+    if (b === "DELIVERY_AGENT") return -1;
+    return 0;
+  });
   let composed = [];
-  for (const r of rolesToUse) composed = mergeMenus(composed, ROLE_MENU_TEMPLATES[r] || []);
+  for (const r of roleOrder) composed = mergeMenus(composed, ROLE_MENU_TEMPLATES[r] || []);
   if (!composed.length) composed = deepClone(BASE_STORE_MENU);
 
   const permsSet = normPerms((hasPerm && hasPerm.__all) ? hasPerm.__all : []);
