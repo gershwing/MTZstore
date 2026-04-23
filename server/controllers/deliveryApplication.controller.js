@@ -1,5 +1,6 @@
 // server/controllers/deliveryApplication.controller.js
 import DeliveryApplication from "../models/deliveryApplication.model.js";
+import DeliveryAgentProfile from "../models/deliveryAgentProfile.model.js";
 import User from "../models/user.model.js";
 
 // Emails (best-effort)
@@ -68,6 +69,10 @@ export async function createDeliveryApp(req, res, next) {
       idBackUrl,
       selfieUrl,
       licenseUrl,
+      // Delivery V2
+      serviceTypesRequested,
+      vehicleExpress,
+      vehicleStandard,
     } = req.body || {};
 
     const motor = ["Moto", "Auto", "Camioneta"].includes(vehicleType);
@@ -105,10 +110,16 @@ export async function createDeliveryApp(req, res, next) {
       selfieUrl,
       licenseUrl,
       status: "PENDING",
+      // Delivery V2
+      serviceTypesRequested: Array.isArray(serviceTypesRequested) && serviceTypesRequested.length
+        ? serviceTypesRequested
+        : ["express"],
+      vehicleExpress: vehicleExpress || undefined,
+      vehicleStandard: vehicleStandard || undefined,
       reviews: [
         {
           action: "SUBMITTED",
-          by: userId, // el solicitante
+          by: userId,
           at: new Date(),
         },
       ],
@@ -200,39 +211,104 @@ export async function listDeliveryAppsAdmin(req, res, next) {
 
 /* =========================
  * POST /api/delivery-applications/:id/approve
+ *  - Soporta aprobación granular por tipo (body.serviceType) o global (legacy)
  *  - Marca APPROVED, limpia reason
  *  - Asigna rol DELIVERY_AGENT
+ *  - Crea/actualiza DeliveryAgentProfile
  *  - Email de aprobación (best-effort)
  *  - Registra reviews[APPROVED]
  * ========================= */
 export async function approveDeliveryApp(req, res, next) {
   try {
     const { id } = req.params;
+    const { serviceType } = req.body || {}; // 'express' | 'standard' | undefined (legacy global)
 
     const app = await DeliveryApplication.findById(id);
     if (!app) throw httpError(404, "Postulación no encontrada.");
 
+    // Determinar qué tipos aprobar
+    const typesToApprove = serviceType
+      ? [serviceType]
+      : (app.serviceTypesRequested?.length ? [...app.serviceTypesRequested] : ["express"]);
+
+    // Validar tipos
+    for (const t of typesToApprove) {
+      if (!["express", "standard"].includes(t)) throw httpError(400, `Tipo de servicio inválido: ${t}`);
+    }
+
+    // Actualizar reviewNotesByType
+    const now = new Date();
+    if (!app.reviewNotesByType) app.reviewNotesByType = {};
+    for (const t of typesToApprove) {
+      app.reviewNotesByType[t] = {
+        reviewedBy: req.user?._id,
+        reviewedAt: now,
+        notes: "",
+        status: "APPROVED",
+      };
+    }
+
+    // Actualizar approvedServiceTypes (merge con existentes)
+    const approved = new Set([...(app.approvedServiceTypes || []), ...typesToApprove]);
+    app.approvedServiceTypes = [...approved];
+
+    // Status global: APPROVED si al menos un tipo aprobado
     app.status = "APPROVED";
     app.reason = undefined;
     app.reviewedBy = req.user?._id;
+    if (!app.serviceTypesRequested?.length) app.serviceTypesRequested = ["express"];
 
     // historial
     app.reviews.push({
       action: "APPROVED",
       by: req.user?._id,
-      at: new Date(),
+      at: now,
+      reason: serviceType ? `Tipo: ${serviceType}` : "Global",
     });
 
     await app.save();
 
     // Rol DELIVERY_AGENT — asignar platformRole
-    // Si ya tiene otro rol (ej: STORE_OWNER), sus permisos de tienda se mantienen via memberships.
     const u = await User.findById(app.userId);
     if (u) {
       if (u.platformRole !== "DELIVERY_AGENT") {
         u.platformRole = "DELIVERY_AGENT";
         await u.save();
       }
+    }
+
+    // Delivery V2: crear o actualizar DeliveryAgentProfile
+    let profile = await DeliveryAgentProfile.findOne({ userId: app.userId });
+    if (!profile) {
+      profile = await DeliveryAgentProfile.create({
+        userId: app.userId,
+        approvedServiceTypes: app.approvedServiceTypes,
+        platformTrustLevel: "BASIC",
+        status: "ACTIVE",
+        vehicles: {
+          express: app.vehicleExpress?.vehicleType
+            ? app.vehicleExpress
+            : (app.approvedServiceTypes.includes("express")
+              ? { vehicleType: app.vehicleType, licensePlate: app.plateNumber, licensePhotoUrl: app.licenseUrl }
+              : null),
+          standard: app.vehicleStandard?.vehicleType ? app.vehicleStandard : null,
+        },
+      });
+    } else {
+      // Actualizar profile existente con nuevos tipos
+      const profileTypes = new Set([...(profile.approvedServiceTypes || []), ...typesToApprove]);
+      profile.approvedServiceTypes = [...profileTypes];
+
+      // Actualizar vehículos si corresponde
+      for (const t of typesToApprove) {
+        if (t === "express" && !profile.vehicles?.express?.vehicleType && app.vehicleExpress?.vehicleType) {
+          profile.vehicles = { ...profile.vehicles, express: app.vehicleExpress };
+        }
+        if (t === "standard" && !profile.vehicles?.standard?.vehicleType && app.vehicleStandard?.vehicleType) {
+          profile.vehicles = { ...profile.vehicles, standard: app.vehicleStandard };
+        }
+      }
+      await profile.save();
     }
 
     // Email de aprobación

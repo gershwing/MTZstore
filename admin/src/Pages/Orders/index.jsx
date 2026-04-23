@@ -32,7 +32,16 @@ const PAY_STATUS = {
 const SHIPPING_LABELS = {
   MTZSTORE_EXPRESS: { label: "Express", cls: "bg-purple-100 text-purple-700" },
   MTZSTORE_STANDARD: { label: "Estándar", cls: "bg-blue-100 text-blue-700" },
+  STORE_EXPRESS: { label: "Tienda Express", cls: "bg-orange-100 text-orange-700" },
+  STORE_STANDARD: { label: "Tienda Estándar", cls: "bg-teal-100 text-teal-700" },
   STORE: { label: "Tienda", cls: "bg-gray-100 text-gray-600" },
+};
+
+const SHIPPING_PAGE_TITLES = {
+  MTZSTORE_EXPRESS: "MTZstore Express",
+  MTZSTORE_STANDARD: "MTZstore Estándar",
+  STORE_EXPRESS: "Mi tienda Express",
+  STORE_STANDARD: "Mi tienda Estándar",
 };
 
 const ORDER_STATUS_LABELS = {
@@ -44,7 +53,7 @@ const ORDER_STATUS_LABELS = {
   cancelled: "Cancelado",
 };
 
-export default function OrdersPage() {
+export default function OrdersPage({ shippingFilter } = {}) {
   const { alertBox, viewer, isSuper: authIsSuper } = useAuth();
 
   const me = viewer || {};
@@ -123,6 +132,7 @@ export default function OrdersPage() {
     try {
       setIsLoading(true);
       const params = { page, limit: 20, q, status, dateFrom, dateTo };
+      if (shippingFilter) params.shippingMethod = shippingFilter;
       const config = isSuper ? { params, __noTenant: true } : { params };
 
       const res = await api.get("/api/order/order-list", config);
@@ -141,7 +151,7 @@ export default function OrdersPage() {
     }
   };
 
-  useEffect(() => { load(1); }, []); // eslint-disable-line
+  useEffect(() => { load(1); }, [shippingFilter]); // eslint-disable-line
 
   const applyFilters = () => load(1);
   const toggleExpand = (key) => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -215,7 +225,8 @@ export default function OrdersPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ordenes_${new Date().toISOString().slice(0, 10)}.csv`;
+    const suffix = shippingFilter ? `_${shippingFilter.toLowerCase()}` : "";
+    a.download = `ordenes${suffix}_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -316,7 +327,9 @@ export default function OrdersPage() {
   return (
     <div className="p-5">
       <div className="flex items-center justify-between mb-3 gap-2">
-        <h1 className="text-xl font-semibold">Órdenes en línea</h1>
+        <h1 className="text-xl font-semibold">
+          {shippingFilter ? SHIPPING_PAGE_TITLES[shippingFilter] || "Órdenes en línea" : "Órdenes en línea"}
+        </h1>
         <Button variant="outlined" onClick={exportVisibleToCSV}>
           Exportar CSV
         </Button>

@@ -59,6 +59,7 @@ export const PERMISSIONS = {
 
     // --- DELIVERY / SUPPORT ---
     "delivery:read", "delivery:take", "delivery:assign", "delivery:updateStatus", "delivery:proof",
+    "delivery:partnerships:read", "delivery:partnerships:write", "delivery:trust:manage",
     "support:read", "support:reply", "support:close",
 
     // --- ADMISSIONS (Aplicaciones) ---
@@ -113,6 +114,7 @@ export const PERMISSIONS = {
     "banner:image:upload", "banner:image:delete",
 
     "delivery:read", "delivery:take", "delivery:assign", "delivery:updateStatus", "delivery:proof",
+    "delivery:partnerships:read", "delivery:partnerships:write",
     "support:read", "support:reply", "support:close",
 
     "product:rw", "order:rw", "delivery:rw", "payment:rw",
@@ -160,6 +162,7 @@ export const PERMISSIONS = {
 
   [ROLES.DELIVERY_AGENT]: [
     "delivery:read", "delivery:take", "delivery:updateStatus", "delivery:proof",
+    "delivery:partnerships:read", "delivery:partnerships:write",
     "order:read",
 
     "delivery:rw",
@@ -308,6 +311,9 @@ export const GROUP_PERMISSION_OF = Object.freeze({
   "delivery:assign": "delivery:rw",
   "delivery:updateStatus": "delivery:rw",
   "delivery:proof": "delivery:rw",
+  "delivery:partnerships:read": "delivery:rw",
+  "delivery:partnerships:write": "delivery:rw",
+  "delivery:trust:manage": "delivery:rw",
 
   // Reviews
   "review:create": "product:rw",
@@ -355,6 +361,7 @@ export const PERMISSION_REGISTRY = new Set([
   "store:read", "store:create", "store:update", "store:delete", "store:members",
   "sellerApp:approve", "sellerApp:admin",
   "warehouse:read", "warehouse:write",
+  "delivery:partnerships:read", "delivery:partnerships:write", "delivery:trust:manage",
 ]);
 
 /**

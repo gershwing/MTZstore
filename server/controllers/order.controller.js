@@ -77,7 +77,7 @@ export const createOrderController = async (req, res, next) => {
 
                 const product = await ProductModel.findById(p.productId)
                     .select(
-                        "storeId name images basePrice baseCurrency productType countInStock warehouseStock salesConfig"
+                        "storeId name images basePrice baseCurrency productType countInStock warehouseStock salesConfig shipping"
                     )
                     .lean();
 
@@ -124,6 +124,20 @@ export const createOrderController = async (req, res, next) => {
                     variant?.price ??
                     product.basePrice ??
                     0;
+
+                // Validate shipping method is enabled on this product
+                const SHIPPING_METHOD_MAP = {
+                    MTZSTORE_EXPRESS: "mtzExpress",
+                    MTZSTORE_STANDARD: "mtzStandard",
+                    STORE_EXPRESS: "storeExpress",
+                    STORE_STANDARD: "storeStandard",
+                };
+                const shippingKey = SHIPPING_METHOD_MAP[shippingMethod];
+                if (shippingKey && product.shipping && product.shipping[shippingKey] === false) {
+                    throw ERR.CONFLICT(
+                        `El método de envío seleccionado no está disponible para ${product.name}`
+                    );
+                }
 
                 // Determine which stock to check based on shipping method
                 const isMtzShipping = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(shippingMethod);
@@ -327,7 +341,7 @@ export const createOrderController = async (req, res, next) => {
         /* ======================================================
            7b) Auto-create DeliveryTask for all shipping methods
         ====================================================== */
-        if (["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD", "STORE"].includes(shippingMethod)) {
+        if (["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD", "STORE_EXPRESS", "STORE_STANDARD", "STORE"].includes(shippingMethod)) {
             try {
                 const addr = delivery_address
                     ? await AddressModel.findById(delivery_address).lean()
@@ -338,6 +352,8 @@ export const createOrderController = async (req, res, next) => {
                 const methodLabels = {
                     MTZSTORE_EXPRESS: "Express",
                     MTZSTORE_STANDARD: "Estandar",
+                    STORE_EXPRESS: "Tienda Express",
+                    STORE_STANDARD: "Tienda Estandar",
                     STORE: "Tienda",
                 };
 
@@ -458,6 +474,7 @@ export async function getOrderDetailsController(req, res, next) {
         if (req.query.status) extra.order_status = String(req.query.status);
         if (req.query.payment_status) extra.payment_status = String(req.query.payment_status);
         if (req.query.userId) extra.userId = req.query.userId;
+        if (req.query.shippingMethod) extra.shippingMethod = String(req.query.shippingMethod);
 
         const from = req.query.from ? new Date(req.query.from) : null;
         const to = req.query.to ? new Date(req.query.to) : null;

@@ -3,6 +3,7 @@ import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { setIO, emitToUser as _emitToUser } from './utils/socketEmitter.js';
 dotenv.config();
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
@@ -33,6 +34,9 @@ import webhookRouter from './routes/webhook.route.js';
 import settlementRouter from "./routes/settlement.route.js";
 import supportRouter from "./routes/support.route.js";
 import deliveryRouter from "./routes/delivery.route.js";
+import deliveryPartnershipRouter from "./routes/deliveryPartnership.route.js";
+import deliveryAgentProfileRouter from "./routes/deliveryAgentProfile.route.js";
+import deliveryRouteRouter from "./routes/deliveryRoute.route.js";
 import reportExportRouter from "./routes/reportExport.route.js";
 import reportRouter from "./routes/report.route.js";
 import auditRouter from "./routes/audit.route.js";
@@ -199,6 +203,9 @@ app.use('/api/webhook', webhookRouter);
 app.use('/api/settlements', settlementRouter);
 app.use('/api/support', supportRouter);
 app.use('/api/delivery', deliveryRouter);
+app.use('/api/delivery-partnerships', deliveryPartnershipRouter);
+app.use('/api/delivery-agent-profile', deliveryAgentProfileRouter);
+app.use('/api/delivery-routes', deliveryRouteRouter);
 app.use('/api/report', reportRouter);
 app.use('/api/report', reportExportRouter);
 app.use('/api/audit', auditRouter);
@@ -273,6 +280,7 @@ const io = new SocketIOServer(server, {
     pingInterval: 25000,
     allowEIO3: true,
 });
+setIO(io);
 
 /** 🔐 Handshake auth */
 io.use((socket, next) => {
@@ -329,13 +337,8 @@ try {
     });
 } catch { }
 
-/** ========= Export util global ========= */
-export function emitToUser(userId, event, payload) {
-    if (!userId) return;
-    const uid = String(userId);
-    io.to(`user:${uid}`).emit(event, payload);
-    // io.to(uid).emit(event, payload); // compat sin prefijo si lo usas
-}
+/** ========= Export util global (re-export desde socketEmitter para compat) ========= */
+export { _emitToUser as emitToUser };
 
 /* ====== Boot + (opcional) syncIndexes ====== */
 connectDB()
@@ -354,6 +357,8 @@ connectDB()
         try {
             const ShippingRate = (await import('./models/shippingRate.model.js')).default;
             const seedRates = [
+                { method: 'MTZSTORE_EXPRESS', zone: 'DEFAULT', baseRate: 15, perKgRate: 3, freeAbove: 500, estimatedDays: { min: 0, max: 1 }, active: true },
+                { method: 'MTZSTORE_STANDARD', zone: 'DEFAULT', baseRate: 5, perKgRate: 1.5, freeAbove: 200, estimatedDays: { min: 1, max: 3 }, active: true },
                 { method: 'STORE_EXPRESS', zone: 'DEFAULT', baseRate: 0, perKgRate: 0, freeAbove: 0, estimatedDays: { min: 1, max: 2 }, active: true },
                 { method: 'STORE_STANDARD', zone: 'DEFAULT', baseRate: 0, perKgRate: 0, freeAbove: 0, estimatedDays: { min: 3, max: 5 }, active: true },
             ];
@@ -364,6 +369,8 @@ connectDB()
                     { upsert: true }
                 );
             }
+            // Eliminar rate legacy "STORE" (reemplazado por STORE_EXPRESS/STORE_STANDARD)
+            await ShippingRate.deleteMany({ method: 'STORE' });
         } catch (e) { console.error('Seed shipping rates:', e.message); }
 
         server.listen(process.env.PORT || 8000, () => {

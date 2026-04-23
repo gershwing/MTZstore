@@ -66,7 +66,7 @@ export default function MyStore() {
   const [saving, setSaving] = useState(false);
 
   // Formulario editable
-  const [form, setForm] = useState({ name: "", description: "", email: "", phoneCode: "+591", phoneNumber: "", city: "", street: "", wholesaleEnabled: false, categoryId: "" });
+  const [form, setForm] = useState({ name: "", description: "", email: "", phoneCode: "+591", phoneNumber: "", city: "", street: "", wholesaleEnabled: false, categoryId: "", deliveryExpressMode: "open", deliveryStandardMode: "partners_only" });
   const [level2Categories, setLevel2Categories] = useState([]);
 
   const platformLogo = usePlatformLogo();
@@ -166,6 +166,8 @@ export default function MyStore() {
             street: storeData.address?.street || "",
             wholesaleEnabled: storeData.config?.wholesaleEnabled || false,
             categoryId: storeData.categoryId?._id || storeData.categoryId || "",
+            deliveryExpressMode: storeData.delivery?.expressMode || "open",
+            deliveryStandardMode: storeData.delivery?.standardMode || "partners_only",
           });
         }
       } catch {
@@ -197,6 +199,11 @@ export default function MyStore() {
           ...(store.config || {}),
           wholesaleEnabled: form.wholesaleEnabled,
         },
+        delivery: {
+          ...(store.delivery || {}),
+          expressMode: form.deliveryExpressMode,
+          standardMode: form.deliveryStandardMode,
+        },
         ...(form.categoryId ? { categoryId: form.categoryId } : {}),
       }, { headers: { "X-Store-Id": String(store._id) } });
       alert("Tienda actualizada correctamente");
@@ -211,6 +218,7 @@ export default function MyStore() {
           phone: fullPhone,
           address: { ...(prev.address || {}), city: form.city, street: form.street },
           config: { ...(prev.config || {}), wholesaleEnabled: form.wholesaleEnabled },
+          delivery: { ...(prev.delivery || {}), expressMode: form.deliveryExpressMode, standardMode: form.deliveryStandardMode },
           categoryId: catObj ? { _id: catObj._id, name: catObj.name, slug: catObj.slug } : prev.categoryId,
         };
       });
@@ -411,6 +419,55 @@ export default function MyStore() {
               </div>
             }
           />
+        </div>
+
+        {/* Configuracion de entrega */}
+        <div className="border-t pt-4 mt-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Configuracion de entrega</h3>
+          <p className="text-xs text-gray-500 mb-3">Define quien puede repartir tus pedidos. "Abierto" permite que cualquier repartidor aprobado tome tus envios. "Solo socios" restringe a repartidores que hayas aprobado como socios.</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Modo Express</label>
+              <select
+                value={form.deliveryExpressMode}
+                onChange={(e) => updateForm("deliveryExpressMode", e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
+                <option value="open">Abierto a todos</option>
+                <option value="partners_only">Solo socios</option>
+              </select>
+              <p className="text-[11px] text-gray-400 mt-1">Entregas rapidas (1-2 dias) por moto o bicicleta.</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Modo Estandar</label>
+              <select
+                value={form.deliveryStandardMode}
+                onChange={(e) => updateForm("deliveryStandardMode", e.target.value)}
+                className="w-full border rounded px-3 py-2 text-sm"
+              >
+                <option value="open">Abierto a todos</option>
+                <option value="partners_only">Solo socios</option>
+              </select>
+              <p className="text-[11px] text-gray-400 mt-1">Entregas programadas (3-5 dias) con mayor volumen.</p>
+            </div>
+          </div>
+
+          {form.deliveryStandardMode === "open" && (
+            <div className="mt-3 bg-amber-50 border border-amber-200 rounded px-3 py-2 text-xs text-amber-700">
+              Los envios estandar suelen transportar articulos de mayor valor. Considera usar modo "Solo socios" para mayor seguridad.
+            </div>
+          )}
+
+          <div className="mt-3">
+            <button
+              onClick={() => navigate("/admin/store-partnerships")}
+              className="text-blue-600 text-xs hover:underline"
+            >
+              Gestionar socios de delivery →
+            </button>
+          </div>
         </div>
 
         <div className="flex justify-end pt-2">

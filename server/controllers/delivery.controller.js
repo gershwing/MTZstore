@@ -2,7 +2,10 @@ import DeliveryTask from "../models/deliveryTask.model.js";
 import OrderModel from "../models/order.model.js";
 import Payment from "../models/payment.model.js";
 import UserModel from "../models/user.model.js";
+import StoreModel from "../models/store.model.js";
+import DeliveryAgentProfile from "../models/deliveryAgentProfile.model.js";
 import { createAutoSettlement } from "./settlement.controller.js";
+import { buildAvailableTasksFilter, canAgentTakeTask } from "../services/deliveryEligibility.service.js";
 import upload from "../middlewares/multer.js";
 import { ERR } from "../utils/httpError.js";
 import { auditLog } from "../services/audit.service.js";
@@ -99,16 +102,36 @@ export async function listDeliveryController(req, res, next) {
   }
 }
 
-// GET /api/delivery/available — Entregas PENDING sin asignar (para delivery agents)
+// GET /api/delivery/available — Entregas disponibles filtradas por elegibilidad del agente
 export async function availableDeliveriesController(req, res, next) {
   try {
-    const { page = 1, limit = 50 } = req.query;
+    const userId = req.userId || req.user?._id;
+    const { page = 1, limit = 50, serviceType } = req.query;
 
-    const filter = {
-      status: "PENDING",
-      shippingMethod: "MTZSTORE_EXPRESS",
-      $or: [{ assigneeId: { $exists: false } }, { assigneeId: null }],
-    };
+    // Buscar perfil del agente
+    const agentProfile = await DeliveryAgentProfile.findOne({ userId, status: "ACTIVE" });
+    if (!agentProfile) {
+      return res.ok({ data: [], total: 0, page: 1, limit: +limit });
+    }
+
+    // Construir filtro dinámico basado en capabilities + trust + partnerships
+    const filter = await buildAvailableTasksFilter(agentProfile);
+
+    // Filtro adicional por serviceType si se especifica
+    if (serviceType && filter.$or) {
+      const expressMethods = ["MTZSTORE_EXPRESS", "STORE_EXPRESS"];
+      const standardMethods = ["MTZSTORE_STANDARD", "STORE_STANDARD", "STORE"];
+      const allowedMethods = serviceType === "express" ? expressMethods : standardMethods;
+      filter.$or = filter.$or.filter((f) => {
+        const m = f.shippingMethod;
+        if (typeof m === "string") return allowedMethods.includes(m);
+        if (m?.$in) return m.$in.some((v) => allowedMethods.includes(v));
+        return false;
+      });
+      if (filter.$or.length === 0) {
+        return res.ok({ data: [], total: 0, page: 1, limit: +limit });
+      }
+    }
 
     const limitN = Math.max(1, +limit);
     const skip = (Math.max(1, +page) - 1) * limitN;
@@ -124,8 +147,6 @@ export async function availableDeliveriesController(req, res, next) {
         .sort({ createdAt: -1 }).skip(skip).limit(limitN).lean(),
       DeliveryTask.countDocuments(filter)
     ]);
-
-    console.log("[availableDeliveries] found:", total, "items");
 
     return res.ok({ data: items, total, page: +page, limit: limitN });
   } catch (e) {
@@ -145,11 +166,19 @@ export async function takeDeliveryController(req, res, next) {
 
     const task = await DeliveryTask.findById(id);
     if (!task) return next(ERR.NOT_FOUND("Delivery no encontrado"));
-    if (task.shippingMethod && task.shippingMethod !== "MTZSTORE_EXPRESS") {
-      return next(ERR.VALIDATION({ status: "Solo entregas Express pueden ser tomadas por repartidores" }));
-    }
     if (task.status !== "PENDING") return next(ERR.VALIDATION({ status: "Solo se pueden tomar entregas pendientes" }));
     if (task.assigneeId) return next(ERR.CONFLICT("Esta entrega ya fue tomada por otro repartidor"));
+
+    // Verificar elegibilidad del agente (Delivery V2)
+    const agentProfile = await DeliveryAgentProfile.findOne({ userId });
+    if (!agentProfile || agentProfile.status !== "ACTIVE") {
+      return next(ERR.VALIDATION("No tienes un perfil de agente activo"));
+    }
+    const store = task.storeId ? await StoreModel.findById(task.storeId).lean() : null;
+    const eligible = await canAgentTakeTask(agentProfile, task, store);
+    if (!eligible) {
+      return next(ERR.VALIDATION("No tienes permisos para tomar esta entrega"));
+    }
 
     task.assigneeId = userId;
     task.status = "ASSIGNED";
@@ -364,6 +393,14 @@ export async function updateStatusController(req, res, next) {
     task.status = status;
     task.timeline.push(asEvent(status, req.userId, note || ""));
     await task.save();
+
+    // Sincronizar stats de la ruta si el task pertenece a una
+    if (task.routeId) {
+      try {
+        const { syncRouteStats } = await import("./deliveryRoute.controller.js");
+        await syncRouteStats(task.routeId);
+      } catch (e) { console.warn("[syncRouteStats]", e?.message); }
+    }
 
     // Sincronizar estado de la orden (minusculas, matchea enum del Order model)
     const orderStatus = DELIVERY_TO_ORDER_STATUS[status];

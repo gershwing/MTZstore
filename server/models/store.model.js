@@ -85,6 +85,12 @@ const storeSchema = new mongoose.Schema(
       minMarginPct:     { type: Number, default: 20 },
       commissionPct:    { type: Number, default: 10, min: 0, max: 100 },
     },
+
+    // Configuración de delivery (Delivery V2)
+    delivery: {
+      expressMode:  { type: String, enum: ["open", "partners_only"], default: "open" },
+      standardMode: { type: String, enum: ["open", "partners_only"], default: "partners_only" },
+    },
   },
   { timestamps: true }
 );

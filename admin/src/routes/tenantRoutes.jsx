@@ -30,6 +30,11 @@ import DeliveryList from "../Pages/Delivery/DeliveryList";
 import DeliveryDetail from "../Pages/Delivery/DeliveryDetail";
 import MyDeliveries from "../Pages/Delivery/MyDeliveries";
 import AvailableDeliveries from "../Pages/Delivery/AvailableDeliveries";
+import MyPartnerships from "../Pages/Delivery/MyPartnerships";
+import StorePartnerships from "../Pages/Delivery/StorePartnerships";
+import RouteList from "../Pages/Delivery/RouteList";
+import RouteDetail from "../Pages/Delivery/RouteDetail";
+import MyRoutes from "../Pages/Delivery/MyRoutes";
 import ReportsPage from "../Pages/Reports/ReportsPage";
 import ReportsPrint from "../Pages/Reports/ReportsPrint";
 import DirectSalesPage from "../Pages/DirectSales";
@@ -67,6 +72,10 @@ export const tenantRoutes = [
   { path: "profit-loss", element: <ProfitLossPage /> },
   { path: "accounts-receivable", element: <AccountsReceivablePage /> },
   { path: "orders", element: <Orders /> },
+  { path: "orders/mtzstore-express", element: <Orders shippingFilter="MTZSTORE_EXPRESS" /> },
+  { path: "orders/mtzstore-standard", element: <Orders shippingFilter="MTZSTORE_STANDARD" /> },
+  { path: "orders/store-express", element: <Orders shippingFilter="STORE_EXPRESS" /> },
+  { path: "orders/store-standard", element: <Orders shippingFilter="STORE_STANDARD" /> },
   { path: "payments", element: <PaymentsPage /> },
   { path: "settlements", element: <SettlementsPage /> },
 
@@ -86,6 +95,11 @@ export const tenantRoutes = [
   { path: "delivery/:id", element: <DeliveryDetail /> },
   { path: "available-deliveries", element: <AvailableDeliveries /> },
   { path: "my-deliveries", element: <MyDeliveries /> },
+  { path: "my-partnerships", element: <MyPartnerships /> },
+  { path: "store-partnerships", element: <StorePartnerships /> },
+  { path: "delivery-routes", element: <RouteList /> },
+  { path: "delivery-routes/:id", element: <RouteDetail /> },
+  { path: "my-routes", element: <MyRoutes /> },
 
   { path: "reports", element: <ReportsPage /> },
   { path: "reports/print", element: <ReportsPrint /> },

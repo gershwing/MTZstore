@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import {
   listDeliveryAppsAdmin,
   approveDeliveryApp,
+  approveDeliveryAppByType,
   rejectDeliveryApp,
   deleteDeliveryApp,
 } from "../../services/deliveryApps";
@@ -23,6 +24,12 @@ const STATUS_COLORS = {
 
 const MIN_REASON = 6;
 const isUrl = (u) => !!u && /^(https?:|data:)/i.test(String(u));
+
+// Helpers V2: estado por tipo de servicio
+const getTypeStatus = (row, type) => row.reviewNotesByType?.[type]?.status || "PENDING";
+const getTypeLabel = (row, type) => STATUS_LABELS[getTypeStatus(row, type)] || "Pendiente";
+const getTypeColor = (row, type) => STATUS_COLORS[getTypeStatus(row, type)] || STATUS_COLORS.PENDING;
+const hasV2Types = (row) => row.serviceTypesRequested?.length > 0;
 
 export default function DeliveryApplicationsAdmin() {
   const [rows, setRows] = useState([]);
@@ -59,12 +66,26 @@ export default function DeliveryApplicationsAdmin() {
 
   useEffect(() => { fetchList(1); }, []);
 
+  // Aprobación global (legacy / apps sin V2)
   const handleApprove = async (row) => {
     if (!confirm("Aprobar esta solicitud de delivery?")) return;
     try {
       await approveDeliveryApp(row._id || row.id);
       await fetchList(page);
       toast.success("Solicitud aprobada");
+    } catch (err) {
+      toast.error(err?.response?.data?.message || err?.message || "Error al aprobar");
+    }
+  };
+
+  // Aprobación granular por tipo (V2)
+  const handleApproveType = async (row, serviceType) => {
+    const label = serviceType === "express" ? "Express" : "Estándar";
+    if (!confirm(`Aprobar servicio ${label} para este agente?`)) return;
+    try {
+      await approveDeliveryAppByType(row._id || row.id, serviceType);
+      await fetchList(page);
+      toast.success(`${label} aprobado`);
     } catch (err) {
       toast.error(err?.response?.data?.message || err?.message || "Error al aprobar");
     }
@@ -114,6 +135,8 @@ export default function DeliveryApplicationsAdmin() {
       { url: row.idBackUrl, label: "CI Rev." },
       { url: row.selfieUrl, label: "Selfie" },
       { url: row.licenseUrl, label: "Licencia" },
+      { url: row.vehicleExpress?.licensePhotoUrl, label: "Lic. Express" },
+      { url: row.vehicleStandard?.licensePhotoUrl, label: "Lic. Estándar" },
     ].filter((i) => isUrl(i.url));
   };
 
@@ -124,7 +147,6 @@ export default function DeliveryApplicationsAdmin() {
 
   return (
     <div className="p-4 space-y-3 h-[calc(100vh-80px)] overflow-y-auto">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Solicitudes de Delivery</h1>
         <span className="text-sm text-gray-500">{total} solicitudes</span>
@@ -133,29 +155,19 @@ export default function DeliveryApplicationsAdmin() {
       {/* Filtros */}
       <div className="bg-white border rounded-lg p-3 flex flex-wrap gap-2 items-center">
         <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
+          value={q} onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") fetchList(1, { q: e.target.value }); }}
           placeholder="Buscar por nombre, documento, telefono, placa..."
           className="border rounded px-3 py-1.5 text-sm flex-1 min-w-[200px]"
         />
-        <select
-          value={status}
-          onChange={(e) => { setStatus(e.target.value); fetchList(1, { status: e.target.value }); }}
-          className="border rounded px-3 py-1.5 text-sm"
-        >
+        <select value={status} onChange={(e) => { setStatus(e.target.value); fetchList(1, { status: e.target.value }); }} className="border rounded px-3 py-1.5 text-sm">
           {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
-        <button onClick={() => { setQ(""); setStatus("ALL"); fetchList(1, { q: "", status: "ALL" }); }} className="border rounded px-3 py-1.5 text-sm hover:bg-gray-50">
-          Limpiar
-        </button>
+        <button onClick={() => { setQ(""); setStatus("ALL"); fetchList(1, { q: "", status: "ALL" }); }} className="border rounded px-3 py-1.5 text-sm hover:bg-gray-50">Limpiar</button>
         <div className="flex gap-1 ml-auto">
           {STATUS_OPTIONS.map((s) => (
-            <button
-              key={s.value}
-              onClick={() => { setStatus(s.value); fetchList(1, { status: s.value }); }}
-              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${status === s.value ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"}`}
-            >
+            <button key={s.value} onClick={() => { setStatus(s.value); fetchList(1, { status: s.value }); }}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${status === s.value ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"}`}>
               {s.label}
             </button>
           ))}
@@ -174,72 +186,120 @@ export default function DeliveryApplicationsAdmin() {
             const images = getImages(row);
             const s = row.status || "PENDING";
             const isPending = s === "PENDING";
+            const v2 = hasV2Types(row);
 
             return (
-              <div key={row.id} className="bg-white border rounded-lg px-4 py-3 flex items-center gap-4 hover:shadow-sm transition-shadow">
-                {/* Info principal */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-sm truncate">{applicant.name}</span>
-                    {applicant.email && <span className="text-xs text-gray-400 truncate">{applicant.email}</span>}
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5 flex-wrap">
-                    <span>{row.vehicleType || "—"}</span>
-                    <span>Ciudad: {row.city || "—"}</span>
-                    <span>CI: {row.documentNumber || "—"}</span>
-                    {row.plateNumber && <span>Placa: {row.plateNumber}</span>}
-                    {row.phone && <span>Tel: {row.phone}</span>}
-                    <span>{formatDate(row.createdAt)}</span>
-                  </div>
-                  {s === "REJECTED" && row.reason && (
-                    <p className="text-[11px] text-red-600 mt-0.5 truncate">Motivo: {row.reason}</p>
-                  )}
-                </div>
-
-                {/* Imágenes */}
-                <div className="flex gap-1.5 shrink-0">
-                  {images.map((img, idx) => (
-                    <div key={idx} className="text-center">
-                      <img
-                        src={img.url}
-                        alt={img.label}
-                        onClick={() => setZoomSrc(img.url)}
-                        className="w-14 h-14 object-cover rounded border border-gray-200 cursor-zoom-in hover:border-blue-400"
-                      />
-                      <p className="text-[9px] text-gray-400 mt-0.5">{img.label}</p>
+              <div key={row.id} className="bg-white border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow">
+                <div className="flex items-center gap-4">
+                  {/* Info principal */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm truncate">{applicant.name}</span>
+                      {applicant.email && <span className="text-xs text-gray-400 truncate">{applicant.email}</span>}
                     </div>
-                  ))}
+                    <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5 flex-wrap">
+                      {!v2 && <span>{row.vehicleType || "—"}</span>}
+                      <span>Ciudad: {row.city || "—"}</span>
+                      <span>CI: {row.documentNumber || "—"}</span>
+                      {row.plateNumber && <span>Placa: {row.plateNumber}</span>}
+                      {row.phone && <span>Tel: {row.phone}</span>}
+                      <span>{formatDate(row.createdAt)}</span>
+                    </div>
+
+                    {/* V2: info de vehículos */}
+                    {v2 && (
+                      <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5 flex-wrap">
+                        {row.vehicleExpress?.vehicleType && (
+                          <span>Express: {row.vehicleExpress.vehicleType} {row.vehicleExpress.licensePlate || ""}</span>
+                        )}
+                        {row.vehicleStandard?.vehicleType && (
+                          <span>Estándar: {row.vehicleStandard.vehicleType} {row.vehicleStandard.licensePlate || ""} {row.vehicleStandard.cargoCapacityKg ? `(${row.vehicleStandard.cargoCapacityKg}kg)` : ""}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {s === "REJECTED" && row.reason && (
+                      <p className="text-[11px] text-red-600 mt-0.5 truncate">Motivo: {row.reason}</p>
+                    )}
+                  </div>
+
+                  {/* Imágenes */}
+                  <div className="flex gap-1.5 shrink-0">
+                    {images.map((img, idx) => (
+                      <div key={idx} className="text-center">
+                        <img src={img.url} alt={img.label} onClick={() => setZoomSrc(img.url)}
+                          className="w-14 h-14 object-cover rounded border border-gray-200 cursor-zoom-in hover:border-blue-400" />
+                        <p className="text-[9px] text-gray-400 mt-0.5">{img.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Estado global */}
+                  <span className={`text-xs px-2 py-1 rounded font-medium shrink-0 ${STATUS_COLORS[s] || ""}`}>
+                    {STATUS_LABELS[s] || s}
+                  </span>
                 </div>
 
-                {/* Estado */}
-                <span className={`text-xs px-2 py-1 rounded font-medium shrink-0 ${STATUS_COLORS[s] || ""}`}>
-                  {STATUS_LABELS[s] || s}
-                </span>
+                {/* V2: badges por tipo + botones granulares */}
+                {v2 && (
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 flex-wrap">
+                    {/* Badges de estado por tipo */}
+                    {row.serviceTypesRequested?.includes("express") && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${getTypeColor(row, "express")}`}>
+                        Express: {getTypeLabel(row, "express")}
+                      </span>
+                    )}
+                    {row.serviceTypesRequested?.includes("standard") && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${getTypeColor(row, "standard")}`}>
+                        Estándar: {getTypeLabel(row, "standard")}
+                      </span>
+                    )}
 
-                {/* Acciones */}
-                <div className="flex gap-1.5 shrink-0">
-                  <button
-                    onClick={() => handleApprove(row)}
-                    disabled={!isPending || loading}
-                    className="bg-green-600 text-white rounded px-3 py-1 text-xs font-medium hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    Aprobar
-                  </button>
-                  <button
-                    onClick={() => handleRejectOpen(row._id)}
-                    disabled={!isPending || loading}
-                    className="bg-orange-500 text-white rounded px-3 py-1 text-xs font-medium hover:bg-orange-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    Rechazar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(row._id)}
-                    disabled={s === "APPROVED" || loading}
-                    className="border border-red-300 text-red-600 rounded px-2 py-1 text-xs hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    Eliminar
-                  </button>
-                </div>
+                    <div className="flex-1" />
+
+                    {/* Botones granulares */}
+                    {row.serviceTypesRequested?.includes("express") && getTypeStatus(row, "express") === "PENDING" && (
+                      <button onClick={() => handleApproveType(row, "express")} disabled={loading}
+                        className="bg-purple-600 text-white rounded px-2.5 py-1 text-[11px] font-medium hover:bg-purple-700 disabled:opacity-30">
+                        Aprobar Express
+                      </button>
+                    )}
+                    {row.serviceTypesRequested?.includes("standard") && getTypeStatus(row, "standard") === "PENDING" && (
+                      <button onClick={() => handleApproveType(row, "standard")} disabled={loading}
+                        className="bg-blue-600 text-white rounded px-2.5 py-1 text-[11px] font-medium hover:bg-blue-700 disabled:opacity-30">
+                        Aprobar Estándar
+                      </button>
+                    )}
+                    {isPending && (
+                      <button onClick={() => handleRejectOpen(row._id)} disabled={loading}
+                        className="bg-orange-500 text-white rounded px-2.5 py-1 text-[11px] font-medium hover:bg-orange-600 disabled:opacity-30">
+                        Rechazar
+                      </button>
+                    )}
+                    <button onClick={() => handleDelete(row._id)} disabled={s === "APPROVED" || loading}
+                      className="border border-red-300 text-red-600 rounded px-2 py-1 text-[11px] hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed">
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+
+                {/* Legacy: botones cuando no hay V2 */}
+                {!v2 && (
+                  <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-gray-100 justify-end">
+                    <button onClick={() => handleApprove(row)} disabled={!isPending || loading}
+                      className="bg-green-600 text-white rounded px-3 py-1 text-xs font-medium hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed">
+                      Aprobar
+                    </button>
+                    <button onClick={() => handleRejectOpen(row._id)} disabled={!isPending || loading}
+                      className="bg-orange-500 text-white rounded px-3 py-1 text-xs font-medium hover:bg-orange-600 disabled:opacity-30 disabled:cursor-not-allowed">
+                      Rechazar
+                    </button>
+                    <button onClick={() => handleDelete(row._id)} disabled={s === "APPROVED" || loading}
+                      className="border border-red-300 text-red-600 rounded px-2 py-1 text-xs hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed">
+                      Eliminar
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}

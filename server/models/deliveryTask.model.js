@@ -30,9 +30,10 @@ const DeliveryTaskSchema = new mongoose.Schema(
     storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", default: null, index: true },
     orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true, unique: true },
     assigneeId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // repartidor
+    routeId: { type: mongoose.Schema.Types.ObjectId, ref: "DeliveryRoute", default: null, index: true },
     shippingMethod: {
       type: String,
-      enum: ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD", "STORE"],
+      enum: ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD", "STORE_EXPRESS", "STORE_STANDARD", "STORE"],
       default: "MTZSTORE_EXPRESS",
       index: true
     },

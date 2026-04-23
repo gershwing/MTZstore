@@ -22,6 +22,17 @@ const ReviewEntrySchema = new Schema(
   { _id: false }
 );
 
+/** Subdocumento de revisión por tipo de servicio */
+const TypeReviewSchema = new Schema(
+  {
+    reviewedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    reviewedAt: { type: Date },
+    notes: { type: String },
+    status: { type: String, enum: ["PENDING", "APPROVED", "REJECTED"], default: "PENDING" },
+  },
+  { _id: false }
+);
+
 const DeliveryApplicationSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true }, // 👈 sin index aquí
@@ -39,7 +50,7 @@ const DeliveryApplicationSchema = new Schema(
     city: { type: String, required: true, trim: true }, // capital / zona
     documentNumber: { type: String, required: true, trim: true },
 
-    // Vehículo (placa requerida si es motorizado)
+    // Vehículo legacy (placa requerida si es motorizado)
     plateNumber: {
       type: String,
       trim: true,
@@ -52,7 +63,41 @@ const DeliveryApplicationSchema = new Schema(
     selfieUrl: { type: String, required: true }, // foto con CI en mano
     licenseUrl: { type: String }, // requerido si es motorizado
 
-    // Estado de revisión
+    // ─── Delivery V2: tipos de servicio ───
+    serviceTypesRequested: {
+      type: [String],
+      enum: ["express", "standard"],
+      default: ["express"],
+    },
+    approvedServiceTypes: {
+      type: [String],
+      enum: ["express", "standard"],
+      default: [],
+    },
+
+    // Vehículo Express (condicional: si postula a express)
+    vehicleExpress: {
+      vehicleType: { type: String, enum: ["Moto", "Bicicleta", "Otro"] },
+      licensePlate: { type: String, trim: true },
+      licensePhotoUrl: { type: String },
+    },
+
+    // Vehículo Estándar (condicional: si postula a standard)
+    vehicleStandard: {
+      vehicleType: { type: String, enum: ["Auto", "Camioneta", "Van", "Otro"] },
+      licensePlate: { type: String, trim: true },
+      licensePhotoUrl: { type: String },
+      cargoCapacityKg: { type: Number, min: 0 },
+    },
+
+    // Revisión granular por tipo
+    reviewNotesByType: {
+      express: { type: TypeReviewSchema, default: undefined },
+      standard: { type: TypeReviewSchema, default: undefined },
+    },
+    // ─── Fin Delivery V2 ───
+
+    // Estado de revisión (global: APPROVED si al menos un tipo aprobado)
     status: {
       type: String,
       enum: ["PENDING", "APPROVED", "REJECTED"],

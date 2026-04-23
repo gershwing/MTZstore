@@ -31,6 +31,10 @@ export const listDeliveryAppsAdmin = (params = {}) =>
 export const approveDeliveryApp = (id) =>
   api.post(`/api/delivery-applications/${id}/approve`).then((r) => r.data?.data);
 
+// Aprobación granular por tipo de servicio (Delivery V2)
+export const approveDeliveryAppByType = (id, serviceType) =>
+  api.post(`/api/delivery-applications/${id}/approve`, { serviceType }).then((r) => r.data?.data);
+
 export const rejectDeliveryApp = (id, reason) =>
   api
     .post(`/api/delivery-applications/${id}/reject`, { reason })

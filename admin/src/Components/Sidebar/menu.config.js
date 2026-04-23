@@ -76,6 +76,8 @@ export const ALLOW_WITHOUT_TENANT_PREFIXES = [
   "/admin/delivery",
   "/admin/available-deliveries",
   "/admin/my-deliveries",
+  "/admin/my-partnerships",
+  "/admin/my-routes",
 ];
 
 const startsWithAny = (path, prefixes = []) =>
@@ -304,6 +306,10 @@ export const PLATFORM_MENU = [
     onlySuper: true,
     children: [
       { label: "Todas las órdenes", icon: "IoBagCheckOutline", to: "orders", required: [MODULE_PERMS.orders.read] },
+      { label: "MTZstore Express", icon: "MdLocalShipping", to: "orders/mtzstore-express", required: [MODULE_PERMS.orders.read] },
+      { label: "MTZstore Estándar", icon: "MdLocalShipping", to: "orders/mtzstore-standard", required: [MODULE_PERMS.orders.read] },
+      { label: "Tienda Express", icon: "TbBuildingStore", to: "orders/store-express", required: [MODULE_PERMS.orders.read] },
+      { label: "Tienda Estándar", icon: "TbBuildingStore", to: "orders/store-standard", required: [MODULE_PERMS.orders.read] },
     ],
   },
 
@@ -325,8 +331,10 @@ export const PLATFORM_MENU = [
     onlySuper: true,
     children: [
       { label: "Entregas", icon: "TbTruckDelivery", to: "delivery", required: [MODULE_PERMS.delivery.read] },
+      { label: "Rutas de reparto", icon: "MdLocalShipping", to: "delivery-routes", required: [MODULE_PERMS.delivery.assign] },
       { label: "Entregas disponibles", icon: "MdLocalShipping", to: "available-deliveries", required: [MODULE_PERMS.delivery.read] },
       { label: "Repartidores", icon: "FiUsers", to: "delivery-agents", required: [MODULE_PERMS.delivery.read] },
+      { label: "Niveles de confianza", icon: "FiUsers", to: "trust-management", required: [MODULE_PERMS.delivery.read] },
       { label: "Mis entregas", icon: "TbTruckDelivery", to: "my-deliveries", required: [MODULE_PERMS.delivery.selfUpdate] },
     ],
   },
@@ -404,6 +412,10 @@ export const BASE_STORE_MENU = [
     required: [MODULE_PERMS.orders.read],
     children: [
       { label: "Todas las órdenes", icon: "IoBagCheckOutline", to: "/admin/orders", required: [MODULE_PERMS.orders.read] },
+      { label: "MTZstore Express", icon: "MdLocalShipping", to: "/admin/orders/mtzstore-express", required: [MODULE_PERMS.orders.read] },
+      { label: "MTZstore Estándar", icon: "MdLocalShipping", to: "/admin/orders/mtzstore-standard", required: [MODULE_PERMS.orders.read] },
+      { label: "Tienda Express", icon: "TbBuildingStore", to: "/admin/orders/store-express", required: [MODULE_PERMS.orders.read] },
+      { label: "Tienda Estándar", icon: "TbBuildingStore", to: "/admin/orders/store-standard", required: [MODULE_PERMS.orders.read] },
     ],
   },
 
@@ -423,7 +435,9 @@ export const BASE_STORE_MENU = [
     required: [MODULE_PERMS.delivery.read],
     children: [
       { label: "Entregas", icon: "TbTruckDelivery", to: "/admin/delivery", required: [MODULE_PERMS.delivery.read] },
+      { label: "Rutas de reparto", icon: "MdLocalShipping", to: "/admin/delivery-routes", required: [MODULE_PERMS.delivery.assign] },
       { label: "Entregas disponibles", icon: "MdLocalShipping", to: "/admin/available-deliveries", required: [MODULE_PERMS.delivery.take] },
+      { label: "Socios delivery", icon: "FiUsers", to: "/admin/store-partnerships", required: [MODULE_PERMS.delivery.read] },
       { label: "Mis entregas", icon: "TbTruckDelivery", to: "/admin/my-deliveries", required: [MODULE_PERMS.delivery.selfUpdate] },
     ],
   },
@@ -490,6 +504,18 @@ export const ROLE_MENU_TEMPLATES = {
       icon: "TbTruckDelivery",
       to: "/admin/my-deliveries",
       required: [MODULE_PERMS.delivery.selfUpdate],
+    },
+    {
+      label: "Mi ruta activa",
+      icon: "MdLocalShipping",
+      to: "/admin/my-routes",
+      required: [MODULE_PERMS.delivery.selfUpdate],
+    },
+    {
+      label: "Mis sociedades",
+      icon: "TbTruckDelivery",
+      to: "/admin/my-partnerships",
+      required: [MODULE_PERMS.delivery.read],
     },
   ],
 

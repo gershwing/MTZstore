@@ -28,14 +28,24 @@ const rates = [
     active: true,
   },
   {
-    method: "STORE",
+    method: "STORE_EXPRESS",
     zone: "DEFAULT",
     baseRate: 0,
     perKgRate: 0,
     freeAbove: 0,
-    estimatedDays: { min: 2, max: 5 },
+    estimatedDays: { min: 1, max: 2 },
     active: true,
   },
+  {
+    method: "STORE_STANDARD",
+    zone: "DEFAULT",
+    baseRate: 0,
+    perKgRate: 0,
+    freeAbove: 0,
+    estimatedDays: { min: 3, max: 5 },
+    active: true,
+  },
+  // Legacy "STORE" eliminado — reemplazado por STORE_EXPRESS y STORE_STANDARD
 ];
 
 async function main() {

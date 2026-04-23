@@ -68,16 +68,62 @@ const Checkout = () => {
     }).catch(() => {});
   }, []);
 
-  // Auto-seleccionar método de envío si el actual no tiene stock
+  // Enriquecer cart items con datos frescos del producto (shipping + stock)
+  const [enrichedCart, setEnrichedCart] = useState([]);
+  const [storeNames, setStoreNames] = useState({});
   useEffect(() => {
-    if (!availableShippingRates.length || !context?.cartData?.length) return;
-    const items = context.cartData;
+    const items = context?.cartData || [];
+    if (!items.length) { setEnrichedCart([]); return; }
+    const uniqueIds = [...new Set(items.map(i => i.productId?._id || i.productId).filter(Boolean))];
+    Promise.all(
+      uniqueIds.map(id =>
+        fetchDataFromApi(`/api/product/${id}`)
+          .then(r => { const raw = r?.data || r; const p = raw?.product || raw; return p ? { id: String(p._id || p.id), shipping: p.shipping, countInStock: p.countInStock, warehouseStock: p.warehouseStock, storeId: p.storeId } : null; })
+          .catch(() => null)
+      )
+    ).then(products => {
+      const map = {};
+      const storeIds = new Set();
+      products.filter(Boolean).forEach(p => { map[p.id] = p; if (p.storeId) storeIds.add(String(p.storeId)); });
+      setEnrichedCart(items.map(i => {
+        const pid = String(i.productId?._id || i.productId || "");
+        const fresh = map[pid];
+        return fresh ? { ...i, shipping: fresh.shipping, countInStock: fresh.countInStock, warehouseStock: fresh.warehouseStock, storeId: fresh.storeId } : i;
+      }));
+      // Obtener nombres de tiendas
+      [...storeIds].forEach(sid => {
+        fetchDataFromApi(`/api/store/by-id/${sid}`)
+          .then(r => { const s = r?.row || r?.data?.row || r?.data || r; if (s?.name) setStoreNames(prev => ({ ...prev, [sid]: s.name })); })
+          .catch(() => {});
+      });
+    });
+  }, [context?.cartData]);
+
+  // Auto-seleccionar método de envío si el actual no está disponible
+  useEffect(() => {
+    if (!availableShippingRates.length || !enrichedCart.length) return;
+    const items = enrichedCart;
     const hasWarehouse = items.some(i => (i.warehouseStock ?? 0) > 0);
     const hasStore = items.some(i => (i.countInStock ?? 0) > 0);
 
+    // Mapa de método de envío a campo del producto
+    const SHIPPING_KEY = {
+      MTZSTORE_EXPRESS: "mtzExpress",
+      MTZSTORE_STANDARD: "mtzStandard",
+      STORE_EXPRESS: "storeExpress",
+      STORE_STANDARD: "storeStandard",
+    };
+
     const isAvailable = (method) => {
-      if (["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(method)) return hasWarehouse;
-      if (["STORE_EXPRESS", "STORE_STANDARD"].includes(method)) return hasStore;
+      // Verificar stock
+      if (["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(method) && !hasWarehouse) return false;
+      if (["STORE_EXPRESS", "STORE_STANDARD"].includes(method) && !hasStore) return false;
+      // Verificar que TODOS los productos tengan el método habilitado
+      const key = SHIPPING_KEY[method];
+      if (key) {
+        const allEnabled = items.every(i => !i.shipping || i.shipping[key] !== false);
+        if (!allEnabled) return false;
+      }
       return true;
     };
 
@@ -85,7 +131,7 @@ const Checkout = () => {
       const fallback = availableShippingRates.find(r => isAvailable(r.method));
       if (fallback) setShippingMethod(fallback.method);
     }
-  }, [availableShippingRates, context?.cartData, shippingMethod]);
+  }, [availableShippingRates, enrichedCart, shippingMethod]);
 
   // Calcular costo de envío al seleccionar dirección o método
   useEffect(() => {
@@ -449,27 +495,41 @@ const Checkout = () => {
                 <p className="text-[13px] font-[600] mb-2">Método de envío</p>
                 <div className="space-y-1.5">
                   {availableShippingRates.filter((rate) => {
-                    // Filtrar métodos según stock disponible en los productos del carrito
-                    const items = context?.cartData || [];
+                    // Excluir método legacy STORE (reemplazado por STORE_EXPRESS/STORE_STANDARD)
+                    if (rate.method === "STORE") return false;
+                    // Filtrar por stock + métodos habilitados en los productos
+                    const items = enrichedCart.length ? enrichedCart : (context?.cartData || []);
+                    const hasWarehouse = items.some(i => (i.warehouseStock ?? 0) > 0);
+                    const hasStore = items.some(i => (i.countInStock ?? 0) > 0);
+                    const SHIPPING_KEY = {
+                      MTZSTORE_EXPRESS: "mtzExpress",
+                      MTZSTORE_STANDARD: "mtzStandard",
+                      STORE_EXPRESS: "storeExpress",
+                      STORE_STANDARD: "storeStandard",
+                    };
                     const isMtzMethod = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(rate.method);
                     const isStoreMethod = ["STORE_EXPRESS", "STORE_STANDARD"].includes(rate.method);
-                    if (isMtzMethod) {
-                      // MTZ methods require warehouseStock > 0 on at least one item
-                      return items.some(i => (i.warehouseStock ?? 0) > 0);
-                    }
-                    if (isStoreMethod) {
-                      // Store methods require countInStock > 0 on at least one item
-                      return items.some(i => (i.countInStock ?? 0) > 0);
+                    // Check stock
+                    if (isMtzMethod && !hasWarehouse) return false;
+                    if (isStoreMethod && !hasStore) return false;
+                    // Check shipping enabled on ALL products
+                    const key = SHIPPING_KEY[rate.method];
+                    if (key) {
+                      const allEnabled = items.every(i => !i.shipping || i.shipping[key] !== false);
+                      if (!allEnabled) return false;
                     }
                     return true;
                   }).map((rate) => {
                     const isSelected = shippingMethod === rate.method;
                     const isMtz = ["MTZSTORE_EXPRESS", "MTZSTORE_STANDARD"].includes(rate.method);
                     const isFree = !isMtz && rate.baseRate === 0;
+                    // Obtener nombre de tienda del primer item enriquecido
+                    const firstStoreId = String(enrichedCart[0]?.storeId || "");
+                    const sName = storeNames[firstStoreId] || "Mi tienda";
                     const methodLabel = rate.method === "MTZSTORE_EXPRESS" ? "MTZstore Express"
                       : rate.method === "MTZSTORE_STANDARD" ? "MTZstore Estándar"
-                      : rate.method === "STORE_EXPRESS" ? "Mi tienda Express"
-                      : rate.method === "STORE_STANDARD" ? "Mi tienda Estándar"
+                      : rate.method === "STORE_EXPRESS" ? `${sName} Express`
+                      : rate.method === "STORE_STANDARD" ? `${sName} Estándar`
                       : "Envío por tienda";
 
                     return (
