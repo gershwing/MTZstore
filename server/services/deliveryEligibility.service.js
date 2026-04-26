@@ -6,6 +6,9 @@ import DeliveryAgentProfile from "../models/deliveryAgentProfile.model.js";
 
 const TRUST_RANK = { BASIC: 0, VERIFIED: 1, TRUSTED: 2 };
 
+// Tiempo de ventaja para socios antes de abrir al pool de verificados
+const FALLBACK_POOL_DELAY_MS = 5 * 60 * 1000; // 5 minutos
+
 /**
  * Mapea shippingMethod del task a serviceType del agente.
  */
@@ -55,9 +58,19 @@ export async function canAgentTakeTask(agentProfile, task, store = null) {
   if (!store) return false;
 
   const modeKey = serviceType === "express" ? "expressMode" : "standardMode";
-  const mode = store.delivery?.[modeKey] || (serviceType === "express" ? "open" : "partners_only");
+  const mode = store.delivery?.[modeKey] || "partners_only";
 
   if (mode === "open") return true;
+
+  // Fallback pool: VERIFIED+ toma STORE_EXPRESS si lleva 5+ min pendiente
+  if (
+    serviceType === "express" &&
+    TRUST_RANK[agentProfile.platformTrustLevel] >= TRUST_RANK.VERIFIED &&
+    task.createdAt &&
+    new Date(task.createdAt).getTime() <= Date.now() - FALLBACK_POOL_DELAY_MS
+  ) {
+    return true;
+  }
 
   // partners_only → verificar partnership activa
   const partnership = await DeliveryPartnership.findOne({
@@ -155,6 +168,14 @@ export async function buildAvailableTasksFilter(agentProfile) {
     });
   }
 
+  // Fallback pool: VERIFIED+ express ven STORE_EXPRESS de cualquier tienda si llevan 5+ min sin tomar
+  if (hasExpress && trustRank >= TRUST_RANK.VERIFIED) {
+    methodFilters.push({
+      shippingMethod: "STORE_EXPRESS",
+      createdAt: { $lte: new Date(Date.now() - FALLBACK_POOL_DELAY_MS) },
+    });
+  }
+
   if (methodFilters.length === 0) {
     // No puede ver nada → filtro imposible
     return { ...base, _id: null };
@@ -197,7 +218,7 @@ export async function getEligibleAgentsForTask(task) {
   if ((method.startsWith("STORE") || method === "STORE") && storeId) {
     const store = await StoreModel.findById(storeId).lean();
     const modeKey = serviceType === "express" ? "expressMode" : "standardMode";
-    const mode = store?.delivery?.[modeKey] || (serviceType === "express" ? "open" : "partners_only");
+    const mode = store?.delivery?.[modeKey] || "partners_only";
 
     if (mode === "partners_only") {
       const activePartners = await DeliveryPartnership.find({
@@ -207,7 +228,17 @@ export async function getEligibleAgentsForTask(task) {
       }).select("agentId").lean();
 
       const partnerIds = new Set(activePartners.map((p) => String(p.agentId)));
-      profiles = profiles.filter((p) => partnerIds.has(String(p.userId._id || p.userId)));
+
+      // Fallback pool: si el task lleva 5+ min, incluir VERIFIED+ express
+      const taskAge = task.createdAt ? Date.now() - new Date(task.createdAt).getTime() : 0;
+      const fallbackActive = serviceType === "express" && taskAge >= FALLBACK_POOL_DELAY_MS;
+
+      profiles = profiles.filter((p) => {
+        const id = String(p.userId._id || p.userId);
+        if (partnerIds.has(id)) return true;
+        if (fallbackActive && TRUST_RANK[p.platformTrustLevel] >= TRUST_RANK.VERIFIED) return true;
+        return false;
+      });
     }
   }
 

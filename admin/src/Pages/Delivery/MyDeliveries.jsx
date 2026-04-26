@@ -1,13 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { myDeliveries, updateDeliveryStatus, uploadDeliveryProof, deleteDeliveryProof } from "../../services/delivery";
+import { myDeliveries, updateDeliveryStatus, uploadDeliveryProof, deleteDeliveryProof, verifyPickupCode } from "../../services/delivery";
 import Badge from "../../Components/Badge";
 import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { toast } from "react-toastify";
 
 export default function MyDeliveries() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [failModal, setFailModal] = useState({ open: false, id: null });
   const [failNote, setFailNote] = useState("");
+
+  // Modal de confirmación de entrega
+  const [deliverModal, setDeliverModal] = useState({ open: false, id: null, task: null });
+  const [deliverPhoto, setDeliverPhoto] = useState(null); // File preview
+  const [deliverPhotoUploaded, setDeliverPhotoUploaded] = useState(false);
+  const [deliverCode, setDeliverCode] = useState("");
+  const [codeVerified, setCodeVerified] = useState(false);
+  const [codeError, setCodeError] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [delivering, setDelivering] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -43,6 +55,95 @@ export default function MyDeliveries() {
     if (!files?.length) return;
     uploadDeliveryProof(id, [...files]).then(() => load());
   };
+
+  // --- Modal de entrega verificada ---
+  const openDeliverModal = (task) => {
+    setDeliverModal({ open: true, id: task._id, task });
+    setDeliverPhoto(null);
+    setDeliverPhotoUploaded(task.proofs?.length > 0);
+    setDeliverCode("");
+    setCodeVerified(!!task.codeVerifiedAt);
+    setCodeError("");
+  };
+
+  const handlePhotoCapture = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setDeliverPhoto(URL.createObjectURL(file));
+    setUploadingPhoto(true);
+    try {
+      await uploadDeliveryProof(deliverModal.id, [file]);
+      setDeliverPhotoUploaded(true);
+      await load();
+    } catch {
+      toast.error("Error al subir la foto");
+      setDeliverPhoto(null);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!deliverCode.trim()) return;
+    setVerifying(true);
+    setCodeError("");
+    try {
+      const res = await verifyPickupCode(deliverModal.id, deliverCode.trim());
+      const data = res?.data || res;
+      if (data?.verified) {
+        setCodeVerified(true);
+        toast.success("Codigo verificado correctamente");
+      } else {
+        setCodeError(data?.message || "Codigo incorrecto");
+      }
+    } catch (err) {
+      setCodeError(err?.response?.data?.message || "Error al verificar");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleConfirmDelivery = async () => {
+    setDelivering(true);
+    try {
+      // Capturar geolocalización automáticamente
+      let geo = null;
+      try {
+        const pos = await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          })
+        );
+        geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      } catch {
+        // Si no se puede obtener geo, continuar sin ella
+        console.warn("No se pudo obtener la geolocalizacion");
+      }
+
+      const res = await updateDeliveryStatus(deliverModal.id, {
+        status: "DELIVERED",
+        geo,
+      });
+
+      if (res?.error) {
+        const msg = res?.message || "Error al confirmar entrega";
+        toast.error(typeof msg === "object" ? Object.values(msg).join(". ") : msg);
+      } else {
+        toast.success("Entrega confirmada exitosamente");
+        setDeliverModal({ open: false, id: null, task: null });
+      }
+      load();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Error al confirmar entrega");
+    } finally {
+      setDelivering(false);
+    }
+  };
+
+  const canConfirmDelivery = deliverPhotoUploaded && codeVerified;
 
   if (loading) return <div className="p-4 text-gray-500">Cargando entregas...</div>;
 
@@ -109,6 +210,16 @@ export default function MyDeliveries() {
                 </div>
               )}
 
+              {/* Indicador de código verificado */}
+              {d.codeVerifiedAt && (
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Codigo verificado
+                </p>
+              )}
+
               <div className="grid grid-cols-2 gap-2">
                 <Button size="small" variant="outlined" onClick={() => setStatus(d._id, "PICKED_UP")}
                   disabled={d.status !== "ASSIGNED"}>
@@ -119,9 +230,9 @@ export default function MyDeliveries() {
                   En ruta
                 </Button>
                 <Button size="small" variant="contained" color="success"
-                  onClick={() => setStatus(d._id, "DELIVERED")}
-                  disabled={d.status !== "IN_TRANSIT" || !hasProof}
-                  title={d.status !== "IN_TRANSIT" ? "Primero marque Recogido y En ruta" : !hasProof ? "Suba prueba de entrega primero" : ""}>
+                  onClick={() => openDeliverModal(d)}
+                  disabled={d.status !== "IN_TRANSIT"}
+                  title={d.status !== "IN_TRANSIT" ? "Primero marque Recogido y En ruta" : ""}>
                   Entregado
                 </Button>
                 <Button size="small" variant="outlined" color="error"
@@ -139,6 +250,115 @@ export default function MyDeliveries() {
           );
         })}
       </div>
+
+      {/* Modal: Confirmar entrega con verificación */}
+      <Dialog open={deliverModal.open} onClose={() => !delivering && setDeliverModal({ open: false, id: null, task: null })} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Confirmar entrega</DialogTitle>
+        <DialogContent>
+          <div className="space-y-5 pt-2">
+
+            {/* Paso 1: Foto */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${deliverPhotoUploaded ? "bg-green-500" : "bg-gray-300"}`}>
+                  {deliverPhotoUploaded ? "✓" : "1"}
+                </span>
+                <span className="font-medium text-sm">Foto de entrega</span>
+              </div>
+              {deliverPhotoUploaded ? (
+                <div className="flex items-center gap-2 pl-8">
+                  {deliverPhoto && (
+                    <img src={deliverPhoto} alt="Foto" className="w-16 h-16 rounded object-cover border" />
+                  )}
+                  <span className="text-sm text-green-600">Foto subida correctamente</span>
+                </div>
+              ) : (
+                <div className="pl-8">
+                  <Button component="label" size="small" variant="outlined" disabled={uploadingPhoto}>
+                    {uploadingPhoto ? "Subiendo..." : "Tomar foto"}
+                    <input type="file" accept="image/*" capture="environment" hidden onChange={handlePhotoCapture} />
+                  </Button>
+                  <p className="text-xs text-gray-400 mt-1">Se abrira la camara de tu dispositivo</p>
+                </div>
+              )}
+            </div>
+
+            {/* Paso 2: Código */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${codeVerified ? "bg-green-500" : "bg-gray-300"}`}>
+                  {codeVerified ? "✓" : "2"}
+                </span>
+                <span className="font-medium text-sm">Codigo de recogida</span>
+              </div>
+              {codeVerified ? (
+                <p className="text-sm text-green-600 pl-8 flex items-center gap-1">
+                  <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Codigo verificado
+                </p>
+              ) : (
+                <div className="pl-8">
+                  <div className="flex gap-2 items-start">
+                    <TextField
+                      size="small"
+                      label="Codigo"
+                      placeholder="Ej: A3B5K2"
+                      value={deliverCode}
+                      onChange={(e) => {
+                        setDeliverCode(e.target.value.toUpperCase());
+                        setCodeError("");
+                      }}
+                      error={!!codeError}
+                      helperText={codeError}
+                      inputProps={{ maxLength: 6, style: { textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 700 } }}
+                      sx={{ width: 160 }}
+                    />
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={handleVerifyCode}
+                      disabled={deliverCode.trim().length < 4 || verifying}
+                      sx={{ mt: "4px", textTransform: "none" }}
+                    >
+                      {verifying ? "..." : "Verificar"}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">Solicite el codigo al cliente</p>
+                </div>
+              )}
+            </div>
+
+            {/* Paso 3: Confirmar */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${canConfirmDelivery ? "bg-blue-500" : "bg-gray-300"}`}>
+                  3
+                </span>
+                <span className="font-medium text-sm">Confirmar entrega</span>
+              </div>
+              {!canConfirmDelivery && (
+                <p className="text-xs text-gray-400 pl-8">Complete los pasos 1 y 2 para habilitar</p>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeliverModal({ open: false, id: null, task: null })} disabled={delivering}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleConfirmDelivery}
+            disabled={!canConfirmDelivery || delivering}
+            sx={{ textTransform: "none", fontWeight: 600 }}
+          >
+            {delivering ? "Confirmando..." : "Confirmar entregado"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Modal para nota de entrega fallida */}
       <Dialog open={failModal.open} onClose={() => setFailModal({ open: false, id: null })} maxWidth="sm" fullWidth>

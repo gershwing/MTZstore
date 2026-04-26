@@ -41,3 +41,11 @@ export const demoteAgent = (id, level, reason) =>
 // Super admin: suspender
 export const suspendAgent = (id, reason) =>
   api.patch(`${BASE}/${id}/suspend`, { reason }).then((r) => r.data?.data);
+
+// Agente: solicitar verificación presencial
+export const requestVerification = (notes) =>
+  api.post(`${BASE}/me/request-verification`, { notes }).then((r) => r.data?.data);
+
+// Super admin: rechazar verificación
+export const rejectVerification = (id, reason) =>
+  api.patch(`${BASE}/${id}/reject-verification`, { reason }).then((r) => r.data?.data);

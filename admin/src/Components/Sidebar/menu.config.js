@@ -78,6 +78,7 @@ export const ALLOW_WITHOUT_TENANT_PREFIXES = [
   "/admin/my-deliveries",
   "/admin/my-partnerships",
   "/admin/my-routes",
+  "/admin/my-driver-profile",
 ];
 
 const startsWithAny = (path, prefixes = []) =>
@@ -321,6 +322,7 @@ export const PLATFORM_MENU = [
       { label: "Rutas de reparto", icon: "MdLocalShipping", to: "delivery-routes", required: [MODULE_PERMS.delivery.assign] },
       { label: "Repartidores", icon: "FiUsers", to: "delivery-agents", required: [MODULE_PERMS.delivery.read] },
       { label: "Niveles de confianza", icon: "FiUsers", to: "trust-management", required: [MODULE_PERMS.delivery.read] },
+      { label: "Socios delivery", icon: "FiUsers", to: "store-partnerships", required: [MODULE_PERMS.delivery.read] },
     ],
   },
 
@@ -442,6 +444,7 @@ export const BASE_STORE_MENU = [
     icon: "TbTruckDelivery",
     required: [MODULE_PERMS.delivery.take],
     children: [
+      { label: "Mi perfil", icon: "FiUsers", to: "/admin/my-driver-profile", required: [MODULE_PERMS.delivery.read] },
       { label: "Entregas disponibles", icon: "MdLocalShipping", to: "/admin/available-deliveries", required: [MODULE_PERMS.delivery.take] },
       { label: "Mis entregas", icon: "TbTruckDelivery", to: "/admin/my-deliveries", required: [MODULE_PERMS.delivery.selfUpdate] },
       { label: "Mi ruta activa", icon: "MdLocalShipping", to: "/admin/my-routes", required: [MODULE_PERMS.delivery.selfUpdate] },

@@ -31,8 +31,13 @@ export async function assignDelivery(id, { assigneeId, note }) {
   return await patchData(`/api/delivery/${id}/assign`, { assigneeId, note });
 }
 
-export async function updateDeliveryStatus(id, { status, note }) {
-  return await patchData(`/api/delivery/${id}/status`, { status, note });
+export async function updateDeliveryStatus(id, { status, note, geo }) {
+  return await patchData(`/api/delivery/${id}/status`, { status, note, geo });
+}
+
+/** Verificar código de recogida */
+export async function verifyPickupCode(id, code) {
+  return await patchData(`/api/delivery/${id}/verify-code`, { code });
 }
 
 /** Subida de pruebas (fotos). files: File[] */

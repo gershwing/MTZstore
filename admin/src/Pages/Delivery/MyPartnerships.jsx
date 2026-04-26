@@ -237,8 +237,8 @@ export default function MyPartnerships() {
               <label className="block text-sm font-medium mb-1">Tipo de servicio</label>
               <select value={reqType} onChange={(e) => setReqType(e.target.value)} className="w-full border rounded px-3 py-2">
                 <option value="express">Express</option>
-                <option value="standard">Estandar</option>
               </select>
+              <p className="text-xs text-gray-400 mt-1">Las sociedades estandar solo se crean por invitacion de la tienda.</p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Notas (opcional)</label>

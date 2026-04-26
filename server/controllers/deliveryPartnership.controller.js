@@ -21,6 +21,11 @@ export async function requestPartnership(req, res, next) {
     if (!storeId || !serviceType) return next(ERR.VALIDATION("storeId y serviceType son requeridos"));
     if (!["express", "standard"].includes(serviceType)) return next(ERR.VALIDATION("serviceType debe ser 'express' o 'standard'"));
 
+    // Standard solo por invitación de tienda/plataforma (seguridad: llevan múltiples productos)
+    if (serviceType === "standard") {
+      return next(ERR.VALIDATION("Las sociedades estandar solo pueden ser creadas por invitación de la tienda o plataforma"));
+    }
+
     // Validar perfil de agente
     const profile = await DeliveryAgentProfile.findOne({ userId, status: "ACTIVE" });
     if (!profile) return next(ERR.VALIDATION("No tienes un perfil de agente activo"));

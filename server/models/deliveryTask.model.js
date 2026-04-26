@@ -51,6 +51,20 @@ const DeliveryTaskSchema = new mongoose.Schema(
     },
     timeline: [DeliveryEventSchema],
     proofs: [ProofSchema],   // fotos/archivos de prueba
+
+    // Código de recogida (generado al crear el task)
+    pickupCode: { type: String, uppercase: true, trim: true, index: true },
+
+    // Verificación del código por el repartidor
+    codeVerifiedAt: { type: Date },
+    codeVerifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
+    // Geolocalización capturada al momento de entrega
+    deliveryGeo: {
+      lat: { type: Number },
+      lng: { type: Number },
+      capturedAt: { type: Date },
+    },
   },
   { timestamps: true }
 );

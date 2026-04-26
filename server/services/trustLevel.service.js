@@ -6,24 +6,19 @@ import { auditLog } from "./audit.service.js";
 const TRUST_ORDER = ["BASIC", "VERIFIED", "TRUSTED"];
 const TRUST_RANK = { BASIC: 0, VERIFIED: 1, TRUSTED: 2 };
 
-// Umbrales para candidatos a VERIFIED (ajustables vía env en el futuro)
-const VERIFIED_MIN_DELIVERIES = 50;
-const VERIFIED_MIN_RATING = 4.5;
-const VERIFIED_MAX_INCIDENTS = 0;
-
 /**
- * Retorna agentes BASIC que cumplen criterios para promoción a VERIFIED.
+ * Retorna agentes BASIC que solicitaron verificación presencial.
+ * La verificación requiere presentarse en persona con documentos del
+ * motorizado y licencia de conducir.
  */
 export async function getCandidatesForVerified() {
   return DeliveryAgentProfile.find({
     platformTrustLevel: "BASIC",
     status: "ACTIVE",
-    "stats.totalDeliveries": { $gte: VERIFIED_MIN_DELIVERIES },
-    "stats.rating": { $gte: VERIFIED_MIN_RATING },
-    "stats.incidentCount": { $lte: VERIFIED_MAX_INCIDENTS },
+    "verificationRequest.status": "REQUESTED",
   })
     .populate("userId", "name email phone")
-    .sort({ "stats.totalDeliveries": -1 })
+    .sort({ "verificationRequest.requestedAt": 1 })
     .lean();
 }
 
@@ -65,6 +60,16 @@ export async function promoteAgent(agentUserId, newLevel, promotedBy, reason = "
     promotedAt: new Date(),
     reason: reason || `Promoción de ${prev} a ${newLevel}`,
   });
+
+  // Al promover a VERIFIED, marcar verificación presencial completada
+  if (newLevel === "VERIFIED") {
+    profile.identityReverifiedAt = new Date();
+    if (profile.verificationRequest?.status === "REQUESTED") {
+      profile.verificationRequest.status = "COMPLETED";
+      profile.verificationRequest.reviewedAt = new Date();
+      profile.verificationRequest.reviewedBy = promotedBy;
+    }
+  }
 
   await profile.save();
 

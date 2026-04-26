@@ -5,6 +5,8 @@ import { requirePermission } from "../middlewares/requirePermission.js";
 import {
   getMyProfile,
   updateMyProfile,
+  requestVerification,
+  rejectVerification,
   listAgentProfiles,
   getCandidatesVerifiedController,
   promoteAgentController,
@@ -17,6 +19,17 @@ const router = Router();
 // Agente: mi perfil
 router.get("/me", auth, requirePermission("delivery:read"), getMyProfile);
 router.patch("/me", auth, requirePermission("delivery:read"), updateMyProfile);
+
+// Agente: solicitar verificación presencial
+router.post("/me/request-verification", auth, requirePermission("delivery:read"), requestVerification);
+
+// Super admin: rechazar verificación
+router.patch(
+  "/:id/reject-verification",
+  auth,
+  requirePermission("delivery:trust:manage"),
+  rejectVerification
+);
 
 // Super admin: listar perfiles
 router.get(

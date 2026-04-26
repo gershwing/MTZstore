@@ -115,6 +115,13 @@ export default function AvailableDeliveries() {
                   {d?.storeId?.name ? `Tienda: ${d.storeId.name}` : "Plataforma MTZ"}
                 </p>
 
+                {/* Fecha de creación */}
+                {d?.createdAt && (
+                  <p className="text-xs text-gray-400">
+                    Creada: {new Date(d.createdAt).toLocaleString("es-BO", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                )}
+
                 {/* Order info */}
                 {d?.orderId && (
                   <div className="text-xs text-gray-500 flex justify-between">

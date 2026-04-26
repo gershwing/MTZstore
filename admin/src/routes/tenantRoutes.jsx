@@ -35,6 +35,7 @@ import StorePartnerships from "../Pages/Delivery/StorePartnerships";
 import RouteList from "../Pages/Delivery/RouteList";
 import RouteDetail from "../Pages/Delivery/RouteDetail";
 import MyRoutes from "../Pages/Delivery/MyRoutes";
+import MyDriverProfile from "../Pages/Delivery/MyDriverProfile";
 import ReportsPage from "../Pages/Reports/ReportsPage";
 import ReportsPrint from "../Pages/Reports/ReportsPrint";
 import DirectSalesPage from "../Pages/DirectSales";
@@ -100,6 +101,7 @@ export const tenantRoutes = [
   { path: "delivery-routes", element: <RouteList /> },
   { path: "delivery-routes/:id", element: <RouteDetail /> },
   { path: "my-routes", element: <MyRoutes /> },
+  { path: "my-driver-profile", element: <MyDriverProfile /> },
 
   { path: "reports", element: <ReportsPage /> },
   { path: "reports/print", element: <ReportsPrint /> },

@@ -364,7 +364,7 @@ export async function updateStatusController(req, res, next) {
     const isSuper = req.user?.role === "SUPER_ADMIN";
     const storeId = req.tenant?.storeId || null;
     const { id } = req.params;
-    const { status, note } = req.body;
+    const { status, note, geo } = req.body;
 
     const allowed = new Set(["PICKED_UP", "IN_TRANSIT", "FAILED", "DELIVERED", "CANCELLED"]);
     if (!allowed.has(status)) return next(ERR.VALIDATION({ status: "Inválido" }));
@@ -380,6 +380,16 @@ export async function updateStatusController(req, res, next) {
     // Validar prueba antes de DELIVERED o FAILED
     if (status === "DELIVERED" && (!task.proofs || task.proofs.length === 0)) {
       return next(ERR.VALIDATION({ status: "Debe subir prueba de entrega antes de marcar como entregado" }));
+    }
+
+    // Validar código de recogida verificado antes de DELIVERED
+    if (status === "DELIVERED" && task.pickupCode && !task.codeVerifiedAt) {
+      return next(ERR.VALIDATION({ status: "Debe verificar el código de recogida antes de marcar como entregado" }));
+    }
+
+    // Capturar geolocalización al momento de entrega
+    if (status === "DELIVERED" && geo?.lat != null && geo?.lng != null) {
+      task.deliveryGeo = { lat: geo.lat, lng: geo.lng, capturedAt: new Date() };
     }
     if (status === "FAILED") {
       if (!task.proofs || task.proofs.length === 0) {
@@ -481,6 +491,44 @@ export async function updateStatusController(req, res, next) {
       meta: { message: e?.message }
     });
 
+    return next(e?.status ? e : ERR.SERVER(e.message));
+  }
+}
+
+// PATCH /api/delivery/:id/verify-code — Repartidor verifica código de recogida
+export async function verifyPickupCodeController(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { code } = req.body || {};
+    const userId = req.userId || req.user?._id;
+
+    if (!code || typeof code !== "string") {
+      return next(ERR.VALIDATION("Se requiere el código de recogida"));
+    }
+
+    const task = await DeliveryTask.findById(id);
+    if (!task) return next(ERR.NOT_FOUND("Delivery no encontrado"));
+
+    const isAssignee = userId && String(task.assigneeId) === String(userId);
+    if (!isAssignee) {
+      return next(ERR.VALIDATION("Solo el repartidor asignado puede verificar el código"));
+    }
+
+    if (!task.pickupCode) {
+      return next(ERR.VALIDATION("Esta entrega no tiene código de recogida"));
+    }
+
+    const matches = code.trim().toUpperCase() === task.pickupCode.toUpperCase();
+    if (!matches) {
+      return res.ok({ verified: false, message: "Código incorrecto" });
+    }
+
+    task.codeVerifiedAt = new Date();
+    task.codeVerifiedBy = userId;
+    await task.save();
+
+    return res.ok({ verified: true, message: "Código verificado correctamente" });
+  } catch (e) {
     return next(e?.status ? e : ERR.SERVER(e.message));
   }
 }

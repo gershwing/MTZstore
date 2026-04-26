@@ -357,10 +357,16 @@ export const createOrderController = async (req, res, next) => {
                     STORE: "Tienda",
                 };
 
+                // Código de recogida alfanumérico (sin I,O,0,1 para evitar confusión)
+                const _pickupChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                let _pickupCode = "";
+                for (let i = 0; i < 6; i++) _pickupCode += _pickupChars[Math.floor(Math.random() * _pickupChars.length)];
+
                 const deliveryPayload = {
                     orderId: order._id,
                     shippingMethod,
                     status: "PENDING",
+                    pickupCode: _pickupCode,
                     address: addr
                         ? {
                               name: addr.fullName || orderUser?.name || "",
@@ -584,12 +590,21 @@ export async function getUserOrderDetailsController(req, res, next) {
             OrderModel.countDocuments(filter)
         ]);
 
-        // 2) Traer pagos de esas órdenes en un solo query
+        // 2) Traer pagos y delivery tasks de esas órdenes en paralelo
         const orderIds = orderlist.map(o => o._id);
         const payFilter = { orderId: { $in: orderIds } };
         if (tenantStoreId) payFilter.storeId = tenantStoreId;
 
-        const payments = await Payment.find(payFilter).sort({ createdAt: -1 }).lean();
+        const [payments, deliveryTasks] = await Promise.all([
+            Payment.find(payFilter).sort({ createdAt: -1 }).lean(),
+            DeliveryTask.find({ orderId: { $in: orderIds } }).select("orderId pickupCode status").lean(),
+        ]);
+
+        // Mapa de delivery task por orderId
+        const deliveryByOrder = new Map();
+        for (const dt of deliveryTasks) {
+            deliveryByOrder.set(String(dt.orderId), dt);
+        }
 
         // 3) Agrupar pagos por orderId
         const byOrder = new Map();
@@ -631,6 +646,10 @@ export async function getUserOrderDetailsController(req, res, next) {
             };
             // Atajo útil para el front:
             o.paymentStatus = o.paymentSummary.lastStatus;
+
+            // Código de recogida del delivery task
+            const dt = deliveryByOrder.get(String(doc._id));
+            if (dt?.pickupCode) o.pickupCode = dt.pickupCode;
 
             return o;
         });

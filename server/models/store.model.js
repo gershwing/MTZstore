@@ -88,7 +88,7 @@ const storeSchema = new mongoose.Schema(
 
     // Configuración de delivery (Delivery V2)
     delivery: {
-      expressMode:  { type: String, enum: ["open", "partners_only"], default: "open" },
+      expressMode:  { type: String, enum: ["open", "partners_only"], default: "partners_only" },
       standardMode: { type: String, enum: ["open", "partners_only"], default: "partners_only" },
     },
   },

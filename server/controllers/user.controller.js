@@ -182,27 +182,45 @@ export async function verifyEmailController(req, res, next) {
             });
         }
 
-        // Flujo normal: crear usuario por primera vez
+        // Flujo normal: crear usuario por primera vez (o fusionar con cuenta Google existente)
         const normEmail = String(payload.email).trim().toLowerCase();
 
-        // Verificar que no exista ya (race condition / doble-submit)
-        const existing = await UserModel.findOne({ email: normEmail }).select("+verify_email");
-        if (existing && existing.verify_email === true) {
-            throw ERR.VALIDATION("User already registered with this email");
-        }
+        // Verificar si ya existe un usuario con ese email
+        const existing = await UserModel.findOne({ email: normEmail })
+            .select("+verify_email +signUpWithGoogle +password");
 
-        const user = await UserModel.create({
-            name: payload.name,
-            email: normEmail,
-            password: payload.hashedPassword,
-            mobile: payload.mobile || "",
-            birthDate: payload.birthDate || null,
-            gender: payload.gender || "",
-            verify_email: true,
-            signUpWithGoogle: false,
-            status: 'active',
-            verifiedAt: new Date(),
-        });
+        let user;
+
+        if (existing) {
+            if (existing.verify_email === true && !existing.signUpWithGoogle) {
+                // Cuenta email ya verificada (no Google) → duplicado real
+                throw ERR.VALIDATION("User already registered with this email");
+            }
+            // Cuenta existente (Google o parcial): fusionar password + marcar verificado
+            existing.name = payload.name || existing.name;
+            existing.password = payload.hashedPassword;
+            existing.mobile = payload.mobile || existing.mobile;
+            existing.birthDate = payload.birthDate || existing.birthDate;
+            existing.gender = payload.gender || existing.gender;
+            existing.verify_email = true;
+            existing.verifiedAt = new Date();
+            if (String(existing.status || "").toLowerCase() !== "active") existing.status = "active";
+            await existing.save();
+            user = existing;
+        } else {
+            user = await UserModel.create({
+                name: payload.name,
+                email: normEmail,
+                password: payload.hashedPassword,
+                mobile: payload.mobile || "",
+                birthDate: payload.birthDate || null,
+                gender: payload.gender || "",
+                verify_email: true,
+                signUpWithGoogle: false,
+                status: 'active',
+                verifiedAt: new Date(),
+            });
+        }
 
         const accessToken = await generatedAccessToken(user._id);
         const refreshToken = await generatedRefreshToken(user._id);

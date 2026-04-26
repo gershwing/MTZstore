@@ -8,6 +8,7 @@ import {
   promoteAgent,
   demoteAgent,
   suspendAgent,
+  rejectVerification,
 } from "../../services/deliveryAgentProfile";
 
 const TRUST_BADGE = {
@@ -43,6 +44,12 @@ export default function TrustManagement() {
   const [actionName, setActionName] = useState("");
   const [actionLevel, setActionLevel] = useState("VERIFIED");
   const [actionReason, setActionReason] = useState("");
+
+  // Modal rechazar verificación
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectId, setRejectId] = useState(null);
+  const [rejectName, setRejectName] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
 
   const loadCandidates = async () => {
     setLoading(true);
@@ -111,22 +118,31 @@ export default function TrustManagement() {
       {/* Tabs */}
       <div className="flex gap-2 border-b pb-2">
         <button onClick={() => setTab("candidates")} className={`px-4 py-2 text-sm font-medium rounded-t ${tab === "candidates" ? "bg-white border border-b-0 text-blue-600" : "text-gray-500"}`}>
-          Candidatos a Verificado
+          Solicitudes de verificacion {candidates.length > 0 && <span className="ml-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{candidates.length}</span>}
         </button>
         <button onClick={() => setTab("agents")} className={`px-4 py-2 text-sm font-medium rounded-t ${tab === "agents" ? "bg-white border border-b-0 text-blue-600" : "text-gray-500"}`}>
           Todos los agentes
         </button>
       </div>
 
-      {/* Tab: Candidatos */}
+      {/* Tab: Solicitudes de verificación */}
       {tab === "candidates" && (
         loading ? <p className="text-gray-500 py-8 text-center">Cargando...</p> : candidates.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">No hay candidatos que cumplan los criterios para Verificado.</div>
+          <div className="text-center py-12 text-gray-400">
+            <p>No hay solicitudes de verificacion pendientes.</p>
+            <p className="text-sm mt-1">Los conductores pueden solicitar verificacion desde su perfil.</p>
+          </div>
         ) : (
           <div className="space-y-2">
-            <p className="text-xs text-gray-500">{candidates.length} candidatos encontrados (50+ entregas, rating 4.5+, 0 incidentes)</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+              <strong>{candidates.length}</strong> conductor{candidates.length !== 1 ? "es" : ""} solicit{candidates.length !== 1 ? "aron" : "o"} verificacion presencial.
+              Deben presentarse en persona con documentos del motorizado y licencia de conducir.
+            </div>
             {candidates.map((p) => {
               const user = p.userId || {};
+              const reqDate = p.verificationRequest?.requestedAt
+                ? new Date(p.verificationRequest.requestedAt).toLocaleDateString("es-BO")
+                : "—";
               return (
                 <div key={p._id} className="bg-white border rounded-lg px-4 py-3 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
@@ -134,17 +150,27 @@ export default function TrustManagement() {
                       <span className="font-semibold text-sm">{user.name || "Agente"}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${TRUST_BADGE.BASIC}`}>Basico</span>
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5 flex gap-3">
+                    <div className="text-xs text-gray-500 mt-0.5 flex gap-3 flex-wrap">
+                      <span>Solicitada: {reqDate}</span>
                       <span>{p.stats?.totalDeliveries || 0} entregas</span>
                       <span>Rating: {p.stats?.rating?.toFixed(1) || "—"}</span>
-                      <span>Incidentes: {p.stats?.incidentCount || 0}</span>
                       <span>Servicios: {p.approvedServiceTypes?.join(", ")}</span>
+                      {user.phone && <span>Tel: {user.phone}</span>}
                     </div>
+                    {p.verificationRequest?.notes && (
+                      <p className="text-xs text-gray-400 mt-0.5 italic">"{p.verificationRequest.notes}"</p>
+                    )}
                   </div>
-                  <button onClick={() => openAction("promote", p)}
-                    className="bg-blue-600 text-white rounded px-3 py-1.5 text-xs font-medium hover:bg-blue-700">
-                    Promover a Verificado
-                  </button>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button onClick={() => openAction("promote", p)}
+                      className="bg-blue-600 text-white rounded px-3 py-1.5 text-xs font-medium hover:bg-blue-700">
+                      Verificar
+                    </button>
+                    <button onClick={() => { setRejectId(p._id); setRejectName(user.name || "Agente"); setRejectReason(""); setRejectOpen(true); }}
+                      className="border border-red-300 text-red-600 rounded px-3 py-1.5 text-xs font-medium hover:bg-red-50">
+                      Rechazar
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -231,6 +257,37 @@ export default function TrustManagement() {
             </div>
           )}
         </>
+      )}
+
+      {/* Modal: Rechazar verificación */}
+      {rejectOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-md p-6 space-y-4">
+            <h2 className="text-lg font-bold text-red-700">Rechazar verificacion de {rejectName}</h2>
+            <p className="text-sm text-gray-600">El conductor podra volver a solicitar verificacion despues.</p>
+            <div>
+              <label className="block text-sm font-medium mb-1">Motivo *</label>
+              <textarea autoFocus rows={2} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}
+                className="w-full border rounded px-3 py-2" placeholder="Documentos incompletos, no se presento..." />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setRejectOpen(false)} className="flex-1 border rounded py-2 text-sm hover:bg-gray-50">Cancelar</button>
+              <button
+                disabled={rejectReason.trim().length < 3}
+                onClick={async () => {
+                  try {
+                    await rejectVerification(rejectId, rejectReason);
+                    toast.success("Verificacion rechazada");
+                    setRejectOpen(false);
+                    loadCandidates();
+                  } catch (e) { toast.error(e?.response?.data?.message || "Error"); }
+                }}
+                className="flex-1 bg-red-600 text-white rounded py-2 text-sm font-medium hover:bg-red-700 disabled:opacity-50">
+                Rechazar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modal: Accion */}

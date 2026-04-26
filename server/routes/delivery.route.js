@@ -11,6 +11,7 @@ import {
   createDeliveryController,
   assignDeliveryController,
   updateStatusController,
+  verifyPickupCodeController,
   uploadProofMdw,
   uploadProofController,
   deleteProofController,
@@ -98,6 +99,15 @@ router.patch(
   withTenant({ required: false }),
   requirePermission("delivery:updateStatus"),
   updateStatusController
+);
+
+// Verificar código de recogida
+router.patch(
+  "/:id/verify-code",
+  auth,
+  withTenant({ required: false }),
+  requirePermission("delivery:updateStatus"),
+  verifyPickupCodeController
 );
 
 // Subir prueba de entrega (foto/archivo)

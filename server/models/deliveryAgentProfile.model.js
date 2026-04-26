@@ -93,6 +93,20 @@ const DeliveryAgentProfileSchema = new Schema(
       lastDeliveryAt: { type: Date },
     },
 
+    // Solicitud de verificación presencial
+    verificationRequest: {
+      status: {
+        type: String,
+        enum: ["NONE", "REQUESTED", "COMPLETED", "REJECTED"],
+        default: "NONE",
+      },
+      requestedAt: { type: Date },
+      reviewedAt: { type: Date },
+      reviewedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      rejectionReason: { type: String },
+      notes: { type: String, default: "" },
+    },
+
     // Fecha de reverificación de identidad (para promoción a VERIFIED)
     identityReverifiedAt: { type: Date },
   },

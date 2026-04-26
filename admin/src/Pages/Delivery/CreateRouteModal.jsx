@@ -20,8 +20,15 @@ export default function CreateRouteModal({ open, onClose, onCreated }) {
     listDeliveries({ status: "PENDING", shippingMethod: "MTZSTORE_STANDARD", limit: 100 })
       .then(r => {
         const data = r?.data?.data || r?.data || [];
-        // Filtrar solo los que no tienen ruta y no tienen agente
-        const pending = (Array.isArray(data) ? data : []).filter(t => !t.routeId && !t.assigneeId);
+        // Filtrar: sin ruta, sin agente, y MTZSTORE_STANDARD solo si fue recibido en almacén
+        const pending = (Array.isArray(data) ? data : []).filter(t => {
+          if (t.routeId || t.assigneeId) return false;
+          if (t.shippingMethod === "MTZSTORE_STANDARD") {
+            const received = t.timeline?.some(e => e.type === "RECEIVED_AT_WAREHOUSE");
+            if (!received) return false;
+          }
+          return true;
+        });
         setTasks(pending);
       })
       .catch(() => setTasks([]))
@@ -40,19 +47,38 @@ export default function CreateRouteModal({ open, onClose, onCreated }) {
       .catch(() => {});
   }, [open]);
 
-  // Cargar agentes estándar al pasar a step 2
+  // Cargar agentes disponibles al pasar a step 2
+  // Busca socios activos de la tienda + agentes estándar globales
   useEffect(() => {
     if (step !== 2) return;
     setLoading(true);
-    import("../../services/deliveryAgentProfile").then(mod => {
-      mod.listAgentProfiles({ serviceType: "standard", status: "ACTIVE", limit: 50 })
-        .then(r => {
-          const data = r?.data || [];
-          setAgents(Array.isArray(data) ? data : []);
-        })
-        .catch(() => setAgents([]))
-        .finally(() => setLoading(false));
-    });
+    Promise.all([
+      // Socios activos de la tienda (cualquier tipo)
+      import("../../services/deliveryPartnerships").then(mod =>
+        mod.getStorePartnerships({ status: "ACTIVE", limit: 50 })
+          .then(r => (Array.isArray(r?.data) ? r.data : []).map(p => ({
+            _id: p.agentId?._id || p.agentId,
+            userId: p.agentId,
+            platformTrustLevel: p.agentProfile?.platformTrustLevel || "BASIC",
+            approvedServiceTypes: p.agentProfile?.approvedServiceTypes || [],
+            stats: p.agentProfile?.stats || p.stats || {},
+            _isPartner: true,
+            _serviceType: p.serviceType,
+          })))
+          .catch(() => [])
+      ),
+      // Agentes estándar globales (fallback)
+      import("../../services/deliveryAgentProfile").then(mod =>
+        mod.listAgentProfiles({ serviceType: "standard", status: "ACTIVE", limit: 50 })
+          .then(r => (Array.isArray(r?.data) ? r.data : []))
+          .catch(() => [])
+      ),
+    ]).then(([partners, globals]) => {
+      // Merge: socios primero, luego globales sin duplicar
+      const seen = new Set(partners.map(p => String(p.userId?._id || p.userId)));
+      const merged = [...partners, ...globals.filter(g => !seen.has(String(g.userId?._id || g.userId)))];
+      setAgents(merged);
+    }).finally(() => setLoading(false));
   }, [step]);
 
   const toggleTask = (id) => {
@@ -133,7 +159,7 @@ export default function CreateRouteModal({ open, onClose, onCreated }) {
                     <option value="">Seleccionar repartidor...</option>
                     {agents.map(a => (
                       <option key={a._id} value={a.userId?._id || a.userId}>
-                        {a.userId?.name || "Agente"} — {a.platformTrustLevel} · {a.stats?.totalDeliveries || 0} entregas
+                        {a.userId?.name || "Agente"} — {a.platformTrustLevel} · {a.stats?.totalDeliveries || 0} entregas{a._isPartner ? ` (socio ${a._serviceType})` : ""}
                       </option>
                     ))}
                   </select>

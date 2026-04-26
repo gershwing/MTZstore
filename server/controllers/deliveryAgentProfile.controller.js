@@ -60,6 +60,78 @@ export async function updateMyProfile(req, res, next) {
   } catch (e) { return next(e?.status ? e : ERR.SERVER(e.message)); }
 }
 
+// POST /api/delivery-agent-profile/me/request-verification
+export async function requestVerification(req, res, next) {
+  try {
+    const userId = req.userId || req.user?._id;
+    if (!userId) return next(ERR.VALIDATION("No autorizado"));
+
+    const profile = await DeliveryAgentProfile.findOne({ userId });
+    if (!profile) return next(ERR.NOT_FOUND("Perfil de agente no encontrado"));
+
+    if (profile.platformTrustLevel !== "BASIC") {
+      return next(ERR.VALIDATION("Solo agentes con nivel Basico pueden solicitar verificación"));
+    }
+    if (profile.verificationRequest?.status === "REQUESTED") {
+      return next(ERR.VALIDATION("Ya tienes una solicitud de verificación pendiente"));
+    }
+
+    const { notes } = req.body || {};
+
+    profile.verificationRequest = {
+      status: "REQUESTED",
+      requestedAt: new Date(),
+      notes: notes || "",
+    };
+    await profile.save();
+
+    await safeAudit(req, {
+      action: "VERIFICATION_REQUESTED",
+      entity: "DeliveryAgentProfile",
+      entityId: String(profile._id),
+    });
+
+    return res.ok({ data: profile });
+  } catch (e) { return next(e?.status ? e : ERR.SERVER(e.message)); }
+}
+
+// PATCH /api/delivery-agent-profile/:id/reject-verification
+export async function rejectVerification(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body || {};
+    const reviewedBy = req.userId || req.user?._id;
+
+    if (!reason || reason.trim().length < 3) {
+      return next(ERR.VALIDATION("Se requiere un motivo (mínimo 3 caracteres)"));
+    }
+
+    const profile = await DeliveryAgentProfile.findById(id);
+    if (!profile) return next(ERR.NOT_FOUND("Perfil no encontrado"));
+
+    if (profile.verificationRequest?.status !== "REQUESTED") {
+      return next(ERR.VALIDATION("No hay solicitud de verificación pendiente"));
+    }
+
+    profile.verificationRequest.status = "REJECTED";
+    profile.verificationRequest.reviewedAt = new Date();
+    profile.verificationRequest.reviewedBy = reviewedBy;
+    profile.verificationRequest.rejectionReason = reason;
+    await profile.save();
+
+    emitToUser(profile.userId, "verification:rejected", { reason });
+
+    await safeAudit(req, {
+      action: "VERIFICATION_REJECTED",
+      entity: "DeliveryAgentProfile",
+      entityId: String(profile._id),
+      meta: { reason },
+    });
+
+    return res.ok({ data: profile });
+  } catch (e) { return next(e?.status ? e : ERR.SERVER(e.message)); }
+}
+
 // GET /api/delivery-agent-profile — Lista todos los perfiles (super admin)
 export async function listAgentProfiles(req, res, next) {
   try {
