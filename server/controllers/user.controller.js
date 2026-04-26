@@ -28,6 +28,20 @@ cloudinary.config({
     secure: true,
 });
 
+/**
+ * Normaliza email: lowercase + trim + quita puntos en Gmail
+ * (Gmail ignora puntos: mtz.store.wow = mtzstore.wow)
+ */
+function normalizeEmail(raw) {
+    const e = String(raw || "").trim().toLowerCase();
+    const [local, domain] = e.split("@");
+    if (!domain) return e;
+    if (domain === "gmail.com" || domain === "googlemail.com") {
+        return local.replace(/\./g, "") + "@" + domain;
+    }
+    return e;
+}
+
 function getCookieClearOpts(req) {
     // Usa EXACTAMENTE los mismos valores que al setear
     const sameSite = process.env.COOKIE_SAMESITE || "lax"; // "lax" | "none" | "strict"
@@ -54,7 +68,7 @@ export async function registerUserController(req, res, next) {
             throw ERR.VALIDATION('provide email, name, password');
         }
 
-        const normEmail = String(email).trim().toLowerCase();
+        const normEmail = normalizeEmail(email);
         const trimName = String(name).trim();
         const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normEmail);
         if (!isEmailValid) throw ERR.VALIDATION('Invalid email format');
@@ -183,7 +197,7 @@ export async function verifyEmailController(req, res, next) {
         }
 
         // Flujo normal: crear usuario por primera vez (o fusionar con cuenta Google existente)
-        const normEmail = String(payload.email).trim().toLowerCase();
+        const normEmail = normalizeEmail(payload.email);
 
         // Verificar si ya existe un usuario con ese email
         const existing = await UserModel.findOne({ email: normEmail })
@@ -298,7 +312,7 @@ export async function resendVerifyEmailController(req, res, next) {
             { expiresIn: '15m' }
         );
 
-        const normEmail = String(payload.email).trim().toLowerCase();
+        const normEmail = normalizeEmail(payload.email);
         sendEmailFun({
             sendTo: normEmail,
             subject: 'Verify email from Ecommerce App',
@@ -324,7 +338,7 @@ export async function resendVerifyEmailController(req, res, next) {
 export async function authWithGoogle(req, res, next) {
     try {
         const { name, email, avatar, mobile } = req.body;
-        const normEmail = String(email || "").trim().toLowerCase();
+        const normEmail = normalizeEmail(email);
         if (!normEmail) throw ERR.VALIDATION("Email is required");
 
         let user = await UserModel.findOne({ email: normEmail });
@@ -409,7 +423,7 @@ export async function authWithGoogle(req, res, next) {
 /** ========== Login con contraseña ========== */
 export async function loginUserController(req, res, next) {
     try {
-        const email = String(req.body?.email || "").trim().toLowerCase();
+        const email = normalizeEmail(req.body?.email);
         const password = String(req.body?.password || "");
 
         if (!email || !password) throw ERR.VALIDATION("provide email and password");
@@ -700,7 +714,7 @@ export async function updateUserDetails(req, res, next) {
 
         // 2) Cambio de email (opcional, con verificación)
         if (typeof email === 'string' && email.trim()) {
-            const normEmail = email.trim().toLowerCase();
+            const normEmail = normalizeEmail(email);
 
             if (normEmail !== user.email) {
                 const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normEmail);
@@ -782,7 +796,7 @@ export async function forgotPasswordController(req, res, next) {
         const { email } = req.body;
         if (!email) throw ERR.VALIDATION('Email is required');
 
-        const normEmail = String(email).trim().toLowerCase();
+        const normEmail = normalizeEmail(email);
         const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normEmail);
         if (!isEmailValid) throw ERR.VALIDATION('Invalid email format');
 
@@ -824,7 +838,7 @@ export async function verifyForgotPasswordOtp(req, res, next) {
         const { email, otp } = req.body;
         if (!email || !otp) throw ERR.VALIDATION('Provide required field email, otp.');
 
-        const normEmail = String(email).trim().toLowerCase();
+        const normEmail = normalizeEmail(email);
         const user = await UserModel.findOne({ email: normEmail });
         if (!user) throw ERR.VALIDATION('Email not available');
 
@@ -896,7 +910,7 @@ export async function resetpassword(req, res, next) {
             throw ERR.VALIDATION('provide required fields email, newPassword, confirmPassword');
         }
 
-        const normEmail = String(email).trim().toLowerCase();
+        const normEmail = normalizeEmail(email);
         const user = await UserModel.findOne({ email: normEmail }).select("+password +signUpWithGoogle");
         if (!user) throw ERR.VALIDATION('Email is not available');
 
@@ -944,7 +958,7 @@ export async function changePasswordController(req, res, next) {
             throw ERR.VALIDATION('provide required fields email, newPassword, confirmPassword');
         }
 
-        const normEmail = String(email).trim().toLowerCase();
+        const normEmail = normalizeEmail(email);
         const user = await UserModel.findOne({ email: normEmail }).select('+password');
         if (!user) throw ERR.VALIDATION('Email is not available');
 
