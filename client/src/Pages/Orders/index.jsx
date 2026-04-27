@@ -20,6 +20,14 @@ const PAYMENT_LABELS = {
   Cryptomus: "Cryptomus",
 };
 
+const SHIPPING_LABELS = {
+  MTZSTORE_EXPRESS: { label: "Express", cls: "bg-purple-100 text-purple-700" },
+  MTZSTORE_STANDARD: { label: "Estandar", cls: "bg-blue-100 text-blue-700" },
+  STORE_EXPRESS: { label: "Tienda Express", cls: "bg-orange-100 text-orange-700" },
+  STORE_STANDARD: { label: "Tienda Estandar", cls: "bg-teal-100 text-teal-700" },
+  STORE: { label: "Tienda", cls: "bg-gray-100 text-gray-600" },
+};
+
 const CANCEL_WINDOW_MS = 30 * 60 * 1000; // 30 minutos
 
 const canCancel = (order) => {
@@ -163,6 +171,11 @@ const Orders = () => {
                         <span className="font-mono text-sm font-bold text-primary">
                           {order?._id?.slice(-10)?.toUpperCase()}
                         </span>
+                        {order?.shippingMethod && SHIPPING_LABELS[order.shippingMethod] && (
+                          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${SHIPPING_LABELS[order.shippingMethod].cls}`}>
+                            {SHIPPING_LABELS[order.shippingMethod].label}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-gray-400">
