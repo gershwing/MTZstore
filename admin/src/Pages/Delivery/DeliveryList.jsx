@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ContentFilters from "../../Components/Filters/ContentFilters";
 import Badge from "../../Components/Badge";
+import VerifiedBadge from "../../Components/VerifiedBadge";
 import { Button, Pagination, IconButton, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { listDeliveries, updateDeliveryStatus, uploadDeliveryProof, dispatchToWarehouse, receiveAtWarehouse } from "../../services/delivery";
 import AssignModal from "./AssignModal";
@@ -143,7 +144,7 @@ export default function DeliveryList() {
                     )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-xs">
-                    {row?.assigneeId?.name || <span className="text-gray-400">Sin asignar</span>}
+                    {row?.assigneeId?.name ? <><span>{row.assigneeId.name}</span> <VerifiedBadge trustLevel={row.assigneeTrustLevel} size={13} /></> : <span className="text-gray-400">Sin asignar</span>}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <Badge kind="delivery" status={row?.status} />

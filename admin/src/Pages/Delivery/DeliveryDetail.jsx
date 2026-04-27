@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getDelivery, updateDeliveryStatus, uploadDeliveryProof } from "../../services/delivery";
 import Badge from "../../Components/Badge";
+import VerifiedBadge from "../../Components/VerifiedBadge";
 import DeliveryStatusSelect from "./DeliveryStatusSelect";
 import { Button, Chip } from "@mui/material";
 
@@ -88,7 +89,7 @@ export default function DeliveryDetail({ id: propId }) {
         <div className="bg-white border rounded-lg p-4">
           <h3 className="font-semibold mb-2 text-sm text-gray-700">Asignacion</h3>
           <div className="text-sm space-y-1">
-            <p>Agente: <span className="font-medium">{assignee?.name || "Sin asignar"}</span></p>
+            <p>Agente: <span className="font-medium">{assignee?.name || "Sin asignar"}</span> <VerifiedBadge trustLevel={data?.assigneeTrustLevel} size={14} /></p>
             {assignee?.email && <p className="text-xs text-gray-500">{assignee.email}</p>}
             {assignee?.phone && <p className="text-xs text-gray-500">Tel: {assignee.phone}</p>}
           </div>

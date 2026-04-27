@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getRoute } from "../../services/deliveryRoute";
 import Badge from "../../Components/Badge";
+import VerifiedBadge from "../../Components/VerifiedBadge";
 
 const STATUS_BADGE = {
   CREATED: "bg-gray-100 text-gray-700",
@@ -65,7 +66,7 @@ export default function RouteDetail() {
 
       {/* Info */}
       <div className="bg-white border rounded-lg p-4 space-y-2 text-sm">
-        <p><span className="text-gray-500">Repartidor:</span> <span className="font-medium">{route.agentId?.name || "—"}</span> {route.agentId?.phone && <span className="text-gray-400">({route.agentId.phone})</span>}</p>
+        <p><span className="text-gray-500">Repartidor:</span> <span className="font-medium">{route.agentId?.name || "—"}</span> <VerifiedBadge trustLevel={route.agentTrustLevel} size={14} /> {route.agentId?.phone && <span className="text-gray-400">({route.agentId.phone})</span>}</p>
         <p><span className="text-gray-500">Creada por:</span> {route.createdBy?.name || "—"}</p>
         <p><span className="text-gray-500">Creada:</span> {fmt(route.createdAt)}</p>
         {route.startedAt && <p><span className="text-gray-500">Iniciada:</span> {fmt(route.startedAt)}</p>}

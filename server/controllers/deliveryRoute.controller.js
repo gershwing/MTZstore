@@ -139,6 +139,13 @@ export async function getRoute(req, res, next) {
       .lean();
 
     if (!route) return next(ERR.NOT_FOUND("Ruta no encontrada"));
+
+    // Enriquecer con trust level del agente
+    if (route.agentId?._id) {
+      const profile = await DeliveryAgentProfile.findOne({ userId: route.agentId._id }).select("platformTrustLevel").lean();
+      if (profile) route.agentTrustLevel = profile.platformTrustLevel;
+    }
+
     return res.ok({ data: route });
   } catch (e) { return next(e?.status ? e : ERR.SERVER(e.message)); }
 }

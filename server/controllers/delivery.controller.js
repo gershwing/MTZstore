@@ -24,6 +24,20 @@ cloudinary.config({
 // util
 const asEvent = (type, by, note = "") => ({ type, by, note, at: new Date() });
 
+// Enriquecer items de delivery con platformTrustLevel del agente
+async function enrichWithTrustLevel(items) {
+  const agentIds = [...new Set(items.filter(i => i.assigneeId).map(i => String(i.assigneeId?._id || i.assigneeId)))];
+  if (!agentIds.length) return items;
+  const profiles = await DeliveryAgentProfile.find({ userId: { $in: agentIds } })
+    .select("userId platformTrustLevel").lean();
+  const trustMap = new Map(profiles.map(p => [String(p.userId), p.platformTrustLevel]));
+  return items.map(i => {
+    const id = String(i.assigneeId?._id || i.assigneeId);
+    if (trustMap.has(id)) i.assigneeTrustLevel = trustMap.get(id);
+    return i;
+  });
+}
+
 async function uploadToCloudinary(files = []) {
   const results = [];
   for (const f of files) {
@@ -90,8 +104,10 @@ export async function listDeliveryController(req, res, next) {
       DeliveryTask.countDocuments(filter)
     ]);
 
+    const enriched = await enrichWithTrustLevel(items);
+
     return res.ok({
-      data: items,
+      data: enriched,
       total,
       page: +page,
       limit: limitN,
@@ -277,6 +293,13 @@ export async function getDeliveryController(req, res, next) {
     if (!task) return next(ERR.NOT_FOUND("Delivery no encontrado"));
     if (!isSuper && storeId && String(task.storeId?._id || task.storeId) !== String(storeId)) {
       return next(ERR.TENANT_FORBIDDEN());
+    }
+
+    // Enriquecer con trust level
+    if (task.assigneeId) {
+      const profile = await DeliveryAgentProfile.findOne({ userId: task.assigneeId._id || task.assigneeId })
+        .select("platformTrustLevel").lean();
+      if (profile) task.assigneeTrustLevel = profile.platformTrustLevel;
     }
 
     return res.ok({ data: task });

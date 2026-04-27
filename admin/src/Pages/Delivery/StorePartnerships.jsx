@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Button } from "@mui/material";
+import VerifiedBadge from "../../Components/VerifiedBadge";
 import {
   getStorePartnerships,
   getAvailableAgents,
@@ -142,6 +143,7 @@ export default function StorePartnerships() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-sm">{p.agentId?.name || "Agente"}</span>
+                    <VerifiedBadge trustLevel={p.agentProfile?.platformTrustLevel} size={14} />
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${SVC_BADGE[p.serviceType] || ""}`}>
                       {SVC_LABEL[p.serviceType] || p.serviceType}
                     </span>
@@ -176,6 +178,7 @@ export default function StorePartnerships() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-sm">{p.agentId?.name || "Agente"}</span>
+                    <VerifiedBadge trustLevel={p.agentProfile?.platformTrustLevel} size={14} />
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${SVC_BADGE[p.serviceType] || ""}`}>
                       {SVC_LABEL[p.serviceType] || p.serviceType}
                     </span>

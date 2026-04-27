@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Pagination } from "@mui/material";
 import { api } from "../../utils/api";
+import VerifiedBadge from "../../Components/VerifiedBadge";
+import { listAgentProfiles } from "../../services/deliveryAgentProfile";
 
 const STATUS_BADGE = {
   active: { label: "Activo", cls: "bg-green-100 text-green-700" },
@@ -12,17 +14,23 @@ export default function DeliveryAgents() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [trustMap, setTrustMap] = useState({});
   const limit = 20;
 
   const load = async (p = 1) => {
     setLoading(true);
     try {
-      const { data: res } = await api.get("/api/admin/users", {
-        params: { role: "DELIVERY_AGENT", page: p, limit },
-        __noTenant: true,
-      });
+      const [{ data: res }, profilesRes] = await Promise.all([
+        api.get("/api/admin/users", { params: { role: "DELIVERY_AGENT", page: p, limit }, __noTenant: true }),
+        listAgentProfiles({ limit: 200 }).catch(() => ({ data: [] })),
+      ]);
       setAgents(Array.isArray(res?.data) ? res.data : []);
       setTotal(res?.total || 0);
+      // Build trust level map: userId -> platformTrustLevel
+      const map = {};
+      const profiles = Array.isArray(profilesRes?.data) ? profilesRes.data : [];
+      profiles.forEach((p) => { if (p.userId?._id) map[p.userId._id] = p.platformTrustLevel; else if (p.userId) map[String(p.userId)] = p.platformTrustLevel; });
+      setTrustMap(map);
     } catch {
       setAgents([]);
     } finally {
@@ -70,7 +78,7 @@ export default function DeliveryAgents() {
                 const st = STATUS_BADGE[u?.status] || STATUS_BADGE.active;
                 return (
                   <tr key={u._id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 font-medium">{u?.name || "---"}</td>
+                    <td className="p-3 font-medium">{u?.name || "---"} <VerifiedBadge trustLevel={trustMap[u?._id]} size={14} /></td>
                     <td className="p-3 text-gray-600">{u?.email || "---"}</td>
                     <td className="p-3 text-gray-600">{u?.mobile || u?.phone || "---"}</td>
                     <td className="p-3 text-center">
